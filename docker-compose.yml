@@ -1,0 +1,46 @@
+services:
+  bd:
+    container_name: historia-internet-bd
+    image: mysql:8.0
+    networks:
+      - historia-internet
+    environment:
+      MYSQL_DATABASE: ${WP_NOMBRE_BD}
+      MYSQL_USER: ${WP_USUARIO_BD}
+      MYSQL_PASSWORD: ${WP_CLAVE_BD}
+      MYSQL_ROOT_PASSWORD: ${BD_CLAVE}
+    volumes:
+      - ./basededatos:/var/lib/mysql
+
+  wordpress:
+    container_name: historia-internet-wp
+    depends_on:
+      - bd
+    image: wordpress
+    ports:
+      - ${WP_PUERTO}:80
+    networks:
+      - historia-internet
+    environment:
+      WORDPRESS_DB_HOST: bd
+      WORDPRESS_DB_USER: ${WP_USUARIO_BD}
+      WORDPRESS_DB_PASSWORD: ${WP_CLAVE_BD}
+      WORDPRESS_DB_NAME: ${WP_NOMBRE_BD}
+    volumes:
+      - ./wordpress:/var/www/html
+
+  admin:
+    container_name: historia-internet-admin
+    image: phpmyadmin/phpmyadmin:latest
+    depends_on:
+      - bd
+    ports:
+      - "8090:80"
+    environment:
+      PMA_HOST: bd
+      MYSQL_ROOT_PASSWORD: ${BD_CLAVE}
+    networks:
+      - historia-internet
+
+networks:
+  historia-internet:
