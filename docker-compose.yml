@@ -31,7 +31,7 @@ services:
 
   admin:
     container_name: historia-internet-admin
-    image: phpmyadmin/phpmyadmin:latest
+    image: phpmyadmin
     depends_on:
       - bd
     ports:
