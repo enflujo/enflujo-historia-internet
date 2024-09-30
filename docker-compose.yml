@@ -5,10 +5,10 @@ services:
     networks:
       - historia-internet
     environment:
-      MYSQL_DATABASE: ${WP_NOMBRE_BD}
-      MYSQL_USER: ${WP_USUARIO_BD}
-      MYSQL_PASSWORD: ${WP_CLAVE_BD}
-      MYSQL_ROOT_PASSWORD: ${BD_CLAVE}
+      MYSQL_DATABASE: historia_local
+      MYSQL_USER: historia
+      MYSQL_PASSWORD: clave
+      MYSQL_ROOT_PASSWORD: clave
     volumes:
       - ./basededatos:/var/lib/mysql
 
@@ -18,14 +18,18 @@ services:
       - bd
     image: wordpress
     ports:
-      - ${WP_PUERTO}:80
+      - 4040:80
     networks:
       - historia-internet
     environment:
       WORDPRESS_DB_HOST: bd
-      WORDPRESS_DB_USER: ${WP_USUARIO_BD}
-      WORDPRESS_DB_PASSWORD: ${WP_CLAVE_BD}
-      WORDPRESS_DB_NAME: ${WP_NOMBRE_BD}
+      WORDPRESS_DB_USER: historia
+      WORDPRESS_DB_PASSWORD: clave
+      WORDPRESS_DB_NAME: historia_local
+      WORDPRESS_DEBUG: true
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_DEBUG_LOG', true );
+        define( 'WP_DEBUG_DISPLAY', false );
     volumes:
       - ./wordpress:/var/www/html
 
