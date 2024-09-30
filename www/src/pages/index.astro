@@ -1,0 +1,36 @@
+---
+import Plantilla from '../plantillas/Plantilla.astro';
+import type { Evento } from '../tipos';
+import { gql, pedirdatos } from '../utilidades/ayudas';
+
+const EsquemaEventos = gql`
+  query Eventos {
+    eventos {
+      nodes {
+        fecha(format: RENDERED)
+        tipo
+        title
+        slug
+        content
+      }
+    }
+  }
+`;
+const { eventos } = await pedirdatos<{ eventos: { nodes: Evento[] } }>(EsquemaEventos);
+---
+
+<Plantilla titulo="Línea de tiempo" descripcion="">
+  <main>
+    <h1>Historia del Internet</h1>
+    {
+      eventos.nodes.map((evento: Evento) => (
+        <div class="evento">
+          <h2 set:html={`${evento.title} (${evento.fecha})`} />
+          <p set:html={evento.content} />
+        </div>
+      ))
+    }
+  </main>
+</Plantilla>
+
+<style lang="scss"></style>
