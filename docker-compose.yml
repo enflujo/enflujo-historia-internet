@@ -42,7 +42,7 @@ services:
       - "8090:80"
     environment:
       PMA_HOST: bd
-      MYSQL_ROOT_PASSWORD: ${BD_CLAVE}
+      MYSQL_ROOT_PASSWORD: clave
     networks:
       - historia-internet
 
