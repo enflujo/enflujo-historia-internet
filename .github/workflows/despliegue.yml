@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  BUILD_PATH: '.'
+  BUILD_PATH: './www'
 
 jobs:
   build:

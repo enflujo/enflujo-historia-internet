@@ -3,11 +3,16 @@ import { defineConfig } from 'astro/config';
 
 export default defineConfig({
   publicDir: './estaticos',
-  site: 'https://historiainternet.uniandes.edu.co',
+  site: 'https://enflujo.github.io/enflujo-historia-internet',
   srcDir: './fuente',
   outDir: './publico',
-  // base: '',
+  base: '/enflujo-historia-internet',
   vite: {
+    server: {
+      watch: {
+        ignored: ['./wordpress/**/**'],
+      },
+    },
     css: {
       preprocessorOptions: {
         scss: {
