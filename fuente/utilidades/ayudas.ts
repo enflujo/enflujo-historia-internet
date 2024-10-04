@@ -2,7 +2,7 @@ import { apiBase } from './constantes';
 
 export const gql = String.raw;
 
-export async function pedirdatos<Esquema>(query: string) {
+export async function pedirDatos<Esquema>(query: string) {
   const peticion = await fetch(`${apiBase}/graphql`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

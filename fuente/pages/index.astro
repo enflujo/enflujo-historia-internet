@@ -1,7 +1,7 @@
 ---
 import Plantilla from '../plantillas/Plantilla.astro';
 import type { Evento } from '../tipos';
-import { gql, pedirdatos } from '../utilidades/ayudas';
+import { gql, pedirDatos } from '../utilidades/ayudas';
 
 const EsquemaEventos = gql`
   query Eventos {
@@ -16,7 +16,7 @@ const EsquemaEventos = gql`
     }
   }
 `;
-const { eventos } = await pedirdatos<{ eventos: { nodes: Evento[] } }>(EsquemaEventos);
+const { eventos } = await pedirDatos<{ eventos: { nodes: Evento[] } }>(EsquemaEventos);
 ---
 
 <Plantilla titulo="Línea de tiempo" descripcion="">

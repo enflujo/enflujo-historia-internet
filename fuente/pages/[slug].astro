@@ -1,7 +1,7 @@
 ---
 import Plantilla from '@/plantillas/Plantilla.astro';
 import type { Pagina } from '@/tipos';
-import { gql, pedirdatos } from '@/utilidades/ayudas';
+import { gql, pedirDatos } from '@/utilidades/ayudas';
 
 export async function getStaticPaths() {
   const Paginas = gql`
@@ -14,7 +14,7 @@ export async function getStaticPaths() {
       }
     }
   `;
-  const { pages } = await pedirdatos<{ pages: { nodes: { slug: string }[] } }>(Paginas);
+  const { pages } = await pedirDatos<{ pages: { nodes: { slug: string }[] } }>(Paginas);
 
   return pages.nodes.map(({ slug }) => {
     return { params: { slug } };
@@ -41,7 +41,7 @@ const PeticionPagina = gql`
   }
 `;
 
-const { page } = await pedirdatos<{ page: Pagina }>(PeticionPagina);
+const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
 ---
 
 <Plantilla titulo={page.title} descripcion={page.descripcion}>

@@ -1,6 +1,6 @@
 ---
 import type { PaginaMenu } from '@/tipos';
-import { gql, pedirdatos } from '@/utilidades/ayudas';
+import { gql, pedirDatos } from '@/utilidades/ayudas';
 
 const EsquemaPaginas = gql`
   query {
@@ -17,7 +17,7 @@ const EsquemaPaginas = gql`
   }
 `;
 
-const { pages } = await pedirdatos<{ pages: { nodes: PaginaMenu[] } }>(EsquemaPaginas);
+const { pages } = await pedirDatos<{ pages: { nodes: PaginaMenu[] } }>(EsquemaPaginas);
 
 /** Preprocesar el resultado */
 
