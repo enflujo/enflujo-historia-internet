@@ -39,7 +39,7 @@ services:
     depends_on:
       - bd
     ports:
-      - "8090:80"
+      - '8090:80'
     environment:
       PMA_HOST: bd
       MYSQL_ROOT_PASSWORD: clave
