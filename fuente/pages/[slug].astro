@@ -1,0 +1,49 @@
+---
+import Plantilla from '@/plantillas/Plantilla.astro';
+import type { Pagina } from '@/tipos';
+import { gql, pedirdatos } from '@/utilidades/ayudas';
+
+export async function getStaticPaths() {
+  const Paginas = gql`
+    query {
+      pages {
+        nodes {
+          status
+          slug
+        }
+      }
+    }
+  `;
+  const { pages } = await pedirdatos<{ pages: { nodes: { slug: string }[] } }>(Paginas);
+
+  return pages.nodes.map(({ slug }) => {
+    return { params: { slug } };
+  });
+}
+const { slug } = Astro.params;
+
+const PeticionPagina = gql`
+  query {
+    page(id: "${slug}", idType: URI) {
+      title
+      status
+      slug
+      iconoA
+      descripcion(format: RAW)
+      featuredImage {
+        node {
+          altText
+          uri
+        }
+      }
+      content(format: RENDERED)
+    }
+  }
+`;
+
+const { page } = await pedirdatos<{ page: Pagina }>(PeticionPagina);
+---
+
+<Plantilla titulo={page.title} descripcion={page.descripcion}>
+  <h1 class="titulo">{page.title}</h1>
+</Plantilla>

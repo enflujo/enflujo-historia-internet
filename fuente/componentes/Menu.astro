@@ -1,0 +1,185 @@
+---
+import type { PaginaMenu } from '@/tipos';
+import { gql, pedirdatos } from '@/utilidades/ayudas';
+
+const EsquemaPaginas = gql`
+  query {
+    pages {
+      nodes {
+        title
+        slug
+        menuOrder
+        status
+        iconoA
+        iconoB
+      }
+    }
+  }
+`;
+
+const { pages } = await pedirdatos<{ pages: { nodes: PaginaMenu[] } }>(EsquemaPaginas);
+
+/** Preprocesar el resultado */
+
+// Ordenar las páginas según el orden que se define en WP
+const paginas = pages.nodes.sort((a, b) => {
+  if (a.menuOrder < b.menuOrder) return -1;
+  if (a.menuOrder > b.menuOrder) return 1;
+  return 0;
+});
+
+// Llenar con valores predeterminados los íconos en caso de que no se llene en WP
+paginas.forEach((pagina) => {
+  pagina.iconoA = pagina.iconoA.length ? pagina.iconoA : '1';
+  pagina.iconoB = pagina.iconoB.length ? pagina.iconoB : '2';
+});
+---
+
+<div id="menuPrincipal">
+  <div id="apagarLuz"></div>
+  <span id="botonMenu" class="fuenteIconos">8</span>
+
+  <nav id="listaPaginas">
+    {
+      paginas &&
+        paginas.map((pagina) => {
+          return (
+            <a
+              class="botonPagina"
+              data-iconoa={pagina.iconoA}
+              data-iconob={pagina.iconoB}
+              href={`/${pagina.slug !== 'inicio' ? pagina.slug : ''}`}
+            >
+              <span class="iconoMenu fuenteIconos">{pagina.iconoA}</span>
+              <span class="nombrePagina">{pagina.title}</span>
+            </a>
+          );
+        })
+    }
+  </nav>
+</div>
+
+<script>
+  let menuAbierto = false;
+
+  const botonMenu = document.querySelector<HTMLSpanElement>('#botonMenu');
+  const botonesPaginas = document.querySelectorAll<HTMLLIElement>('.botonPagina');
+  const contenedor = document.querySelector<HTMLElement>('#listaPaginas');
+  const apagarLuz = document.querySelector<HTMLElement>('#apagarLuz');
+
+  if (botonMenu && apagarLuz) {
+    botonMenu.addEventListener('click', () => {
+      menuAbierto = !menuAbierto;
+      cambiarEstadosMenu();
+    });
+
+    apagarLuz.addEventListener('click', () => {
+      menuAbierto = false;
+      cambiarEstadosMenu();
+    });
+
+    const cambiarEstadosMenu = () => {
+      if (!contenedor) return;
+
+      if (menuAbierto) {
+        botonMenu.innerText = '0';
+        contenedor.classList.add('visible');
+        apagarLuz.classList.add('visible');
+      } else {
+        botonMenu.innerText = '8';
+        contenedor.classList.remove('visible');
+        apagarLuz.classList.remove('visible');
+      }
+    };
+  }
+
+  /** Hacemos acá los cambios de íconos para que se puedan definir en WP */
+  if (botonesPaginas && botonesPaginas.length) {
+    botonesPaginas.forEach((boton) => {
+      const { iconoa, iconob } = boton.dataset;
+      const icono = boton.querySelector<HTMLSpanElement>('.iconoMenu');
+
+      if (icono) {
+        boton.addEventListener('mouseenter', () => {
+          icono.innerHTML = iconoa || '2';
+        });
+
+        boton.addEventListener('mouseleave', () => {
+          icono.innerHTML = iconob || '1';
+        });
+      }
+    });
+  }
+</script>
+
+<style lang="scss">
+  a,
+  a:link {
+    color: var(--colorTexto);
+  }
+
+  #menuPrincipal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 99;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  #apagarLuz {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 100%;
+    background-color: #27206c;
+    opacity: 0;
+    z-index: 1;
+    transition: opacity 0.25s ease-out;
+
+    &.visible {
+      left: 0;
+      opacity: 0.5;
+    }
+  }
+
+  #botonMenu {
+    position: fixed;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+    z-index: 3;
+  }
+
+  #listaPaginas {
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease-out;
+    transform: translateX(100%);
+    background-color: var(--superficiesPriamario);
+    z-index: 2;
+    min-height: 100vh;
+    position: relative;
+    padding: 4em 4em 3em 2em;
+
+    &.visible {
+      transform: translateX(0);
+    }
+
+    .botonPagina {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+
+    .nombrePagina {
+      margin-left: 0.8em;
+    }
+  }
+
+  .iconoMenu {
+    width: 20px;
+  }
+</style>

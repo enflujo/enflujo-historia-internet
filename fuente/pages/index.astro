@@ -21,11 +21,11 @@ const { eventos } = await pedirdatos<{ eventos: { nodes: Evento[] } }>(EsquemaEv
 
 <Plantilla titulo="Línea de tiempo" descripcion="">
   <main>
-    <h1>Historia del Internet</h1>
+    <h1 class="titulo">Historia del Internet</h1>
     {
       eventos.nodes.map((evento: Evento) => (
         <div class="evento">
-          <h2 set:html={`${evento.title} (${evento.fecha})`} />
+          <h2 class="subtitulo" set:html={`${evento.title} (${evento.fecha})`} />
           <p set:html={evento.content} />
         </div>
       ))

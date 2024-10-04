@@ -1,4 +1,5 @@
 ---
+import Menu from '@/componentes/Menu.astro';
 interface Props {
   titulo: string;
   descripcion: string;
@@ -43,30 +44,11 @@ const ruta = new URL(Astro.url.pathname, Astro.site);
     <meta name="generator" content={Astro.generator} />
   </head>
   <body>
+    <Menu />
     <slot />
   </body>
 </html>
 
 <style lang="scss" is:global>
-  html {
-    box-sizing: border-box;
-    height: 100%;
-  }
-
-  *,
-  *:before,
-  *:after {
-    box-sizing: inherit;
-  }
-
-  html,
-  body {
-    margin: 0;
-    padding: 0;
-  }
-
-  ::selection {
-    background-color: #30cac073;
-    color: #130808;
-  }
+  @import url(../scss/estilosGlobales.scss);
 </style>

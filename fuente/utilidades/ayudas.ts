@@ -1,4 +1,4 @@
-export const apiBase = 'https://historiasinternetpre.uniandes.edu.co';
+import { apiBase } from './constantes';
 
 export const gql = String.raw;
 

@@ -1,4 +1,9 @@
-# Historia del Internet 
+# Historia del Internet
+
+![Estilo Código](https://github.com/enflujo/enflujo-historia-internet/actions/workflows/estilo-codigo.yml/badge.svg)
+![Despliegue](https://github.com/enflujo/enflujo-historia-internet/actions/workflows/despliegue.yml/badge.svg)
+![Tamaño](https://img.shields.io/github/repo-size/enflujo/enflujo-historia-internet?color=%235757f7&label=Tama%C3%B1o%20repo&logo=open-access&logoColor=white)
+![Licencia](https://img.shields.io/github/license/enflujo/enflujo-historia-internet?label=Licencia&logo=open-source-initiative&logoColor=white)
 
 - [Historia del Internet](#historia-del-internet)
   - [WordPress local para el desarrollo](#wordpress-local-para-el-desarrollo)
@@ -29,7 +34,6 @@ Git Updater: Para actualizar temas y plugins que subimos a GitHub.
 https://git-updater.com/
 
 Descargar el .zip y subirlo manualmente para instalar.
-
 
 ### Estos se instalan usando el plugin Git Updater
 

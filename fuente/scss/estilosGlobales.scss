@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,100..900;1,100..900&family=Pixelify+Sans:wght@400..700&family=Tourney:ital,wght@0,100..900;1,100..900&family=Yarndings+12&display=swap');
+
+:root {
+  --superficiesPriamario: #f2edff;
+  --colorTexto: #27206c;
+  --fuenteTitulos: 'Tourney', sans-serif;
+  --fuentePixeles: 'Pixelify Sans', sans-serif;
+  --fuenteIconos: 'Yarndings 12', system-ui;
+  --fuenteTexto: 'Chivo Mono', monospace;
+}
+
+::selection {
+  background-color: #30cac073;
+  color: #130808;
+}
+
+html {
+  box-sizing: border-box;
+  height: 100%;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background-color: var(--superficiesPriamario);
+  color: var(--colorTexto);
+}
+
+body {
+  font-family: var(--fuenteTexto);
+}
+
+h1 {
+  font-size: 2em;
+}
+
+a,
+a:link {
+  text-decoration: none;
+}
+
+.titulo {
+  font-family: var(--fuenteTitulos);
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 400;
+  font-variation-settings: 'wdth' 100;
+}
+
+.subtitulo {
+  font-family: var(--fuenteTitulos);
+  font-style: normal;
+  font-weight: 900;
+  line-height: normal;
+}
+
+.textoPixelitos {
+  font-family: var(--fuentePixeles);
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.fuenteIconos {
+  font-family: var(--fuenteIconos);
+  font-weight: 400;
+  font-style: normal;
+  font-size: 2em;
+}
