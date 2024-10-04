@@ -20,7 +20,7 @@ WordPress local para desarrollo.
 Con Docker instalado, iniciar contenedor con:
 
 ```bash
-docker compose up
+yarn servidor
 ```
 
 ## Instalar paquetes

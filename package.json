@@ -1,0 +1,21 @@
+{
+  "name": "enflujo-historia-internet",
+  "private": true,
+  "packageManager": "yarn@4.5.0",
+  "workspaces": [
+    "aplicaciones/*"
+  ],
+  "scripts": {
+    "dev": "yarn workspace www run dev",
+    "servidor": "yarn workspace servidor run dev",
+    "servidor:logs": "yarn workspace servidor run dev:logs",
+    "build": "yarn workspace www run build",
+    "lint": "prettier --check .",
+    "lint:fix": "prettier --write --list-different .",
+    "preview": "yarn workspace www run preview",
+    "revisar": "yarn workspace www run revisar"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}

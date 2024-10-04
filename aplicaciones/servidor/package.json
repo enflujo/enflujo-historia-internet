@@ -1,0 +1,7 @@
+{
+  "name": "servidor",
+  "scripts": {
+    "dev": "docker compose up -d",
+    "dev:logs": "docker compose up"
+  }
+}

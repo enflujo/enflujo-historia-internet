@@ -1,7 +1,7 @@
 .env
 basededatos/
 wordpress/
-
+extensiones/
 publico/
 
 # generated types
