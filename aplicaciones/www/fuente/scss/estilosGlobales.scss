@@ -1,13 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,100..900;1,100..900&family=Pixelify+Sans:wght@400..700&family=Tourney:ital,wght@0,100..900;1,100..900&family=Yarndings+12&display=swap');
-
-:root {
-  --superficiesPriamario: #f2edff;
-  --colorTexto: #27206c;
-  --fuenteTitulos: 'Tourney', sans-serif;
-  --fuentePixeles: 'Pixelify Sans', sans-serif;
-  --fuenteIconos: 'Yarndings 12', system-ui;
-  --fuenteTexto: 'Chivo Mono', monospace;
-}
+@import './variables';
+@import './componentes';
 
 ::selection {
   background-color: #30cac073;
