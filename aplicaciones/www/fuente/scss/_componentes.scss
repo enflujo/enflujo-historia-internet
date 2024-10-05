@@ -6,4 +6,12 @@
   border-right: 4px solid #a43dab;
   border-bottom: 4px solid #a43dab;
   box-shadow: 4px 4px 0px 0px #de96e2 inset;
+  cursor: pointer;
+
+  &:active {
+    background: var(--superficieOscura);
+    box-shadow: 4px 4px 0px 0px #0e074a inset;
+    border-bottom: 4px solid #3f34a4;
+    border-right: 4px solid #3f34a4;
+  }
 }
