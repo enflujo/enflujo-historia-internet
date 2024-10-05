@@ -1,0 +1,13 @@
+---
+import type { Pagina } from '@/tipos';
+
+interface Props {
+  pagina: Pagina;
+}
+
+const { pagina } = Astro.props;
+---
+
+<main>
+  <h1 class="titulo">{pagina.title}</h1>
+</main>

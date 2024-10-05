@@ -2,6 +2,8 @@
 import Plantilla from '@/plantillas/Plantilla.astro';
 import type { Pagina } from '@/tipos';
 import { gql, pedirDatos } from '@/utilidades/ayudas';
+import LineaTiempo from '@/vistas/LineaTiempo.astro';
+import Predeterminada from '@/vistas/Predeterminada.astro';
 
 export async function getStaticPaths() {
   const Paginas = gql`
@@ -42,8 +44,11 @@ const PeticionPagina = gql`
 `;
 
 const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
+let Vista = Predeterminada;
+
+if (slug === 'linea-de-tiempo') Vista = LineaTiempo;
 ---
 
 <Plantilla titulo={page.title} descripcion={page.descripcion}>
-  <h1 class="titulo">{page.title}</h1>
+  <Vista pagina={page} />
 </Plantilla>

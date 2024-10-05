@@ -1,0 +1,42 @@
+---
+import type { Evento } from '../tipos';
+import { gql, pedirDatos } from '../utilidades/ayudas';
+import type { Pagina } from '@/tipos';
+
+interface Props {
+  pagina: Pagina;
+}
+
+const { pagina } = Astro.props;
+
+const EsquemaEventos = gql`
+  query Eventos {
+    eventos {
+      nodes {
+        fecha(format: RENDERED)
+        tipo
+        title
+        slug
+        content
+      }
+    }
+  }
+`;
+const { eventos } = await pedirDatos<{ eventos: { nodes: Evento[] } }>(EsquemaEventos);
+---
+
+<main>
+  <h1 class="titulo">{pagina.title}</h1>
+  {
+    eventos.nodes.map((evento: Evento) => (
+      <div class="evento">
+        <h2 class="subtitulo" set:html={`${evento.title} (${evento.fecha})`} />
+        <p set:html={evento.content} />
+      </div>
+    ))
+  }
+</main>
+
+<script></script>
+
+<style lang="scss"></style>
