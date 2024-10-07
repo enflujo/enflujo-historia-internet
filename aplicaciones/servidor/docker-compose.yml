@@ -2,6 +2,7 @@ services:
   bd:
     container_name: historia-internet-bd
     image: mysql:8.0
+    restart: unless-stopped
     networks:
       - historia-internet
     environment:
@@ -17,6 +18,7 @@ services:
     depends_on:
       - bd
     image: wordpress
+    restart: unless-stopped
     ports:
       - 4040:80
     networks:
@@ -38,6 +40,7 @@ services:
   admin:
     container_name: historia-internet-admin
     image: phpmyadmin
+    restart: unless-stopped
     depends_on:
       - bd
     ports:
