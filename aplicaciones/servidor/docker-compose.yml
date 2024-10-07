@@ -34,7 +34,7 @@ services:
         define( 'WP_DEBUG_DISPLAY', false );
     volumes:
       - ./wordpress:/var/www/html
-      - ./extensiones/enflujo-historia-internet-config:/var/www/html/wp-content/plugins/enflujo-historia-internet-config
+      # - ./extensiones/enflujo-historia-internet-config:/var/www/html/wp-content/plugins/enflujo-historia-internet-config
       - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
 
   admin:
