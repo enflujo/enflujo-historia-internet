@@ -2,6 +2,7 @@
   "name": "servidor",
   "scripts": {
     "dev": "docker compose up -d",
-    "dev:logs": "docker compose up"
+    "dev:logs": "docker compose up",
+    "apagar": "docker compose down"
   }
 }
