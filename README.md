@@ -15,12 +15,20 @@
 
 ## WordPress local para el desarrollo
 
-WordPress local para desarrollo.
+Sólo es necesario si se necesita crear una instancia de wordpress local para desarrollo y pruebas.
 
 Con Docker instalado, iniciar contenedor con:
 
 ```bash
-yarn servidor
+yarn servidor:dev
+```
+
+Cambiar la ruta a donde se hacen las peticiones:
+
+**/aplicaciones/www/fuente/utilidades/constantes.ts**
+
+```js
+export const apiBase = 'http://localhost:4040';
 ```
 
 ## Instalar paquetes
