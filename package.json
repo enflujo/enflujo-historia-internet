@@ -9,6 +9,7 @@
     "dev": "yarn workspace www run dev",
     "servidor": "yarn workspace servidor run dev",
     "servidor:logs": "yarn workspace servidor run dev:logs",
+    "servidor:apagar": "yarn workspace servidor run apagar",
     "build": "yarn workspace www run build",
     "lint": "prettier --check .",
     "lint:fix": "prettier --write --list-different .",
