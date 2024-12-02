@@ -9,7 +9,6 @@ const { titulo, slug } = Astro.props;
 
 const datosPagina = datosPaginas.get().find((pagina) => slug === pagina.slug);
 const icono = datosPagina ? datosPagina.iconoA : '1';
-console.log(icono);
 ---
 
 <header>
