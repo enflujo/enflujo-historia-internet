@@ -8,6 +8,15 @@ interface Props {
 const { pagina } = Astro.props;
 ---
 
-<main>
-  <h1 class="titulo">{pagina.title}</h1>
+<main class='pagina'>
+  <h1 class='titulo'>{pagina.title}</h1>
+  <div class='contenidoPagina' set:html={pagina.content} />
 </main>
+
+<style lang='scss' is:global>
+  .pagina {
+    .contenidoPagina {
+      padding: 2em;
+    }
+  }
+</style>
