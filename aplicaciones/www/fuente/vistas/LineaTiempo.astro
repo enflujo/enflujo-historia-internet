@@ -49,23 +49,23 @@ await pedirSeccionDatos();
 eventos.sort((a, b) => +a.fecha - +b.fecha);
 ---
 
-<main class='lineaTiempo'>
+<main class="lineaTiempo">
   <TituloPagina titulo={pagina.title} slug={pagina.slug} />
 
-  <div class='eventos'>
+  <div class="eventos">
     {
       eventos.map((evento: Evento) => (
-        <div class='evento'>
+        <div class="evento">
           <img
             class={`icono elementoEvento ${evento.tipo}`}
             src={`${import.meta.env.BASE_URL}/iconos/${evento.tipo}.svg`}
             alt={`Icono para tipo ${evento.tipo}`}
           />
 
-          <div class='contenidoEvento'>
-            <span class='fecha'>{evento.fecha}</span>
+          <div class="contenidoEvento">
+            <span class="fecha">{evento.fecha}</span>
 
-            <h2 class='subtitulo' set:html={`${evento.title}`} />
+            <h2 class="subtitulo" set:html={`${evento.title}`} />
           </div>
         </div>
       ))
@@ -75,7 +75,7 @@ eventos.sort((a, b) => +a.fecha - +b.fecha);
 
 <script></script>
 
-<style lang='scss'>
+<style lang="scss">
   .iconoPagina {
     font-family: var(--fuenteIconos);
     font-size: 2em;
