@@ -1,16 +1,15 @@
 :root {
-
   --colorTexto: var(--cobalto);
   --fuenteTitulos: 'Tourney', sans-serif;
   --fuentePixeles: 'Pixelify Sans', sans-serif;
   --fuenteIconos: 'Yarndings 12', system-ui;
   --fuenteTexto: 'Chivo Mono', monospace;
-  --crema: #FFF5EE;
-  --cobalto: #0808FF;
-  --blanco: #FFFFFF;
+  --crema: #fff5ee;
+  --cobalto: #0808ff;
+  --blanco: #ffffff;
   --negro: #000000;
   --superficiePrimario: var(--crema);
-  --superficieClaro:var(--blanco);
+  --superficieClaro: var(--blanco);
   --superficieOscura: var(--cobalto);
   --bordePrimario: var(--cobalto);
   --bordeClaro: var(var(--blanco));
