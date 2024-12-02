@@ -26,3 +26,8 @@ export interface Pagina extends CamposGenerales {
   content: string | null;
   descripcion: string;
 }
+
+export interface MetaInfo {
+  hasNextPage: boolean;
+  endCursor: string;
+}

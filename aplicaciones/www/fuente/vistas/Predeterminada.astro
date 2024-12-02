@@ -1,4 +1,5 @@
 ---
+import TituloPagina from '@/componentes/TituloPagina.astro';
 import type { Pagina } from '@/tipos';
 
 interface Props {
@@ -9,7 +10,7 @@ const { pagina } = Astro.props;
 ---
 
 <main class='pagina'>
-  <h1 class='titulo'>{pagina.title}</h1>
+  <TituloPagina titulo={pagina.title} slug={pagina.slug} />
   <div class='contenidoPagina' set:html={pagina.content} />
 </main>
 

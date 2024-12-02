@@ -1,42 +1,128 @@
 ---
-import type { Evento } from '../tipos';
+import { datosPaginas } from '@/cerebros/general';
+import type { Evento, MetaInfo } from '../tipos';
 import { gql, pedirDatos } from '../utilidades/ayudas';
 import type { Pagina } from '@/tipos';
+import TituloPagina from '@/componentes/TituloPagina.astro';
 
 interface Props {
   pagina: Pagina;
 }
 
 const { pagina } = Astro.props;
+const eventos: Evento[] = [];
 
-const EsquemaEventos = gql`
-  query Eventos {
-    eventos {
-      nodes {
-        fecha(format: RENDERED)
-        tipo
-        title
-        slug
-        content
+async function pedirSeccionDatos(cursor: string = '') {
+  const EsquemaEventos = gql`
+    query Eventos {
+      eventos(first: 1000, after: "${cursor}") {
+        pageInfo {
+          hasNextPage
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
+        }
+        nodes {
+          fecha(format: RENDERED)
+          tipo
+          title
+          slug
+          content
+        }
       }
     }
+  `;
+
+  const { eventos: algunosEventos } = await pedirDatos<{ eventos: { pageInfo: MetaInfo; nodes: Evento[] } }>(
+    EsquemaEventos
+  );
+
+  eventos.push(...algunosEventos.nodes);
+
+  if (algunosEventos.pageInfo.hasNextPage) {
+    await pedirSeccionDatos(algunosEventos.pageInfo.endCursor);
   }
-`;
-const { eventos } = await pedirDatos<{ eventos: { nodes: Evento[] } }>(EsquemaEventos);
+}
+
+await pedirSeccionDatos();
+eventos.sort((a, b) => +a.fecha - +b.fecha);
 ---
 
-<main>
-  <h1 class="titulo">{pagina.title}</h1>
-  {
-    eventos.nodes.map((evento: Evento) => (
-      <div class="evento">
-        <h2 class="subtitulo" set:html={`${evento.title} (${evento.fecha})`} />
-        <p set:html={evento.content} />
-      </div>
-    ))
-  }
+<main class='lineaTiempo'>
+  <TituloPagina titulo={pagina.title} slug={pagina.slug} />
+
+  <div class='eventos'>
+    {
+      eventos.map((evento: Evento) => (
+        <div class='evento'>
+          <img
+            class={`icono elementoEvento ${evento.tipo}`}
+            src={`${import.meta.env.BASE_URL}/iconos/${evento.tipo}.svg`}
+            alt={`Icono para tipo ${evento.tipo}`}
+          />
+
+          <div class='contenidoEvento'>
+            <span class='fecha'>{evento.fecha}</span>
+
+            <h2 class='subtitulo' set:html={`${evento.title}`} />
+          </div>
+        </div>
+      ))
+    }
+  </div>
 </main>
 
 <script></script>
 
-<style lang="scss"></style>
+<style lang='scss'>
+  .iconoPagina {
+    font-family: var(--fuenteIconos);
+    font-size: 2em;
+  }
+
+  .eventos {
+    display: flex;
+    align-items: flex-start;
+  }
+  .evento {
+    width: 320px;
+    border: 2px solid var(--bordes-primario, #0808ff);
+    margin-bottom: 1em;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--superficieClaro);
+    margin-right: 3em;
+    gap: 20px;
+
+    .contenidoEvento {
+      width: 209px;
+    }
+
+    .icono {
+      width: 71px;
+      height: 71px;
+    }
+
+    .fecha {
+      font-size: 1.8em;
+      font-family: var(--fuenteTitulos);
+      font-weight: 900;
+    }
+
+    .subtitulo {
+      margin: 0;
+      font-size: 1em;
+      font-family: var(--fuenteTexto);
+      font-weight: 400;
+    }
+
+    // &::after {
+    //   content: '';
+    //   width: 15px;
+    //   height: 15px;
+    //   background-color: var(--colorTexto);
+    // }
+  }
+</style>
