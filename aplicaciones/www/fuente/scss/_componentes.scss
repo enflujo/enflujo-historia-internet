@@ -3,15 +3,19 @@
   font-family: var(--fuentePixeles);
   padding: 0.5em 1.3em;
   color: var(--colorTexto);
-  border: 4px solid var(--bordePrimario);
-  // border-bottom: 4px solid #a43dab;
-  // box-shadow: 0px 0px 0px 0px var(--bordeOscuro) inset;
+  border-right: 4px solid var(--bordeOscuro);
+  border-bottom: 4px solid var(--bordeOscuro);
+  background: var(--superficieClaro);
+  box-shadow: 2px 2px 0px 0px var(--bordePrimario) inset;
   cursor: pointer;
+  pointer-events: auto;
+  z-index: 10;
 
   &:active {
+    border-right: 4px solid var(--bordeOscuro);
+    border-bottom: 4px solid var(--bordeOscuro);
     background: var(--superficieOscura);
-    box-shadow: 4px 4px 0px 0px var(--bordeOscuro) inset;
-    border: 4px solid var(--bordePrimario);
+    box-shadow: 4px 4px 0px 0px #0e074a inset;
     color: var(--textoInvertido);
   }
 }
