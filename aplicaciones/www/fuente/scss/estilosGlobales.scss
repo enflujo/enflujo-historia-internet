@@ -1,6 +1,6 @@
+@use './variables' as *;
+@use './componentes' as *;
 @import url('https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,100..900;1,100..900&family=Pixelify+Sans:wght@400..700&family=Tourney:ital,wght@0,100..900;1,100..900&family=Yarndings+12&display=swap');
-@import './variables';
-@import './componentes';
 
 ::selection {
   background-color: #30cac073;
