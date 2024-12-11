@@ -20,7 +20,14 @@ Sólo es necesario si se necesita crear una instancia de wordpress local para de
 Con Docker instalado, iniciar contenedor con:
 
 ```bash
+# Para iniciar servidor local mostrando registros en la terminal
+yarn servidor:logs
+
+# Para iniciar servidor local sin registros
 yarn servidor:dev
+
+# Iniciar servidor en modo producción
+yarn servidor
 ```
 
 Cambiar la ruta a donde se hacen las peticiones:

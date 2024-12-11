@@ -15,3 +15,14 @@ export async function pedirDatos<Esquema>(query: string) {
 
   return peticion.data as Esquema;
 }
+
+/**
+ * Ayuda a crear el título con estilos propios.
+ *
+ * @param tituloPagina El nombre o título de la página actual, se puede dejar vacío para la Maloca.
+ * @returns Título para el encabezado con estilos personalizados.
+ */
+export const crearTitulo = (tituloPagina: string) => {
+  const nombreProyecto = `..:: Historia del Internet ::..`;
+  return tituloPagina ? `${tituloPagina} | ${nombreProyecto}` : nombreProyecto;
+};
