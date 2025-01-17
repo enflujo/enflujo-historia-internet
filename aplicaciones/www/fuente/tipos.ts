@@ -50,3 +50,9 @@ export interface EventoLinea extends CamposGenerales {
   categories: CategoriaBasico[];
   tipo: 'colombia' | 'tecnologico' | 'documento';
 }
+
+export interface Glosario extends CamposGenerales {
+  title: string;
+  content: string;
+  slug: string;
+}
