@@ -45,11 +45,10 @@ const PeticionPagina = gql`
 
 const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
 let Vista = Predeterminada;
-console.log(slug)
-if (slug === "glosario"){
+
+if (slug === 'glosario') {
   Vista = Glosario;
 }
-
 ---
 
 <Plantilla titulo={page.title} descripcion={page.descripcion}>

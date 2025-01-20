@@ -1,12 +1,12 @@
 ---
-// Import necessary modules and types
+// Importar los módulos y tipos necesarios
 import Plantilla from '../plantillas/Plantilla.astro';
 import type { Glosario } from '../tipos';
 import { gql, pedirDatos } from '../utilidades/ayudas';
 import type { Pagina } from '@/tipos';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 
-// GraphQL query to fetch glossary data
+// GraphQL esquema (query) para obtener los datos del glosario
 const PeticionGlosario = gql`
   query NewQuery {
     glosarios {
@@ -19,32 +19,16 @@ const PeticionGlosario = gql`
   }
 `;
 
-// Fetch the glossary data
+// Obtener los datos del glosario
 const { glosarios } = await pedirDatos<{ glosarios: { nodes: Glosario[] } }>(PeticionGlosario);
 
-// Sort glossary terms alphabetically
+// Organizar los términos del glosario en orden alfbético
 glosarios.nodes.sort((a, b) => a.title.localeCompare(b.title));
 ---
 
-<!-- <Plantilla titulo="Glosario" descripcion="Un listado de términos y definiciones.">
-  <main class="glosario">
-    <TituloPagina titulo="Glosario" slug="glosario" />
-
-    <section id="contenedorGlosario">
-      {
-        glosarios.nodes.map((glosario) => (
-          <article class="termino" id={glosario.slug}>
-            <h2 class="tituloTermino">{glosario.title}</h2>
-            <div class="contenidoTermino" set:html={glosario.content} />
-          </article>
-        ))
-      }
-    </section>
-  </main>
-</Plantilla> -->
 <main class="glosario">
   <TituloPagina titulo={'Glosario'} slug={'glosario'} />
-  <!-- <div class="contenidoPagina" set:html={pagina.content} /> -->
+
   <section id="contenedorGlosario">
     {
       glosarios.nodes.map((glosario) => (
@@ -58,22 +42,6 @@ glosarios.nodes.sort((a, b) => a.title.localeCompare(b.title));
 </main>
 
 <style lang="scss" is:global>
-  // #contenedorGlosario {
-  //   margin: 0 20vw 0 20vw;
-  // }
-
-  // .contenidoTermino {
-  //   width: 500px;
-  //   border: 2px solid var(--bordes-primario, #0808ff);
-  //   //margin-bottom: 1em;
-  //   padding: 10px;
-  //   // display: flex;
-  //   // justify-content: center;
-  //   // align-items: center;
-  //   background-color: var(--superficieClaro);
-  //   position: relative;
-  // }
-
   #contenedorGlosario {
     display: flex;
     flex-direction: column;
