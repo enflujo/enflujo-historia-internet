@@ -3,6 +3,7 @@ import Plantilla from '@/plantillas/Plantilla.astro';
 import type { Pagina } from '@/tipos';
 import { gql, pedirDatos } from '@/utilidades/ayudas';
 import Predeterminada from '@/vistas/Predeterminada.astro';
+import Glosario from '@/vistas/Glosario.astro';
 
 export async function getStaticPaths() {
   const Paginas = gql`
@@ -44,6 +45,10 @@ const PeticionPagina = gql`
 
 const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
 let Vista = Predeterminada;
+
+if (slug === 'glosario') {
+  Vista = Glosario;
+}
 ---
 
 <Plantilla titulo={page.title} descripcion={page.descripcion}>
