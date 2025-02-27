@@ -1,11 +1,15 @@
 ---
 // Importar los módulos y tipos necesarios
-import Plantilla from '../plantillas/Plantilla.astro';
 import type { Glosario } from '../tipos';
 import { gql, pedirDatos } from '../utilidades/ayudas';
 import type { Pagina } from '@/tipos';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 
+interface Props {
+  pagina: Pagina;
+}
+
+const { pagina } = Astro.props;
 // GraphQL esquema (query) para obtener los datos del glosario
 const PeticionGlosario = gql`
   query NewQuery {
@@ -27,7 +31,7 @@ glosarios.nodes.sort((a, b) => a.title.localeCompare(b.title));
 ---
 
 <main class="glosario">
-  <TituloPagina titulo={'Glosario'} slug={'glosario'} />
+  <TituloPagina titulo={pagina.title} slug={pagina.slug} />
 
   <section id="contenedorGlosario">
     {

@@ -52,7 +52,10 @@ export interface EventoLinea extends CamposGenerales {
 }
 
 export interface Glosario extends CamposGenerales {
-  title: string;
   content: string;
-  slug: string;
+}
+
+export interface Personaje extends CamposGenerales {
+  content: string;
+  featuredImage: Imagen | null;
 }

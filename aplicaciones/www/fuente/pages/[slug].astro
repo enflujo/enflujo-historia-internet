@@ -4,6 +4,7 @@ import type { Pagina } from '@/tipos';
 import { gql, pedirDatos } from '@/utilidades/ayudas';
 import Predeterminada from '@/vistas/Predeterminada.astro';
 import Glosario from '@/vistas/Glosario.astro';
+import HistoriaOral from '@/vistas/HistoriaOral.astro';
 
 export async function getStaticPaths() {
   const Paginas = gql`
@@ -48,6 +49,8 @@ let Vista = Predeterminada;
 
 if (slug === 'glosario') {
   Vista = Glosario;
+} else if (slug === 'historia-oral') {
+  Vista = HistoriaOral;
 }
 ---
 
