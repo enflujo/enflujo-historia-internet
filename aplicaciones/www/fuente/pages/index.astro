@@ -15,12 +15,6 @@ const PeticionPagina = gql`
       slug
       iconoA
       descripcion(format: RAW)
-      featuredImage {
-        node {
-          altText
-          uri
-        }
-      }
       content(format: RENDERED)
     }
   }
