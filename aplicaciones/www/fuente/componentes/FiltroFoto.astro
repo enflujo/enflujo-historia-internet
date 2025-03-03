@@ -1,14 +1,14 @@
 ---
 interface Props {
-  uri: string;
+  ruta: string;
   alt: string;
 }
 
-const { uri, alt } = Astro.props;
+const { ruta, alt } = Astro.props;
 ---
 
 <div class="marco">
-  <img src={`https://wordpress.enflujo.com${uri}`} alt={alt} />
+  <img src={ruta} alt={alt} />
 </div>
 
 <style lang="scss">

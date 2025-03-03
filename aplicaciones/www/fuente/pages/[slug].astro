@@ -36,7 +36,7 @@ const PeticionPagina = gql`
       featuredImage {
         node {
           altText
-          uri
+          sourceUrl(size: MEDIUM)
         }
       }
       content(format: RENDERED)

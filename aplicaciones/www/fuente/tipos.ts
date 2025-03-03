@@ -18,7 +18,7 @@ export interface PaginaMenu extends CamposGenerales {
 }
 
 export type Imagen = {
-  node: { altText: string; uri: string };
+  node: { altText: string; sourceUrl: string };
 };
 
 export interface CategoriaBasico {

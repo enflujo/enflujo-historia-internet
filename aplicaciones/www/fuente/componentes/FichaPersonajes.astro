@@ -21,7 +21,7 @@ const EsquemaPaginas = gql`
     featuredImage {
       node {
         altText
-        uri
+        sourceUrl(size: MEDIUM)
       }
     }
   }
@@ -37,9 +37,13 @@ const { personaje } = await pedirDatos<{ personaje: Personaje }>(EsquemaPaginas)
     <div class="contenidoPersonaje" set:html={personaje.content} />
   </div>
 
-  <div class="foto">
-    <FiltroFoto uri=`${personaje.featuredImage?.node.uri}` alt=`Foto de ${personaje.title}` />
-  </div>
+  {
+    personaje.featuredImage ? (
+      <div class="foto">
+        <FiltroFoto ruta={personaje.featuredImage?.node.sourceUrl} alt={`Foto de ${personaje.title}`} />
+      </div>
+    ) : null
+  }
 </section>
 
 <style>
