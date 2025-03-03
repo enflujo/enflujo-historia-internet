@@ -36,10 +36,7 @@ function procesarDocumentos(documentos: DocumentoSimple[]): EventoLinea[] {
     contenido: documento.descripcion,
     tipo: 'documento',
     fecha: new Date(documento.fecha).getFullYear(),
-    categories: documento.categories.nodes.map((categoria) => ({
-      name: categoria.name,
-      slug: categoria.slug,
-    })),
+    categories: documento.categories.nodes.map((categoria) => ({ name: categoria.name, slug: categoria.slug })),
   }));
 }
 
@@ -51,17 +48,14 @@ function procesarEventos(eventos: Evento[]): EventoLinea[] {
     contenido: evento.content,
     tipo: evento.tipo,
     fecha: new Date(evento.fecha).getFullYear(),
-    categories: evento.categories.nodes.map((categoria) => ({
-      name: categoria.name,
-      slug: categoria.slug,
-    })),
+    categories: evento.categories.nodes.map((categoria) => ({ name: categoria.name, slug: categoria.slug })),
   }));
 }
 
 async function pedirSeccionDatos(cursorEventos: string = '', cursorDocumentos: string = '') {
   const EsquemaEventos = gql`
     query Eventos {
-      eventos(first: 1000, after: "${cursorEventos}") {
+      eventos(first: 1000${cursorEventos ? `, after: "${cursorEventos}"` : ''}) {
         pageInfo {
           hasNextPage
           hasNextPage
@@ -69,6 +63,7 @@ async function pedirSeccionDatos(cursorEventos: string = '', cursorDocumentos: s
           startCursor
           endCursor
         }
+        
         nodes {
           fecha(format: RENDERED)
           title
@@ -85,7 +80,7 @@ async function pedirSeccionDatos(cursorEventos: string = '', cursorDocumentos: s
         }
       }
 
-      documentos(first: 1000, after: "${cursorDocumentos}") {
+      documentos(first: 1000${cursorDocumentos ? `, after: "${cursorDocumentos}"` : ''}) {
         nodes {
           title
           slug
@@ -120,13 +115,20 @@ async function pedirSeccionDatos(cursorEventos: string = '', cursorDocumentos: s
 
 await pedirSeccionDatos();
 eventos.sort((a, b) => +a.fecha - +b.fecha);
-// const años = { min: +eventos[0].fecha, max: +eventos[eventos.length - 1].fecha };
-// const totalFechas = años.max - años.min;
-// const fechas: number[] = Array(totalFechas + 1) // Incluir todos los años
-//   .fill(años.min) // Usar como base la fecha inicial y calcular las otras desde ahí
-//   .map((fechaInicial, i) => fechaInicial + i);
-// const anchoEvento = 320 + 40; //ancho definido en CSS + margen entre ellos
-// const totalAncho = anchoEvento * eventos.length;
+
+const decadas = eventos.reduce(
+  (acumulador, evento, indice) => {
+    const decada = Math.floor(evento.fecha / 10) * 10;
+    const existe = acumulador.find((d) => d.año === decada);
+
+    if (!existe) {
+      acumulador.push({ año: decada, indice });
+    }
+
+    return acumulador;
+  },
+  [] as { año: number; indice: number }[]
+);
 ---
 
 <Plantilla titulo="Línea de tiempo" descripcion="">
@@ -136,8 +138,8 @@ eventos.sort((a, b) => +a.fecha - +b.fecha);
     <div id="contenedorEventos">
       <div id="eventos">
         {
-          eventos.map((evento: Evento) => (
-            <div class="evento">
+          eventos.map((evento) => (
+            <div class={`evento ${evento.tipo}`}>
               <img
                 class={`icono elementoEvento ${evento.tipo} f${evento.fecha}`}
                 src={`${import.meta.env.BASE_URL}/iconos/${evento.tipo}.svg`}
@@ -151,6 +153,16 @@ eventos.sort((a, b) => +a.fecha - +b.fecha);
             </div>
           ))
         }
+
+        <div id="fechasLinea">
+          {
+            decadas.map((decada) => (
+              <span class="fechaLinea" data-indice={decada.indice}>
+                {decada.año}
+              </span>
+            ))
+          }
+        </div>
       </div>
 
       <svg id="conexiones"></svg>
@@ -158,9 +170,9 @@ eventos.sort((a, b) => +a.fecha - +b.fecha);
 
     <nav>
       <ul class="filtros">
-        <li class="boton">Acontecimiento Tecnológico</li>
-        <li class="boton">Acontecimiento en Colombia</li>
-        <li class="boton activo">Todos</li>
+        <li class="boton activo" data-tipo="todos">Todos</li>
+        <li class="boton" data-tipo="tecnologico">Acontecimiento Tecnológico</li>
+        <li class="boton" data-tipo="colombia">Acontecimiento en Colombia</li>
       </ul>
     </nav>
 
@@ -168,8 +180,15 @@ eventos.sort((a, b) => +a.fecha - +b.fecha);
       {
         eventos.length &&
           eventos.map((evento) => (
-            <span class={`fechaBarra f${evento.fecha}`} style={{ width: `${100 / eventos.length}%` }} />
+            <span class={`eventoBarra f${evento.fecha}`} style={{ width: `${100 / eventos.length}%` }} />
           ))
+      }
+      {
+        decadas.map((decada) => (
+          <span class="fechaBarra" style={{ left: `${(decada.indice * 100) / eventos.length}%` }}>
+            {decada.año}
+          </span>
+        ))
       }
       <span id="deslizador"></span>
     </div>
@@ -179,16 +198,40 @@ eventos.sort((a, b) => +a.fecha - +b.fecha);
 <script>
   const deslizador = document.querySelector<HTMLDivElement>('#deslizador');
   const eventos = document.querySelector<HTMLDivElement>('#eventos');
-  const fechas = document.querySelectorAll<HTMLSpanElement>('.fechaBarra');
+  const eventosBarra = document.querySelectorAll<HTMLSpanElement>('.eventoBarra');
   const contenedorBarra = document.querySelector<HTMLDivElement>('#contenedorBarra');
   const conexiones = document.querySelector<SVGElement>('#conexiones');
   const contenedorEventos = document.querySelector<HTMLDivElement>('#contenedorEventos');
+  const botonesFiltros = document.querySelectorAll<HTMLLIElement>('.filtros .boton');
+  const fechasLinea = document.querySelectorAll<HTMLSpanElement>('.fechaLinea');
 
+  const anchoEvento = 320 + 40; //ancho definido en CSS + margen entre ellos
   let anchoContenedorEventos = 0;
   let pasoDeslizador = 0;
-  const anchoEvento = 320 + 40; //ancho definido en CSS + margen entre ellos
   window.addEventListener('resize', escalar);
   escalar();
+
+  botonesFiltros.forEach((boton) => {
+    boton.addEventListener('click', () => {
+      const tipo = boton.dataset.tipo;
+      if (!tipo || !eventos) return;
+
+      botonesFiltros.forEach((boton) => boton.classList.remove('activo'));
+      boton.classList.add('activo');
+
+      eventos.querySelectorAll<HTMLLIElement>('.evento').forEach((evento) => {
+        if (tipo === 'todos') {
+          evento.classList.remove('apagado');
+        } else if (evento.classList.contains(tipo)) {
+          evento.classList.remove('apagado');
+        } else {
+          evento.classList.add('apagado');
+        }
+      });
+
+      escalar();
+    });
+  });
 
   if (deslizador) {
     let puntoXInicio = 0;
@@ -262,14 +305,25 @@ eventos.sort((a, b) => +a.fecha - +b.fecha);
   }
 
   function escalar() {
-    if (!eventos || !fechas) return;
+    if (!eventos || !eventosBarra || !deslizador) return;
     anchoContenedorEventos = eventos.scrollWidth;
-    pasoDeslizador = window.innerWidth / (fechas.length * anchoEvento);
+    pasoDeslizador = window.innerWidth / (eventosBarra.length * anchoEvento);
     deslizador.style.width = `${pasoDeslizador * 100}%`;
+
+    if (!contenedorEventos || !conexiones) return;
 
     const dimsContenedorEventos = contenedorEventos.getBoundingClientRect();
     conexiones.setAttribute('width', `${dimsContenedorEventos.width}`);
     conexiones.setAttribute('height', `${dimsContenedorEventos.height}`);
+
+    if (!fechasLinea) return;
+    const pasoFecha = eventos.offsetWidth / eventosBarra.length - 1;
+
+    fechasLinea.forEach((fecha) => {
+      const indice = fecha.dataset.indice;
+      if (!indice) return;
+      fecha.style.left = `${+indice * pasoFecha}px`;
+    });
   }
 </script>
 
@@ -279,6 +333,33 @@ eventos.sort((a, b) => +a.fecha - +b.fecha);
     margin: 0;
     padding: 0 0 2em;
     display: flex;
+  }
+
+  #fechasLinea {
+    position: absolute;
+    left: 3em;
+    top: 0;
+    width: 100%;
+  }
+  .fechaLinea {
+    position: absolute;
+    top: 0;
+    font-weight: bold;
+    color: var(--colorTexto);
+    font-size: 2em;
+    // transform: translateX(1.1em);
+    z-index: -1;
+    opacity: 0.3;
+
+    &::after {
+      content: '';
+      width: 3px;
+      height: 100vh;
+      background-color: var(--colorTexto);
+      position: absolute;
+      top: 1em;
+      left: 0;
+    }
   }
 
   #contenedorBarra {
@@ -298,11 +379,28 @@ eventos.sort((a, b) => +a.fecha - +b.fecha);
       cursor: grab;
     }
 
-    .fechaBarra {
+    .eventoBarra {
       height: 20px;
       background-color: white;
       margin-right: 4px;
       font-size: 0.7em;
+    }
+
+    .fechaBarra {
+      position: absolute;
+      top: -15px;
+      font-size: 0.75em;
+      transform: translateX(30%);
+
+      &::after {
+        content: '';
+        width: 1px;
+        height: 50px;
+        background-color: var(--colorTexto);
+        position: absolute;
+        top: 0;
+        left: -2px;
+      }
     }
   }
 
@@ -329,8 +427,7 @@ eventos.sort((a, b) => +a.fecha - +b.fecha);
   #eventos {
     position: absolute;
     display: flex;
-    align-items: flex-start;
-
+    align-items: center;
     padding: 3em;
   }
 
@@ -345,6 +442,10 @@ eventos.sort((a, b) => +a.fecha - +b.fecha);
     margin-right: 40px;
     gap: 20px;
     position: relative;
+
+    &.apagado {
+      opacity: 0.1;
+    }
 
     &::after {
       content: '';
@@ -379,11 +480,8 @@ eventos.sort((a, b) => +a.fecha - +b.fecha);
       font-weight: 400;
     }
 
-    // &::after {
-    //   content: '';
-    //   width: 15px;
-    //   height: 15px;
-    //   background-color: var(--colorTexto);
-    // }
+    &:nth-child(odd) {
+      margin-top: 30px;
+    }
   }
 </style>
