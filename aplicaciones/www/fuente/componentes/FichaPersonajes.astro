@@ -32,15 +32,13 @@ const { personaje } = await pedirDatos<{ personaje: Personaje }>(EsquemaPaginas)
 ---
 
 <section class="personaje" id={personaje.slug}>
-
-  
   <div class="contenido">
     <h2 class="tituloPersonaje">{personaje.title}</h2>
     <div class="contenidoPersonaje" set:html={personaje.content} />
   </div>
 
   <div class="foto">
-  <FiltroFoto uri=`${personaje.featuredImage?.node.uri}` alt=`Foto de ${personaje.title}` />
+    <FiltroFoto uri=`${personaje.featuredImage?.node.uri}` alt=`Foto de ${personaje.title}` />
   </div>
 </section>
 
@@ -53,21 +51,19 @@ const { personaje } = await pedirDatos<{ personaje: Personaje }>(EsquemaPaginas)
     gap: 40px;
 
     border: 2px solid var(--bordes-primario, #0808ff);
-    width: 80%;
-
+    width: 60%;
 
     align-items: center;
     justify-content: center;
     margin: 0;
+    padding: 20px;
   }
 
-  .contenido{
-    width: 70%;
+  .contenido {
+    /* width: 70%; */
   }
 
   h2 {
     font-family: var(--fuenteTitulos);
   }
-
-
 </style>
