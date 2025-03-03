@@ -11,7 +11,8 @@
   pointer-events: auto;
   z-index: 10;
 
-  &:active {
+  &:active,
+  &.activo {
     border-right: 4px solid var(--bordeOscuro);
     border-bottom: 4px solid var(--bordeOscuro);
     background: var(--superficieOscura);
