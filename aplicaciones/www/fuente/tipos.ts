@@ -18,7 +18,7 @@ export interface PaginaMenu extends CamposGenerales {
 }
 
 export type Imagen = {
-  node: { altText: string; uri: string };
+  node: { altText: string; sourceUrl: string };
 };
 
 export interface CategoriaBasico {
@@ -52,7 +52,10 @@ export interface EventoLinea extends CamposGenerales {
 }
 
 export interface Glosario extends CamposGenerales {
-  title: string;
   content: string;
-  slug: string;
+}
+
+export interface Personaje extends CamposGenerales {
+  content: string;
+  featuredImage: Imagen | null;
 }

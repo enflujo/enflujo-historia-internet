@@ -1,0 +1,16 @@
+---
+import FichaPersonajes from '@/componentes/FichaPersonajes.astro';
+import TituloPagina from '@/componentes/TituloPagina.astro';
+import type { Pagina } from '@/tipos';
+
+interface Props {
+  pagina: Pagina;
+}
+
+const { pagina } = Astro.props;
+---
+
+<main class="historia-oral">
+  <TituloPagina titulo={pagina.title} slug={pagina.slug} />
+  <FichaPersonajes slug="mauricio-pinilla" />
+</main>

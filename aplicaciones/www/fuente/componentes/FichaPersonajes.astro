@@ -1,0 +1,73 @@
+---
+import { datosPaginas } from '@/cerebros/general';
+import type { Personaje } from '@/tipos';
+import { gql, pedirDatos } from '@/utilidades/ayudas';
+import FiltroFoto from '@/componentes/FiltroFoto.astro';
+
+const rutaActual = Astro.url.pathname;
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+
+const EsquemaPaginas = gql`
+  query {
+  personaje(id: "${slug}", idType: SLUG) {
+    id
+    title
+    content
+    featuredImage {
+      node {
+        altText
+        sourceUrl(size: MEDIUM)
+      }
+    }
+  }
+}
+`;
+
+const { personaje } = await pedirDatos<{ personaje: Personaje }>(EsquemaPaginas);
+---
+
+<section class="personaje" id={personaje.slug}>
+  <div class="contenido">
+    <h2 class="tituloPersonaje">{personaje.title}</h2>
+    <div class="contenidoPersonaje" set:html={personaje.content} />
+  </div>
+
+  {
+    personaje.featuredImage ? (
+      <div class="foto">
+        <FiltroFoto ruta={personaje.featuredImage?.node.sourceUrl} alt={`Foto de ${personaje.title}`} />
+      </div>
+    ) : null
+  }
+</section>
+
+<style>
+  .personaje {
+    display: flex;
+    flex-direction: row;
+    height: 233px;
+    align-items: flex-start;
+    gap: 40px;
+
+    border: 2px solid var(--bordes-primario, #0808ff);
+    width: 60%;
+
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 20px;
+  }
+
+  .contenido {
+    /* width: 70%; */
+  }
+
+  h2 {
+    font-family: var(--fuenteTitulos);
+  }
+</style>
