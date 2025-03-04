@@ -174,7 +174,7 @@ const decadas = eventos.reduce(
       {
         eventos.length &&
           eventos.map((evento) => (
-            <span class={`eventoBarra f${evento.fecha}`} style={{ width: `${100 / eventos.length}%` }} />
+            <span class={`eventoBarra f${evento.fecha} ${evento.tipo}`} style={{ width: `${100 / eventos.length}%` }} />
           ))
       }
       {
@@ -202,8 +202,10 @@ const decadas = eventos.reduce(
   const anchoEvento = 320 + 40; //ancho definido en CSS + margen entre ellos
   let anchoContenedorEventos = 0;
   let pasoDeslizador = 0;
+  let filtroActual = 'todos';
   window.addEventListener('resize', escalar);
   escalar();
+  definirEventosVisibles();
 
   botonesFiltros.forEach((boton) => {
     boton.addEventListener('click', () => {
@@ -221,6 +223,8 @@ const decadas = eventos.reduce(
         } else {
           evento.classList.add('apagado');
         }
+        filtroActual = tipo;
+        definirEventosVisibles();
       });
 
       escalar();
@@ -319,6 +323,20 @@ const decadas = eventos.reduce(
       fecha.style.left = `${+indice * pasoFecha}px`;
     });
   }
+
+  function definirEventosVisibles() {
+    if (!eventosBarra) return;
+
+    eventosBarra.forEach((evento) => {
+      if (filtroActual === 'todos') {
+        evento.classList.add('visible');
+      } else if (evento.classList.contains(filtroActual)) {
+        evento.classList.add('visible');
+      } else {
+        evento.classList.remove('visible');
+      }
+    });
+  }
 </script>
 
 <style lang="scss">
@@ -378,6 +396,10 @@ const decadas = eventos.reduce(
       background-color: white;
       margin-right: 4px;
       font-size: 0.7em;
+
+      &.visible {
+        border: 1px solid var(--colorTexto);
+      }
     }
 
     .fechaBarra {
