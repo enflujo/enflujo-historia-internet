@@ -1,0 +1,81 @@
+---
+import { listaCategorias } from '@/cerebros/general';
+const categorias = await listaCategorias();
+---
+
+<div id="filtros" class="textoPixelitos">
+  <h3 class="subtitulo">Filtros</h3>
+
+  <div id="filtroCategorias">
+    <h4>Categorías</h4>
+
+    <ul>
+      {
+        categorias.map((categoria) => (
+          <li class="categoria categoria0" data-slug={categoria.slug}>
+            <a href={`${import.meta.env.BASE_URL}/categorias/${categoria.slug}`}>{categoria.name}</a>
+
+            {categoria.children.nodes.length > 0 && (
+              <ul class="subcategorias">
+                {categoria.children.nodes.map((subcategoria) => (
+                  <li class="categoria subcategoria" data-slug={subcategoria.slug}>
+                    <a href={`${import.meta.env.BASE_URL}/categorias/${subcategoria.slug}`}>{subcategoria.name}</a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</div>
+
+<style lang="scss">
+  a {
+    color: var(--blanco);
+  }
+
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0 0 0 0.5em;
+  }
+
+  li {
+    padding: 0;
+    margin: 0;
+  }
+
+  #filtros {
+    padding: 0 3em 5em 3em;
+  }
+
+  .categoria {
+    &:hover {
+      &::before {
+        background-color: var(--amarillo);
+      }
+    }
+
+    &::before {
+      content: '';
+      width: 0.6em;
+      height: 0.6em;
+      border: 1px solid var(--blanco);
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 5px;
+      background-color: var(--blanco);
+    }
+  }
+
+  .categoria0 {
+    margin: 0.5em 0;
+    font-size: 1.2em;
+  }
+
+  .subcategoria {
+    font-size: 0.8em;
+  }
+</style>

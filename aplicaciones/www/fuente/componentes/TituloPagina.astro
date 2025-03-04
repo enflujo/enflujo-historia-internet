@@ -4,14 +4,15 @@ import { datosPaginas } from '@/cerebros/general';
 interface Props {
   titulo: string;
   slug: string;
+  modo?: 'oscuro' | 'claro';
 }
-const { titulo, slug } = Astro.props;
+const { titulo, slug, modo } = Astro.props;
 
 const datosPagina = datosPaginas.get().find((pagina) => slug === pagina.slug);
 const icono = datosPagina ? datosPagina.iconoA : '1';
 ---
 
-<header>
+<header class={modo ? modo : 'claro'}>
   <span class="iconoPagina">{icono}</span>
   <h1 class="titulo">{titulo}</h1>
 </header>
@@ -22,6 +23,10 @@ const icono = datosPagina ? datosPagina.iconoA : '1';
     align-items: center;
     flex-wrap: nowrap;
     padding: 2em;
+
+    &.oscuro {
+      color: var(--blanco);
+    }
   }
 
   .titulo {

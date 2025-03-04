@@ -1,5 +1,6 @@
 ---
 import FichaPersonajes from '@/componentes/FichaPersonajes.astro';
+import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import type { Pagina } from '@/tipos';
 
@@ -11,6 +12,24 @@ const { pagina } = Astro.props;
 ---
 
 <main class="historia-oral">
-  <TituloPagina titulo={pagina.title} slug={pagina.slug} />
+  <aside id="columnaOscura">
+    <TituloPagina titulo={pagina.title} slug={pagina.slug} modo="oscuro" />
+    <FiltrosHistoriaOral />
+  </aside>
+
   <FichaPersonajes slug="mauricio-pinilla" />
+
+  <style lang="scss">
+    .historia-oral {
+      display: flex;
+    }
+
+    #columnaOscura {
+      width: 20vw;
+      height: 100vh;
+      overflow-y: auto;
+      background-color: var(--colorTexto);
+      color: var(--blanco);
+    }
+  </style>
 </main>

@@ -59,3 +59,15 @@ export interface Personaje extends CamposGenerales {
   content: string;
   featuredImage: Imagen | null;
 }
+
+export interface Categorias {
+  categories: {
+    nodes: (CategoriaBasico & {
+      children: {
+        nodes: (CategoriaBasico & {
+          children: { nodes: CategoriaBasico[] };
+        })[];
+      };
+    })[];
+  };
+}

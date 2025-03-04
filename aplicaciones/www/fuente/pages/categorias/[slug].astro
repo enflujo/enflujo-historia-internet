@@ -1,0 +1,40 @@
+---
+import Plantilla from '@/plantillas/Plantilla.astro';
+import type { Categorias } from '@/tipos';
+import { gql, pedirDatos } from '@/utilidades/ayudas';
+
+const categoria = 'Categoría';
+export async function getStaticPaths() {
+  const Categorias = gql`
+    query {
+      categories(where: { hideEmpty: true }, first: 200) {
+        nodes {
+          name
+          slug
+        }
+      }
+    }
+  `;
+  const { categories } = await pedirDatos<Categorias>(Categorias);
+
+  return categories.nodes.map(({ slug }) => {
+    return { params: { slug } };
+  });
+}
+
+const { slug } = Astro.params;
+
+const Categoria = gql`
+  query {
+    category(id: "${slug}", idType: SLUG) {
+      name
+    }
+  }
+`;
+
+const { category } = await pedirDatos<{ category: { name: string } }>(Categoria);
+---
+
+<Plantilla titulo={category.name} descripcion={categoria}>
+  <h1>{category.name}</h1>
+</Plantilla>
