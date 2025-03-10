@@ -27,7 +27,8 @@ export async function listaCategorias() {
     }
   `;
 
-  const { categories } = await pedirDatos<Categorias>(EsquemaCategorias);
+  const respuesta = await pedirDatos<Categorias>(EsquemaCategorias);
+  arbolCategorias.set(respuesta);
 
-  return categories.nodes;
+  return respuesta.categories.nodes;
 }

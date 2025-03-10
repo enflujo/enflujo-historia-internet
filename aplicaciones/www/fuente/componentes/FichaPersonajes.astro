@@ -1,10 +1,7 @@
 ---
-import { datosPaginas } from '@/cerebros/general';
 import type { Personaje } from '@/tipos';
 import { gql, pedirDatos } from '@/utilidades/ayudas';
 import FiltroFoto from '@/componentes/FiltroFoto.astro';
-
-const rutaActual = Astro.url.pathname;
 
 interface Props {
   slug: string;

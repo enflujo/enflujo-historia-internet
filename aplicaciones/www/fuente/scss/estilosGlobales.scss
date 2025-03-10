@@ -70,3 +70,11 @@ a:link {
   font-style: normal;
   font-size: 2em;
 }
+
+#columnaOscura {
+  width: 20vw;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: var(--colorTexto);
+  color: var(--blanco);
+}

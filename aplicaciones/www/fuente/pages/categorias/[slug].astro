@@ -1,4 +1,6 @@
 ---
+import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
+import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import type { Categorias } from '@/tipos';
 import { gql, pedirDatos } from '@/utilidades/ayudas';
@@ -36,5 +38,24 @@ const { category } = await pedirDatos<{ category: { name: string } }>(Categoria)
 ---
 
 <Plantilla titulo={category.name} descripcion={categoria}>
-  <h1>{category.name}</h1>
+  <main class="paginaCategorias">
+    <aside id="columnaOscura">
+      <TituloPagina titulo="Historia Oral" slug="historia-oral" modo="oscuro" />
+      <FiltrosHistoriaOral />
+    </aside>
+
+    <div class="contenido">
+      <h1>{category.name}</h1>
+    </div>
+  </main>
 </Plantilla>
+
+<style lang="scss">
+  .paginaCategorias {
+    display: flex;
+  }
+
+  .contenido {
+    padding: 1em 2em 5em 2em;
+  }
+</style>
