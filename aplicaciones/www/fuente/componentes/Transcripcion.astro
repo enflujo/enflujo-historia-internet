@@ -13,8 +13,7 @@ interface Transcripcion {
         archivos: Audio;
       }[];
     };
-  }
-
+  };
 }
 
 const EsquemaTranscripcion = gql`
@@ -42,8 +41,10 @@ const { transcripcion } = await pedirDatos<Transcripcion>(EsquemaTranscripcion);
 <div class="contenedorMultiplesAudios">
   {
     transcripcion.audios.nodes.map((entradaAudio) => (
-      <h3>{entradaAudio.title}</h3>
-      <ReproductorAudio ruta={`${apiBase}${entradaAudio.archivos.node.filePath}`} />
+      <>
+        <h3>{entradaAudio.title}</h3>
+        <ReproductorAudio ruta={`${apiBase}${entradaAudio.archivos.node.filePath}`} />
+      </>
     ))
   }
 </div>
