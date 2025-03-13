@@ -21,6 +21,10 @@ export type Imagen = {
   node: { altText: string; sourceUrl: string };
 };
 
+export type Audio = {
+  node: { title: string; filePath: string };
+};
+
 export interface CategoriaBasico {
   name: string;
   slug: string;

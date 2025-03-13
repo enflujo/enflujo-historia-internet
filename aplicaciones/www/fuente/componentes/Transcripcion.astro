@@ -1,0 +1,49 @@
+---
+import type { Audio } from '@/tipos';
+import { gql, pedirDatos } from '@/utilidades/ayudas';
+import ReproductorAudio from './ReproductorAudio.astro';
+import { apiBase } from '@/utilidades/constantes';
+
+interface Transcripcion {
+  transcripcion: {
+    title: string;
+    audios: {
+      nodes: {
+        title: string;
+        archivos: Audio;
+      }[];
+    };
+  }
+
+}
+
+const EsquemaTranscripcion = gql`
+  query {
+    transcripcion(id: "1664", idType: DATABASE_ID) {
+      title
+      audios {
+        nodes {
+          title
+          archivos {
+            node {
+              title
+              filePath
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const { transcripcion } = await pedirDatos<Transcripcion>(EsquemaTranscripcion);
+---
+
+<div class="contenedorMultiplesAudios">
+  {
+    transcripcion.audios.nodes.map((entradaAudio) => (
+      <h3>{entradaAudio.title}</h3>
+      <ReproductorAudio ruta={`${apiBase}${entradaAudio.archivos.node.filePath}`} />
+    ))
+  }
+</div>

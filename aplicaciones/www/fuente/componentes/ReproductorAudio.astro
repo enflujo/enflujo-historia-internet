@@ -1,0 +1,10 @@
+---
+import { base } from '@/utilidades/constantes';
+
+interface Props {
+  ruta: string;
+}
+const { ruta } = Astro.props;
+---
+
+<audio controls src={ruta}></audio>
