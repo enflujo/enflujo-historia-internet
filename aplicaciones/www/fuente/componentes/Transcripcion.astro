@@ -2,11 +2,13 @@
 import type { Audio } from '@/tipos';
 import { gql, pedirDatos } from '@/utilidades/ayudas';
 import ReproductorAudio from './ReproductorAudio.astro';
-import { apiBase } from '@/utilidades/constantes';
+import { apiBase, base } from '@/utilidades/constantes';
+import { listaCategorias } from '@/cerebros/general';
 
 interface Transcripcion {
   transcripcion: {
     title: string;
+    transcripcion: string;
     audios: {
       nodes: {
         title: string;
@@ -20,6 +22,7 @@ const EsquemaTranscripcion = gql`
   query {
     transcripcion(id: "1664", idType: DATABASE_ID) {
       title
+      transcripcion
       audios {
         nodes {
           title
@@ -36,8 +39,29 @@ const EsquemaTranscripcion = gql`
 `;
 
 const { transcripcion } = await pedirDatos<Transcripcion>(EsquemaTranscripcion);
+async function procesarTranscripcion(texto: string) {
+  const cosas = texto.match(/\*(.*?)\*/g);
+  // console.log(cosas);
+  const categorias = await listaCategorias();
+  // console.log(categorias);
+  if (cosas) {
+    cosas.forEach((entrada) => {
+      const nombre = entrada.replace(/\*/g, '');
+      const categoria = categorias.find((cat) => cat.name === nombre);
+      // console.log(categoria);
+      if (categoria) {
+        texto = texto.replace(entrada, `<a href="${base}/categorias/${categoria.slug}">${nombre}</a>`);
+      }
+    });
+  }
+  return texto;
+}
+const transcripcionProcesada = await procesarTranscripcion(transcripcion.transcripcion);
 ---
 
+<div>
+  {transcripcionProcesada}
+</div>
 <div class="contenedorMultiplesAudios">
   {
     transcripcion.audios.nodes.map((entradaAudio) => (
