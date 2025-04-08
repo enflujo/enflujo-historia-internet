@@ -18,12 +18,18 @@ const { pagina } = Astro.props;
     <FiltrosHistoriaOral />
   </aside>
 
-  <FichaPersonajes slug="mauricio-pinilla" />
-  <Transcripcion />
+  <div class="col2">
+    <FichaPersonajes slug="mauricio-pinilla" />
+    <Transcripcion />
+  </div>
 
   <style lang="scss">
     .historia-oral {
       display: flex;
+    }
+    .col2 {
+      width: 80vw;
+      padding: 2em;
     }
   </style>
 </main>
