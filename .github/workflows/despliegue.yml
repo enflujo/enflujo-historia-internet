@@ -26,27 +26,30 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: 🐜 Activar Corepack
         run: corepack enable
+
       - name: 🐝 Usar Node
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
           cache: 'yarn'
+
       - name: 🐾 Configurar página GitHub
         id: pages
         uses: actions/configure-pages@v5
+
       - name: 🦒 Instalar dependencias
-        run: |
-          yarn install --immutable
-      - name: 🔧 Verificar estructura de node_modules
-        run: ls -la && ls -la aplicaciones/www && ls -la aplicaciones/www/node_modules
+        run: yarn install --immutable
+
       - name: 🐌 Construir página con Astro
         run: |
           yarn workspaces focus www --production
           yarn workspace www run build \
             --site "${{ steps.pages.outputs.origin }}" \
             --base "${{ steps.pages.outputs.base_path }}"
+
       - name: 🐉 Subir archivos
         uses: actions/upload-pages-artifact@v3
         with:
