@@ -42,12 +42,10 @@ jobs:
 
       - name: 🦒 Instalar dependencias solo para `www`
         run: |
-          yarn workspaces focus www --production --all
+          yarn install --immutable
       - name: 🐌 Construir página con Astro
         run: |
-          yarn workspace www run build \
-            --site "${{ steps.pages.outputs.origin }}" \
-            --base "${{ steps.pages.outputs.base_path }}"
+          yarn build
 
       - name: 🐉 Subir archivos
         uses: actions/upload-pages-artifact@v3
