@@ -30,12 +30,12 @@ export async function listaCategorias() {
 
   const respuesta = await pedirDatos<Categorias>(EsquemaCategorias);
   arbolCategorias.set(respuesta);
-  const aplanadas: any = respuesta.categories.nodes.flatMap((categoria) => {
-    return categoria.children.nodes.map((subcategoria) => {
-      return { ...subcategoria, parent: categoria.slug };
-    });
-  });
-  console.log(aplanadas);
+  // const aplanadas: any = respuesta.categories.nodes.flatMap((categoria) => {
+  //   return categoria.children.nodes.map((subcategoria) => {
+  //     return { ...subcategoria, parent: categoria.slug };
+  //   });
+  // });
+  // console.log(aplanadas);
 
   // Guardar las subcategorías en el store
   // categoriasTodas.set(respuesta.categories.nodes.flatMap((categoria) => {
@@ -50,12 +50,36 @@ export async function listaCategorias() {
 }
 
 export async function relaciones() {
+  interface ITranscripciones {
+    transcripciones: {
+      nodes: {
+        title: string;
+        transcripcion: string;
+        slug: string;
+      }[];
+    };
+  }
   const EsquemaTranscripciones = gql`
     query {
       transcripciones {
         nodes {
+          title
+          transcripcion(format: RENDERED)
+          slug
         }
       }
-    }`;
-  const respuesta = await pedirDatos(EsquemaTranscripciones);
+    }
+  `;
+  const { transcripciones } = await pedirDatos<ITranscripciones>(EsquemaTranscripciones);
+
+  if (transcripciones.nodes.length) {
+    transcripciones.nodes.forEach((transcripcion) => {
+      const { transcripcion: contenido } = transcripcion;
+      //const terminos = contenido.match(/\*(.*?)\*/g);
+      let parrafos = contenido.split('\r\n');
+      parrafos = parrafos.map((parrafo) => `<p>${parrafo}</p>`);
+      transcripcion.transcripcion = parrafos.join('');
+    });
+  }
+  //console.log(transcripciones.nodes);
 }

@@ -1,15 +1,159 @@
 ---
+import { relaciones } from '@/cerebros/general';
 import FichaPersonajes from '@/componentes/FichaPersonajes.astro';
 import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
-import Transcripcion from '@/componentes/Transcripcion.astro';
-import type { Pagina } from '@/tipos';
+// import Transcripcion from '@/componentes/Transcripcion.astro';
+import type {
+  Categoria,
+  CategoriaWP,
+  EntreviostaPersonaje,
+  Entrevista,
+  EntrevistaSingularProcesada,
+  EntrevistasProcesadas,
+  Pagina,
+} from '@/tipos';
+import { gql, pedirDatos } from '@/utilidades/ayudas';
+import { apiBase } from '@/utilidades/constantes';
 
 interface Props {
   pagina: Pagina;
 }
 
 const { pagina } = Astro.props;
+relaciones();
+const personajePrueba = 'mauricio-pinilla';
+
+const EsquemaEntrevistaCompleta = gql`
+  query {
+    personaje(id: "${personajePrueba}", idType: SLUG) {
+      title
+      slug
+      content(format: RENDERED)
+      featuredImage {
+        node {
+          altText
+          sourceUrl
+        }
+      }
+      entrevistas {
+        nodes {
+          fecha
+          transcripciones(first: 200) {
+            nodes {
+              transcripcion(format: RAW)
+              categories {
+                nodes {
+                  slug
+                  name
+                  children {
+                    nodes {
+                      slug
+                      name
+                    }
+                  }
+                }
+              }
+              audios(first: 200) {
+                nodes {
+                  archivos {
+                    node {
+                      filePath
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const entrevista = await pedirDatos<EntreviostaPersonaje>(EsquemaEntrevistaCompleta);
+
+const entrevistaProcesada = procesarEntrevistasPersonaje(entrevista.personaje.entrevistas.nodes);
+
+function procesarEntrevistasPersonaje(entrevistas: Entrevista[]): EntrevistasProcesadas {
+  const categoriasPersonaje: Categoria[] = [];
+  const entrevistasPersonaje: EntrevistaSingularProcesada[] = [];
+
+  entrevistas.forEach((entrevista) => {
+    const { fecha, transcripciones } = entrevista;
+    const fechaEntrevista = new Date(fecha);
+    let entrevistaActual = entrevistasPersonaje.find((entrevista) => entrevista.fecha === fechaEntrevista);
+
+    if (!entrevistaActual) {
+      entrevistaActual = {
+        fecha: fechaEntrevista,
+        secciones: [],
+      };
+      entrevistasPersonaje.push(entrevistaActual);
+    }
+
+    transcripciones.nodes.forEach((transcripcion) => {
+      const { transcripcion: textoTranscripcion, audios } = transcripcion;
+
+      const audiosTranscripcion = audios.nodes.map((audio) => {
+        return {
+          url: `${apiBase}${audio.archivos.node.filePath}`,
+          titulo: audio.archivos.node.title,
+        };
+      });
+
+      entrevistaActual.secciones.push({
+        contenido: textoTranscripcion,
+        audios: audiosTranscripcion,
+      });
+
+      transcripcion.categories.nodes.forEach((categoria: CategoriaWP) => {
+        if (categoria.slug === 'sin-categoria') return;
+
+        const { slug, name, children } = categoria;
+        let existe = categoriasPersonaje.find((cat) => cat.slug === slug);
+
+        if (!existe) {
+          existe = {
+            nombre: name,
+            slug,
+            conteo: 1,
+            hijos: [],
+          };
+          categoriasPersonaje.push(existe);
+        } else {
+          existe.conteo++;
+        }
+
+        if (children.nodes.length > 0) {
+          children.nodes.forEach((hijo) => {
+            if (hijo.slug === 'sin-categoria') return;
+            const existeHijo = existe.hijos.find((cat) => cat.slug === hijo.slug);
+
+            if (!existeHijo) {
+              existe.hijos.push({
+                nombre: hijo.name,
+                slug: hijo.slug,
+                conteo: 1,
+              });
+            } else {
+              existeHijo.conteo++;
+            }
+          });
+        }
+      });
+    });
+  });
+
+  return { categoriasPersonaje, entrevistas: entrevistasPersonaje };
+}
+
+const opcionesFecha: Intl.DateTimeFormatOptions = {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+};
 ---
 
 <main class="historia-oral">
@@ -19,8 +163,36 @@ const { pagina } = Astro.props;
   </aside>
 
   <div class="col2">
-    <FichaPersonajes slug="mauricio-pinilla" />
-    <Transcripcion />
+    <FichaPersonajes
+      nombre={entrevista.personaje.title}
+      slug={entrevista.personaje.slug}
+      bio={entrevista.personaje.content}
+      foto={entrevista.personaje.featuredImage}
+    />
+
+    <div id="contenedorEntrevistas">
+      <section>
+        {
+          entrevistaProcesada.entrevistas.map((entrevista) => (
+            <div class="entrevista">
+              <h3>Entrevista: {entrevista.fecha.toLocaleDateString('es-CO', opcionesFecha)}</h3>
+              {entrevista.secciones.map((seccion) => (
+                <div class="seccion">
+                  <p>{seccion.contenido}</p>
+                  {seccion.audios.map((audio) => (
+                    <audio controls>
+                      <source src={audio.url} type="audio/mpeg" />
+                      Your browser does not support the audio element.
+                    </audio>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ))
+        }
+      </section>
+    </div>
+    <!-- <Transcripcion /> -->
   </div>
 
   <style lang="scss">

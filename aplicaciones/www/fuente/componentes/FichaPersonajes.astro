@@ -1,43 +1,27 @@
 ---
-import type { Personaje } from '@/tipos';
-import { gql, pedirDatos } from '@/utilidades/ayudas';
+import type { Imagen } from '@/tipos';
 import FiltroFoto from '@/componentes/FiltroFoto.astro';
 
 interface Props {
   slug: string;
+  nombre: string;
+  bio: string;
+  foto: Imagen | null;
 }
 
-const { slug } = Astro.props;
-
-const EsquemaPaginas = gql`
-  query {
-  personaje(id: "${slug}", idType: SLUG) {
-    id
-    title
-    content
-    featuredImage {
-      node {
-        altText
-        sourceUrl(size: MEDIUM)
-      }
-    }
-  }
-}
-`;
-
-const { personaje } = await pedirDatos<{ personaje: Personaje }>(EsquemaPaginas);
+const { slug, nombre, bio, foto } = Astro.props;
 ---
 
-<section class="personaje" id={personaje.slug}>
+<section class="personaje" id={slug}>
   <div class="contenido">
-    <h2 class="tituloPersonaje">{personaje.title}</h2>
-    <div class="contenidoPersonaje" set:html={personaje.content} />
+    <h2 class="tituloPersonaje">{nombre}</h2>
+    <div class="contenidoPersonaje" set:html={bio} />
   </div>
 
   {
-    personaje.featuredImage ? (
+    foto ? (
       <div class="foto">
-        <FiltroFoto ruta={personaje.featuredImage?.node.sourceUrl} alt={`Foto de ${personaje.title}`} />
+        <FiltroFoto ruta={foto.node.sourceUrl} alt={`Foto de ${nombre}`} />
       </div>
     ) : null
   }

@@ -75,3 +75,62 @@ export interface Categorias {
     })[];
   };
 }
+
+export interface CategoriaWP {
+  name: string;
+  slug: string;
+  children: {
+    nodes: {
+      name: string;
+      slug: string;
+    }[];
+  };
+}
+[];
+export interface Entrevista {
+  fecha: string;
+  content: string;
+  transcripciones: {
+    nodes: {
+      transcripcion: string;
+      categories: {
+        nodes: CategoriaWP[];
+      };
+      audios: {
+        nodes: {
+          archivos: Audio;
+        }[];
+      };
+    }[];
+  };
+}
+export interface EntreviostaPersonaje {
+  personaje: {
+    title: string;
+    slug: string;
+    featuredImage: Imagen | null;
+    content: string;
+    entrevistas: {
+      nodes: Entrevista[];
+    };
+  };
+}
+export interface Categoria {
+  nombre: string;
+  slug: string;
+  conteo: number;
+  hijos: {
+    nombre: string;
+    slug: string;
+    conteo: number;
+  }[];
+}
+export interface EntrevistasProcesadas {
+  categoriasPersonaje: Categoria[];
+  entrevistas: EntrevistaSingularProcesada[];
+}
+
+export interface EntrevistaSingularProcesada {
+  fecha: Date;
+  secciones: { contenido: string; audios: { url: string; titulo: string }[] }[];
+}
