@@ -36,11 +36,9 @@ jobs:
       - name: 🐾 Configurar página GitHub
         id: pages
         uses: actions/configure-pages@v5
-      - name: 🦒 Instalar dependencias
+      - name: 🦒 Instalar y construir página con Astro
         run: |
-          yarn install --immutable
-      - name: 🐌 Construir página con Astro
-        run: |
+          yarn install --immutable && \
           yarn astro build \
             --site "${{ steps.pages.outputs.origin }}" \
             --base "${{ steps.pages.outputs.base_path }}"
