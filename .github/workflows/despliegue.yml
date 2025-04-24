@@ -39,8 +39,11 @@ jobs:
       - name: 🦒 Instalar dependencias
         run: |
           yarn install --immutable
+      - name: 🔧 Verificar estructura de node_modules
+        run: ls -la && ls -la aplicaciones/www && ls -la aplicaciones/www/node_modules
       - name: 🐌 Construir página con Astro
         run: |
+          yarn workspaces focus www --production
           yarn workspace www run build \
             --site "${{ steps.pages.outputs.origin }}" \
             --base "${{ steps.pages.outputs.base_path }}"
