@@ -33,7 +33,7 @@ const categorias = await listaCategorias();
 
 <style lang="scss">
   a {
-    color: var(--blanco);
+    color: var(--crema);
   }
 
   ul {
@@ -47,6 +47,11 @@ const categorias = await listaCategorias();
     margin: 0;
   }
 
+  h4 {
+    font-size: 1.6em;
+    letter-spacing: 1.2px;
+  }
+
   #filtros {
     padding: 0 3em 5em 3em;
   }
@@ -54,7 +59,7 @@ const categorias = await listaCategorias();
   .categoria {
     &:hover {
       &::before {
-        background-color: var(--amarillo);
+        background-color: var(--rojo);
       }
     }
 
@@ -72,10 +77,20 @@ const categorias = await listaCategorias();
 
   .categoria0 {
     margin: 0.5em 0;
-    font-size: 1.2em;
+    font-size: 1.4em;
+    font-weight: 500;
+    letter-spacing: 1.2px;
   }
 
   .subcategoria {
     font-size: 0.8em;
+    font-weight: 200;
+  }
+
+  .subtitulo {
+    font-family: var(--fuenteNeuton);
+    font-size: 1.8em;
+    letter-spacing: 1.2px;
+    font-weight: 600;
   }
 </style>
