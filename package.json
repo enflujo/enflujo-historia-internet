@@ -6,16 +6,16 @@
     "aplicaciones/*"
   ],
   "scripts": {
-    "dev": "yarn workspace www run dev",
-    "servidor": "yarn workspace servidor run prod",
-    "servidor:dev": "yarn workspace servidor run dev",
-    "servidor:logs": "yarn workspace servidor run dev:logs",
-    "servidor:apagar": "yarn workspace servidor run apagar",
-    "build": "yarn workspace www run build",
+    "dev": "yarn workspace www dev",
+    "servidor": "yarn workspace servidor prod",
+    "servidor:dev": "yarn workspace servidor dev",
+    "servidor:logs": "yarn workspace servidor dev:logs",
+    "servidor:apagar": "yarn workspace servidor apagar",
+    "build": "yarn workspace www build",
     "lint": "prettier --check .",
     "lint:fix": "prettier --write --list-different .",
-    "preview": "yarn workspace www run preview",
-    "revisar": "yarn workspace www run revisar"
+    "preview": "yarn workspace www preview",
+    "revisar": "yarn workspace www revisar"
   },
   "devDependencies": {
     "prettier": "^3.5.3"
