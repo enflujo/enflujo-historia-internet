@@ -1,12 +1,13 @@
 :root {
   --fuenteTitulos: 'Tourney', sans-serif;
-  --fuentePixeles: 'Pixelify Sans', sans-serif;
+  --fuenteNeuton: 'Neuton', serif;
   --fuenteIconos: 'Yarndings 12', system-ui;
   --fuenteTexto: 'Chivo Mono', monospace;
-  --crema: #fff5ee;
-  --cobalto: #0808ff;
+  --crema: #f0f4f5;
+  --cobalto: #203f54;
   --blanco: #ffffff;
-  --azulOscuro: #0d0d96;
+  --azulOscuro: #203f54;
+  --rojo: #f21d44;
   --negro: #000000;
   --azulMuyOscuro: #0e074a;
   --colorTexto: var(--cobalto);
@@ -14,7 +15,7 @@
   --superficiePrimario: var(--crema);
   --superficieClaro: var(--blanco);
   --superficieOscura: var(--cobalto);
-  --bordePrimario: var(--cobalto);
+  --bordePrimario: var(--rojo);
   --bordeClaro: var(var(--blanco));
   --bordeOscuro: var(--azulOscuro);
   --bordeNegro: var(--negro);
