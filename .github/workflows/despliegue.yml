@@ -39,7 +39,7 @@ jobs:
       - name: 🦒 Instalar dependencias
         run: |
           yarn install --immutable
-      - name: Build with Astro
+      - name: 🐌 Construir página con Astro
         run: |
           yarn astro build \
             --site "${{ steps.pages.outputs.origin }}" \
