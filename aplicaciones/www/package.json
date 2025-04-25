@@ -17,9 +17,11 @@
     "@astrojs/check": "^0.9.4",
     "astro": "5.7.5",
     "nanostores": "^1.0.1",
+    "slug": "^10.0.0",
     "typescript": "^5.8.3"
   },
   "devDependencies": {
+    "@types/slug": "^5.0.9",
     "prettier-plugin-astro": "^0.14.1",
     "sass": "^1.87.0"
   }

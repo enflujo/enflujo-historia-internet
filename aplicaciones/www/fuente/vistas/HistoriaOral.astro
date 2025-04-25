@@ -16,6 +16,7 @@ import type {
 } from '@/tipos';
 import { gql, pedirDatos } from '@/utilidades/ayudas';
 import { apiBase } from '@/utilidades/constantes';
+import slugificar from 'slug';
 
 interface Props {
   pagina: Pagina;
@@ -83,6 +84,7 @@ function convertirTextoAHTML(input: string): string {
     const regex = new RegExp(`\\*${termino}\\*`, 'g');
     input = input.replace(regex, `<span class="terminoAnotado">${termino}</span>`);
   });
+
   return input
     .split(/\r?\n\r?\n/) // divide por párrafos dobles
     .map((parrafo) => {
@@ -107,8 +109,9 @@ function extraerTerminos(texto: string): string[] {
   const regex = /\*([^\*]+?)\*/g;
   const frases: string[] = [];
   let match;
-  console.log((match = regex.exec(texto)));
+
   while ((match = regex.exec(texto)) !== null) {
+    const slug = slugificar(match[1].trim());
 
     frases.push(match[1].trim());
   }
@@ -239,20 +242,19 @@ const opcionesFecha: Intl.DateTimeFormatOptions = {
     </div>
     <!-- <Transcripcion /> -->
   </div>
-
-
 </main>
 
 <style lang="scss">
-
   #columnaOscura {
     position: fixed;
     left: 0;
   }
+
   .historia-oral {
     display: flex;
     justify-content: flex-end;
   }
+
   .col2 {
     width: 80vw;
     padding: 2em;
