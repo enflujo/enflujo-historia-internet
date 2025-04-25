@@ -22,7 +22,7 @@ interface Props {
 
 const { pagina } = Astro.props;
 relaciones();
-const personajePrueba = 'mauricio-pinilla';
+const personajePrueba = 'juan-guillermo-lalinde';
 
 const EsquemaEntrevistaCompleta = gql`
   query {
@@ -75,6 +75,22 @@ const entrevista = await pedirDatos<EntreviostaPersonaje>(EsquemaEntrevistaCompl
 
 const entrevistaProcesada = procesarEntrevistasPersonaje(entrevista.personaje.entrevistas.nodes);
 
+function convertirTextoAHTML(input: string): string {
+  return input
+    .split(/\r?\n\r?\n/) // dividir en párrafos
+    .map((parrafo) => {
+      const match = parrafo.match(/^(.{0,100}?\[\d{2}:\d{2}:\d{2}\])/); // cualquier cosa antes del [hh:mm:ss]
+      if (match) {
+        const personaTiempo = match[1];
+        const resto = parrafo.slice(personaTiempo.length).trim();
+        return `<p><span class="personaTiempo">${personaTiempo}</span> ${resto}</p>`;
+      } else {
+        return `<p>${parrafo.trim()}</p>`;
+      }
+    })
+    .join('\n');
+}
+
 function procesarEntrevistasPersonaje(entrevistas: Entrevista[]): EntrevistasProcesadas {
   const categoriasPersonaje: Categoria[] = [];
   const entrevistasPersonaje: EntrevistaSingularProcesada[] = [];
@@ -103,7 +119,7 @@ function procesarEntrevistasPersonaje(entrevistas: Entrevista[]): EntrevistasPro
       });
 
       entrevistaActual.secciones.push({
-        contenido: textoTranscripcion,
+        contenido: convertirTextoAHTML(textoTranscripcion),
         audios: audiosTranscripcion,
       });
 
@@ -145,6 +161,11 @@ function procesarEntrevistasPersonaje(entrevistas: Entrevista[]): EntrevistasPro
     });
   });
 
+  categoriasPersonaje.sort((a, b) => b.conteo - a.conteo);
+  categoriasPersonaje.forEach((categoria) => {
+    categoria.hijos.sort((a, b) => b.conteo - a.conteo);
+  });
+  console.log(entrevistasPersonaje[0].secciones[0]);
   return { categoriasPersonaje, entrevistas: entrevistasPersonaje };
 }
 
@@ -168,40 +189,39 @@ const opcionesFecha: Intl.DateTimeFormatOptions = {
       slug={entrevista.personaje.slug}
       bio={entrevista.personaje.content}
       foto={entrevista.personaje.featuredImage}
+      categorias={entrevistaProcesada.categoriasPersonaje}
     />
 
     <div id="contenedorEntrevistas">
-      <section>
-        {
-          entrevistaProcesada.entrevistas.map((entrevista) => (
-            <div class="entrevista">
-              <h3>Entrevista: {entrevista.fecha.toLocaleDateString('es-CO', opcionesFecha)}</h3>
-              {entrevista.secciones.map((seccion) => (
-                <div class="seccion">
-                  <p>{seccion.contenido}</p>
-                  {seccion.audios.map((audio) => (
-                    <audio controls>
-                      <source src={audio.url} type="audio/mpeg" />
-                      Your browser does not support the audio element.
-                    </audio>
-                  ))}
-                </div>
-              ))}
-            </div>
-          ))
-        }
-      </section>
+      {
+        entrevistaProcesada.entrevistas.map((entrevista) => (
+          <section class="entrevista">
+            <h3>Entrevista: {entrevista.fecha.toLocaleDateString('es-CO', opcionesFecha)}</h3>
+            {entrevista.secciones.map((seccion) => (
+              <div class="seccion">
+                <div set:html={seccion.contenido} />
+                {seccion.audios.map((audio) => (
+                  <audio controls>
+                    <source src={audio.url} type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                  </audio>
+                ))}
+              </div>
+            ))}
+          </section>
+        ))
+      }
     </div>
     <!-- <Transcripcion /> -->
   </div>
-
-  <style lang="scss">
-    .historia-oral {
-      display: flex;
-    }
-    .col2 {
-      width: 80vw;
-      padding: 2em;
-    }
-  </style>
 </main>
+
+<style lang="scss">
+  .historia-oral {
+    display: flex;
+  }
+  .col2 {
+    width: 80vw;
+    padding: 2em;
+  }
+</style>

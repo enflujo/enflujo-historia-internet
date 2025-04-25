@@ -59,7 +59,7 @@ a:link {
 }
 
 .textoPixelitos {
-  font-family: var(--fuenteNeuton);
+  font-family: var(--fuenteTextos2);
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -78,4 +78,9 @@ a:link {
   overflow-y: auto;
   background-color: var(--colorTexto);
   color: var(--blanco);
+}
+
+.personaTiempo {
+  font-weight: bold;
+  color: var(--rojo);
 }

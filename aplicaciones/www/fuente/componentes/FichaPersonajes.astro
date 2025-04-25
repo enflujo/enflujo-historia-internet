@@ -1,5 +1,5 @@
 ---
-import type { Imagen } from '@/tipos';
+import type { Categoria, Imagen } from '@/tipos';
 import FiltroFoto from '@/componentes/FiltroFoto.astro';
 
 interface Props {
@@ -7,48 +7,70 @@ interface Props {
   nombre: string;
   bio: string;
   foto: Imagen | null;
+  categorias: Categoria[];
 }
 
-const { slug, nombre, bio, foto } = Astro.props;
+const { slug, nombre, bio, foto, categorias } = Astro.props;
 ---
 
 <section class="personaje" id={slug}>
   <div class="contenido">
     <h2 class="tituloPersonaje">{nombre}</h2>
     <div class="contenidoPersonaje" set:html={bio} />
+
+    {
+      categorias && categorias.length ? (
+        <div class="categorias">
+          <h3>Categorías</h3>
+          <div class="categorias">
+            {categorias.map((categoria) => (
+              <span class="categoria">
+                {categoria.nombre} ({categoria.conteo})
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null
+    }
+
+    {
+      foto ? (
+        <div class="foto">
+          <FiltroFoto ruta={foto.node.sourceUrl} alt={`Foto de ${nombre}`} />
+        </div>
+      ) : null
+    }
   </div>
 
-  {
-    foto ? (
-      <div class="foto">
-        <FiltroFoto ruta={foto.node.sourceUrl} alt={`Foto de ${nombre}`} />
-      </div>
-    ) : null
-  }
+  <style lang="scss">
+    .personaje {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 40px;
+      border: 2px solid var(--rojo, #f21d44);
+      width: 90%;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .contenido {
+      width: 70%;
+    }
+
+    .categorias {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      font-size: 0.85em;
+      font-family: var(--fuenteTextos2);
+    }
+
+    h2 {
+      font-family: var(--fuenteTitulos);
+    }
+  </style>
 </section>
-
-<style>
-  .personaje {
-    display: flex;
-    flex-direction: row;
-    height: 233px;
-    align-items: flex-start;
-    gap: 40px;
-
-    border: 2px solid var(--rojo, #f21d44);
-    width: 60%;
-
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-    padding: 20px;
-  }
-
-  .contenido {
-    /* width: 70%; */
-  }
-
-  h2 {
-    font-family: var(--fuenteTitulos);
-  }
-</style>
