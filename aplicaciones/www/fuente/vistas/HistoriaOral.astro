@@ -15,6 +15,7 @@ import type {
 } from '@/tipos';
 import { gql, pedirDatos } from '@/utilidades/ayudas';
 import { apiBase } from '@/utilidades/constantes';
+import NubePalabras from '@/componentes/NubePalabras.astro';
 
 interface Props {
   pagina: Pagina;
@@ -154,6 +155,24 @@ const opcionesFecha: Intl.DateTimeFormatOptions = {
   month: 'long',
   day: 'numeric',
 };
+
+const terminosEjemplo = [
+  { termino: 'Internet', peso: 10 },
+  { termino: 'Web', peso: 8 },
+  { termino: 'HTTP', peso: 7 },
+  { termino: 'JavaScript', peso: 6 },
+  { termino: 'CSS', peso: 6 },
+  { termino: 'HTML', peso: 6 },
+  { termino: 'TCP/IP', peso: 5 },
+  { termino: 'DNS', peso: 5 },
+  { termino: 'ARPANET', peso: 4 },
+  { termino: 'WWW', peso: 4 },
+  { termino: 'Browser', peso: 3 },
+  { termino: 'URL', peso: 3 },
+  { termino: 'Router', peso: 2 },
+  { termino: 'Protocol', peso: 2 },
+  { termino: 'Server', peso: 2 },
+];
 ---
 
 <main class="historia-oral">
@@ -163,6 +182,7 @@ const opcionesFecha: Intl.DateTimeFormatOptions = {
   </aside>
 
   <div class="col2">
+    <NubePalabras terminos={terminosEjemplo} />
     <FichaPersonajes
       nombre={entrevista.personaje.title}
       slug={entrevista.personaje.slug}

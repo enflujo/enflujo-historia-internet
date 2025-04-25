@@ -1326,7 +1326,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"astro@npm:5.7.5":
+"astro@npm:5.7.5, astro@npm:^5.7.5":
   version: 5.7.5
   resolution: "astro@npm:5.7.5"
   dependencies:
@@ -1875,6 +1875,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "enflujo-historia-internet@workspace:."
   dependencies:
+    astro: "npm:^5.7.5"
     prettier: "npm:^3.5.3"
   languageName: unknown
   linkType: soft
