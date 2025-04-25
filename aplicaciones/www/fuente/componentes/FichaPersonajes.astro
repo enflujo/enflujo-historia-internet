@@ -32,45 +32,52 @@ const { slug, nombre, bio, foto, categorias } = Astro.props;
         </div>
       ) : null
     }
-
-    {
-      foto ? (
-        <div class="foto">
-          <FiltroFoto ruta={foto.node.sourceUrl} alt={`Foto de ${nombre}`} />
-        </div>
-      ) : null
-    }
   </div>
 
-  <style lang="scss">
-    .personaje {
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 40px;
-      border: 2px solid var(--rojo, #f21d44);
-      width: 90%;
-      align-items: center;
-      margin: 0;
-      padding: 20px;
-    }
-
-    .contenido {
-      width: 70%;
-    }
-
-    .categorias {
-      display: flex;
-      flex-direction: row;
-      gap: 10px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-      font-size: 0.85em;
-      font-family: var(--fuenteTextos2);
-    }
-
-    h2 {
-      font-family: var(--fuenteTitulos);
-    }
-  </style>
+  {
+    foto ? (
+      <div class="foto">
+        <FiltroFoto ruta={foto.node.sourceUrl} alt={`Foto de ${nombre}`} />
+      </div>
+    ) : null
+  }
 </section>
+
+<style lang="scss">
+  .personaje {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 40px;
+    border: 2px solid var(--rojo, #f21d44);
+    width: 90%;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+  }
+
+  .foto {
+    width: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .contenido {
+    width: 70%;
+  }
+
+  .categorias {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    font-size: 0.85em;
+    font-family: var(--fuenteTextos2);
+  }
+
+  h2 {
+    font-family: var(--fuenteTitulos);
+  }
+</style>

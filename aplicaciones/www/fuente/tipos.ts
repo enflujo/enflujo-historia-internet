@@ -125,6 +125,12 @@ export interface Categoria {
     conteo: number;
   }[];
 }
+
+export interface Termino {
+  termino: string;
+  conteo: number;
+}
+
 export interface EntrevistasProcesadas {
   categoriasPersonaje: Categoria[];
   entrevistas: EntrevistaSingularProcesada[];

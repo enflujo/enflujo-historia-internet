@@ -84,3 +84,8 @@ a:link {
   font-weight: bold;
   color: var(--rojo);
 }
+
+.terminoAnotado {
+  font-weight: bold;
+  border-bottom: 1px dotted var(--rojo);
+}
