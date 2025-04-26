@@ -1,0 +1,98 @@
+---
+// Importar los módulos y tipos necesarios
+import type { Glosario } from '../tipos';
+import { esquemaPagina, gql, pedirDatos } from '../utilidades/ayudas';
+import type { Pagina } from '@/tipos';
+import TituloPagina from '@/componentes/TituloPagina.astro';
+import Plantilla from '@/plantillas/Plantilla.astro';
+import type { MetaInfo } from '../tipos';
+
+const PeticionPagina = gql`
+  query {
+    ${esquemaPagina('glosario')}
+  }
+`;
+
+async function pedirSeccionDatos(cursorTerminos: string = '', terminosProcesados: Glosario[] = []) {
+  const EsquemaEventos = gql`
+    query Terminos {
+      terminos(first: 1000${cursorTerminos ? `, after: "${cursorTerminos}"` : ''}) {
+        pageInfo {
+          hasNextPage
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
+        }
+        
+        nodes {
+          slug
+          title
+          content
+          status
+        }
+      }
+    }
+  `;
+
+  const { terminos: algunosTerminos } = await pedirDatos<{
+    terminos: { pageInfo: MetaInfo; nodes: Glosario[] };
+  }>(EsquemaEventos);
+  // Filtrar los términos que están publicados
+  terminosProcesados.push(...algunosTerminos.nodes.filter((termino) => termino.status === 'publish'));
+
+  if (algunosTerminos.pageInfo.hasNextPage) {
+    await pedirSeccionDatos(algunosTerminos.pageInfo.endCursor);
+  }
+
+  console.log(terminosProcesados.length);
+
+  return terminosProcesados;
+}
+
+// Obtener los datos de la pagina
+const { pagina, terminos } = await pedirDatos<{ page: Pagina }>(PeticionPagina).then(async (respuesta) => ({
+  pagina: respuesta.page,
+  terminos: await pedirSeccionDatos(),
+}));
+
+// Organizar los términos del glosario en orden alfabético
+terminos.sort((a, b) => a.slug.localeCompare(b.slug));
+---
+
+<Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
+  <main class="glosario">
+    <TituloPagina titulo={pagina.title} slug={pagina.slug} />
+
+    <section id="contenedorGlosario">
+      {
+        terminos.map((glosario) => (
+          <article class="termino" id={glosario.slug}>
+            <h2 class="tituloTermino">{glosario.title}</h2>
+            <div class="contenidoTermino" set:html={glosario.content} />
+          </article>
+        ))
+      }
+    </section>
+  </main>
+</Plantilla>
+
+<style lang="scss">
+  #contenedorGlosario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding-bottom: 8em;
+  }
+
+  .contenidoTermino {
+    width: 30vw;
+    border: 2px solid var(--bordePrimario, #f21d44);
+    padding: 10px;
+    background-color: var(--superficieClaro);
+    position: relative;
+    margin-bottom: 2em;
+  }
+</style>
