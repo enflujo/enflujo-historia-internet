@@ -55,7 +55,7 @@ datosPaginas.set(paginas);
               class={`botonPagina${ruta === rutaActual ? ' actual' : ''}`}
               data-iconoa={pagina.iconoA}
               data-iconob={pagina.iconoB}
-              href={`${pagina.slug !== 'linea-de-tiempo' ? `${ruta}` : `${import.meta.env.BASE_URL}`}`}
+              href={`${pagina.slug !== 'inicio' ? `${ruta}` : `${import.meta.env.BASE_URL}`}`}
             >
               <span class="iconoMenu fuenteIconos">{pagina.iconoA}</span>
               <span class="nombrePagina">{pagina.title}</span>

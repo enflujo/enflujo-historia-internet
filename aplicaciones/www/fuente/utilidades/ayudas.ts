@@ -26,3 +26,13 @@ export const crearTitulo = (tituloPagina: string) => {
   const nombreProyecto = `..:: Historia del Internet ::..`;
   return tituloPagina ? `${tituloPagina} | ${nombreProyecto}` : nombreProyecto;
 };
+
+export const esquemaPagina = (slug: string) => gql`
+page(id: "${slug}", idType: URI) {
+  title
+  status
+  slug
+  iconoA
+  descripcion(format: RAW)
+  content(format: RENDERED)
+}`;
