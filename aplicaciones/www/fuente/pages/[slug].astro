@@ -1,10 +1,8 @@
 ---
+import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import type { Pagina } from '@/tipos';
 import { gql, pedirDatos } from '@/utilidades/ayudas';
-import Predeterminada from '@/vistas/Predeterminada.astro';
-import Glosario from '@/vistas/Glosario.astro';
-import HistoriaOral from '@/vistas/HistoriaOral.astro';
 
 export async function getStaticPaths() {
   const Paginas = gql`
@@ -45,15 +43,49 @@ const PeticionPagina = gql`
 `;
 
 const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
-let Vista = Predeterminada;
-
-if (slug === 'glosario') {
-  Vista = Glosario;
-} else if (slug === 'historia-oral') {
-  Vista = HistoriaOral;
-}
 ---
 
 <Plantilla titulo={page.title} descripcion={page.descripcion}>
-  <Vista pagina={page} />
+  <main class="pagina">
+    <TituloPagina titulo={page.title} slug={page.slug} />
+    <div class="contenidoPagina" set:html={page.content} />
+  </main>
 </Plantilla>
+
+<style lang="scss">
+  .contenidoPagina {
+    padding: 2em;
+    margin-left: 25vw;
+    margin-right: 25vw;
+    display: flex;
+    text-align: justify;
+    flex-direction: column;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 600px) {
+    .contenidoPagina {
+      padding: 1.8em;
+      margin-left: 15vw;
+      margin-right: 15vw;
+    }
+  }
+
+  @media (min-width: 601px) and (max-width: 849px) {
+    .contenidoPagina {
+      padding: 1.8em;
+      margin-left: 20vw;
+      margin-right: 20vw;
+      display: flex;
+    }
+  }
+  @media (min-width: 850px) and (max-width: 1000px) {
+    .contenidoPagina {
+      padding: 1.8em;
+      margin-left: 22vw;
+      margin-right: 22vw;
+      display: flex;
+    }
+  }
+</style>

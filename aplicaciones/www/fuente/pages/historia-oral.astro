@@ -1,9 +1,10 @@
 ---
-import { relaciones } from '@/cerebros/general';
 import FichaPersonajes from '@/componentes/FichaPersonajes.astro';
 import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
+import Plantilla from '@/plantillas/Plantilla.astro';
 // import Transcripcion from '@/componentes/Transcripcion.astro';
+
 import type {
   Categoria,
   CategoriaWP,
@@ -14,18 +15,18 @@ import type {
   Pagina,
   Termino,
 } from '@/tipos';
-import { gql, pedirDatos } from '@/utilidades/ayudas';
+import { esquemaPagina, gql, pedirDatos } from '@/utilidades/ayudas';
 import { apiBase } from '@/utilidades/constantes';
 import slugificar from 'slug';
 
-interface Props {
-  pagina: Pagina;
-}
+const PeticionPagina = gql`
+  query {
+    ${esquemaPagina('historia-oral')}
+  }
+`;
+const { page: pagina } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
 
-const { pagina } = Astro.props;
-relaciones();
 const personajePrueba = 'juan-guillermo-lalinde';
-
 const EsquemaEntrevistaCompleta = gql`
   query {
     personaje(id: "${personajePrueba}", idType: SLUG) {
@@ -38,6 +39,7 @@ const EsquemaEntrevistaCompleta = gql`
           sourceUrl
         }
       }
+
       entrevistas {
         nodes {
           fecha
@@ -73,13 +75,31 @@ const EsquemaEntrevistaCompleta = gql`
   }
 `;
 
+const terminosEjemplo = [
+  { termino: 'Internet', peso: 10 },
+  { termino: 'Web', peso: 8 },
+  { termino: 'HTTP', peso: 7 },
+  { termino: 'JavaScript', peso: 6 },
+  { termino: 'CSS', peso: 6 },
+  { termino: 'HTML', peso: 6 },
+  { termino: 'TCP/IP', peso: 5 },
+  { termino: 'DNS', peso: 5 },
+  { termino: 'ARPANET', peso: 4 },
+  { termino: 'WWW', peso: 4 },
+  { termino: 'Browser', peso: 3 },
+  { termino: 'URL', peso: 3 },
+  { termino: 'Router', peso: 2 },
+  { termino: 'Protocol', peso: 2 },
+  { termino: 'Server', peso: 2 },
+];
+
 const entrevista = await pedirDatos<EntreviostaPersonaje>(EsquemaEntrevistaCompleta);
 const entrevistaProcesada = procesarEntrevistasPersonaje(entrevista.personaje.entrevistas.nodes);
 const terminosEntrevista: Termino[] = [];
 
 function convertirTextoAHTML(input: string): string {
   const terminos = extraerTerminos(input);
-  //console.log(terminos);
+
   terminos.forEach((termino) => {
     const regex = new RegExp(`\\*${termino}\\*`, 'g');
     input = input.replace(regex, `<span class="terminoAnotado">${termino}</span>`);
@@ -205,44 +225,46 @@ const opcionesFecha: Intl.DateTimeFormatOptions = {
 };
 ---
 
-<main class="historia-oral">
-  <aside id="columnaOscura">
-    <TituloPagina titulo={pagina.title} slug={pagina.slug} modo="oscuro" />
-    <FiltrosHistoriaOral />
-  </aside>
+<Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
+  <main class="historia-oral">
+    <aside id="columnaOscura">
+      <TituloPagina titulo={pagina.title} slug={pagina.slug} modo="oscuro" />
+      <FiltrosHistoriaOral />
+    </aside>
 
-  <div class="col2">
-    <FichaPersonajes
-      nombre={entrevista.personaje.title}
-      slug={entrevista.personaje.slug}
-      bio={entrevista.personaje.content}
-      foto={entrevista.personaje.featuredImage}
-      categorias={entrevistaProcesada.categoriasPersonaje}
-    />
+    <div class="col2">
+      <FichaPersonajes
+        nombre={entrevista.personaje.title}
+        slug={entrevista.personaje.slug}
+        bio={entrevista.personaje.content}
+        foto={entrevista.personaje.featuredImage}
+        categorias={entrevistaProcesada.categoriasPersonaje}
+      />
 
-    <div id="contenedorEntrevistas">
-      {
-        entrevistaProcesada.entrevistas.map((entrevista) => (
-          <section class="entrevista">
-            <h3>Entrevista: {entrevista.fecha.toLocaleDateString('es-CO', opcionesFecha)}</h3>
-            {entrevista.secciones.map((seccion) => (
-              <div class="seccion">
-                <div set:html={seccion.contenido} />
-                {seccion.audios.map((audio) => (
-                  <audio controls>
-                    <source src={audio.url} type="audio/mpeg" />
-                    Your browser does not support the audio element.
-                  </audio>
-                ))}
-              </div>
-            ))}
-          </section>
-        ))
-      }
+      <div id="contenedorEntrevistas">
+        {
+          entrevistaProcesada.entrevistas.map((entrevista) => (
+            <section class="entrevista">
+              <h3>Entrevista: {entrevista.fecha.toLocaleDateString('es-CO', opcionesFecha)}</h3>
+              {entrevista.secciones.map((seccion) => (
+                <div class="seccion">
+                  <div set:html={seccion.contenido} />
+                  {seccion.audios.map((audio) => (
+                    <audio controls>
+                      <source src={audio.url} type="audio/mpeg" />
+                      Your browser does not support the audio element.
+                    </audio>
+                  ))}
+                </div>
+              ))}
+            </section>
+          ))
+        }
+      </div>
+      <!-- <Transcripcion /> -->
     </div>
-    <!-- <Transcripcion /> -->
-  </div>
-</main>
+  </main>
+</Plantilla>
 
 <style lang="scss">
   #columnaOscura {
