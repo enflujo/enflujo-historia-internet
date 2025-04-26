@@ -104,7 +104,7 @@ export interface Entrevista {
     }[];
   };
 }
-export interface EntreviostaPersonaje {
+export interface EntrevistaPersonaje {
   personaje: {
     title: string;
     slug: string;

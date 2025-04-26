@@ -1,23 +1,11 @@
 ---
-import FichaPersonajes from '@/componentes/FichaPersonajes.astro';
 import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 // import Transcripcion from '@/componentes/Transcripcion.astro';
 
-import type {
-  Categoria,
-  CategoriaWP,
-  EntreviostaPersonaje,
-  Entrevista,
-  EntrevistaSingularProcesada,
-  EntrevistasProcesadas,
-  Pagina,
-  Termino,
-} from '@/tipos';
+import type { Pagina } from '@/tipos';
 import { esquemaPagina, gql, pedirDatos } from '@/utilidades/ayudas';
-import { apiBase } from '@/utilidades/constantes';
-import slugificar from 'slug';
 
 const PeticionPagina = gql`
   query {
@@ -26,259 +14,30 @@ const PeticionPagina = gql`
 `;
 const { page: pagina } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
 
-const personajePrueba = 'juan-guillermo-lalinde';
-const EsquemaEntrevistaCompleta = gql`
-  query {
-    personaje(id: "${personajePrueba}", idType: SLUG) {
-      title
-      slug
-      content(format: RENDERED)
-      featuredImage {
-        node {
-          altText
-          sourceUrl
-        }
-      }
+// const terminosEjemplo = [
+//   { termino: 'Internet', peso: 10 },
+//   { termino: 'Web', peso: 8 },
+//   { termino: 'HTTP', peso: 7 },
+//   { termino: 'JavaScript', peso: 6 },
+//   { termino: 'CSS', peso: 6 },
+//   { termino: 'HTML', peso: 6 },
+//   { termino: 'TCP/IP', peso: 5 },
+//   { termino: 'DNS', peso: 5 },
+//   { termino: 'ARPANET', peso: 4 },
+//   { termino: 'WWW', peso: 4 },
+//   { termino: 'Browser', peso: 3 },
+//   { termino: 'URL', peso: 3 },
+//   { termino: 'Router', peso: 2 },
+//   { termino: 'Protocol', peso: 2 },
+//   { termino: 'Server', peso: 2 },
+// ];
 
-      entrevistas {
-        nodes {
-          fecha
-          transcripciones(first: 200) {
-            nodes {
-              transcripcion(format: RAW)
-              categories {
-                nodes {
-                  slug
-                  name
-                  children {
-                    nodes {
-                      slug
-                      name
-                    }
-                  }
-                }
-              }
-              audios(first: 200) {
-                nodes {
-                  archivos {
-                    node {
-                      filePath
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-const terminosEjemplo = [
-  { termino: 'Internet', peso: 10 },
-  { termino: 'Web', peso: 8 },
-  { termino: 'HTTP', peso: 7 },
-  { termino: 'JavaScript', peso: 6 },
-  { termino: 'CSS', peso: 6 },
-  { termino: 'HTML', peso: 6 },
-  { termino: 'TCP/IP', peso: 5 },
-  { termino: 'DNS', peso: 5 },
-  { termino: 'ARPANET', peso: 4 },
-  { termino: 'WWW', peso: 4 },
-  { termino: 'Browser', peso: 3 },
-  { termino: 'URL', peso: 3 },
-  { termino: 'Router', peso: 2 },
-  { termino: 'Protocol', peso: 2 },
-  { termino: 'Server', peso: 2 },
-];
-
-const entrevista = await pedirDatos<EntreviostaPersonaje>(EsquemaEntrevistaCompleta);
-const entrevistaProcesada = procesarEntrevistasPersonaje(entrevista.personaje.entrevistas.nodes);
-const terminosEntrevista: Termino[] = [];
-
-function convertirTextoAHTML(input: string): string {
-  const terminos = extraerTerminos(input);
-
-  terminos.forEach((termino) => {
-    const regex = new RegExp(`\\*${termino}\\*`, 'g');
-    input = input.replace(regex, `<span class="terminoAnotado">${termino}</span>`);
-  });
-
-  return input
-    .split(/\r?\n\r?\n/) // divide por párrafos dobles
-    .map((parrafo) => {
-      // convertir saltos de línea dentro del párrafo en <br>
-      const conSaltos = parrafo.replace(/\r?\n/g, '<br>');
-
-      // buscar patrón desde el inicio hasta el primer ] con timestamp
-      const match = conSaltos.match(/^(.{0,100}?\[\d{2}:\d{2}:\d{2}\])/);
-
-      if (match) {
-        const personaTiempo = match[1];
-        const resto = conSaltos.slice(personaTiempo.length).trim();
-        return `<p><span class="personaTiempo">${personaTiempo}</span> ${resto}</p>`;
-      } else {
-        return `<p>${conSaltos.trim()}</p>`;
-      }
-    })
-    .join('\n');
-}
-
-function extraerTerminos(texto: string): string[] {
-  const regex = /\*([^\*]+?)\*/g;
-  const frases: string[] = [];
-  let match;
-
-  while ((match = regex.exec(texto)) !== null) {
-    const slug = slugificar(match[1].trim());
-
-    frases.push(match[1].trim());
-  }
-
-  return frases;
-}
-
-function procesarEntrevistasPersonaje(entrevistas: Entrevista[]): EntrevistasProcesadas {
-  const categoriasPersonaje: Categoria[] = [];
-  const entrevistasPersonaje: EntrevistaSingularProcesada[] = [];
-
-  entrevistas.forEach((entrevista) => {
-    const { fecha, transcripciones } = entrevista;
-    const fechaEntrevista = new Date(fecha);
-    let entrevistaActual = entrevistasPersonaje.find((entrevista) => entrevista.fecha === fechaEntrevista);
-
-    if (!entrevistaActual) {
-      entrevistaActual = {
-        fecha: fechaEntrevista,
-        secciones: [],
-      };
-      entrevistasPersonaje.push(entrevistaActual);
-    }
-
-    transcripciones.nodes.forEach((transcripcion) => {
-      const { transcripcion: textoTranscripcion, audios } = transcripcion;
-
-      const audiosTranscripcion = audios.nodes.map((audio) => {
-        return {
-          url: `${apiBase}${audio.archivos.node.filePath}`,
-          titulo: audio.archivos.node.title,
-        };
-      });
-
-      entrevistaActual.secciones.push({
-        contenido: convertirTextoAHTML(textoTranscripcion),
-        audios: audiosTranscripcion,
-      });
-
-      transcripcion.categories.nodes.forEach((categoria: CategoriaWP) => {
-        if (categoria.slug === 'sin-categoria') return;
-
-        const { slug, name, children } = categoria;
-        let existe = categoriasPersonaje.find((cat) => cat.slug === slug);
-
-        if (!existe) {
-          existe = {
-            nombre: name,
-            slug,
-            conteo: 1,
-            hijos: [],
-          };
-          categoriasPersonaje.push(existe);
-        } else {
-          existe.conteo++;
-        }
-
-        if (children.nodes.length > 0) {
-          children.nodes.forEach((hijo) => {
-            if (hijo.slug === 'sin-categoria') return;
-            const existeHijo = existe.hijos.find((cat) => cat.slug === hijo.slug);
-
-            if (!existeHijo) {
-              existe.hijos.push({
-                nombre: hijo.name,
-                slug: hijo.slug,
-                conteo: 1,
-              });
-            } else {
-              existeHijo.conteo++;
-            }
-          });
-        }
-      });
-    });
-  });
-
-  categoriasPersonaje.sort((a, b) => b.conteo - a.conteo);
-  categoriasPersonaje.forEach((categoria) => {
-    categoria.hijos.sort((a, b) => b.conteo - a.conteo);
-  });
-
-  return { categoriasPersonaje, entrevistas: entrevistasPersonaje };
-}
-
-const opcionesFecha: Intl.DateTimeFormatOptions = {
-  weekday: 'long',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-};
+// const terminosEntrevista: Termino[] = [];
 ---
 
 <Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
-  <main class="historia-oral">
-    <aside id="columnaOscura">
-      <TituloPagina titulo={pagina.title} slug={pagina.slug} modo="oscuro" />
-      <FiltrosHistoriaOral />
-    </aside>
-
-    <div class="col2">
-      <FichaPersonajes
-        nombre={entrevista.personaje.title}
-        slug={entrevista.personaje.slug}
-        bio={entrevista.personaje.content}
-        foto={entrevista.personaje.featuredImage}
-        categorias={entrevistaProcesada.categoriasPersonaje}
-      />
-
-      <div id="contenedorEntrevistas">
-        {
-          entrevistaProcesada.entrevistas.map((entrevista) => (
-            <section class="entrevista">
-              <h3>Entrevista: {entrevista.fecha.toLocaleDateString('es-CO', opcionesFecha)}</h3>
-              {entrevista.secciones.map((seccion) => (
-                <div class="seccion">
-                  <div set:html={seccion.contenido} />
-                  {seccion.audios.map((audio) => (
-                    <audio controls>
-                      <source src={audio.url} type="audio/mpeg" />
-                      Your browser does not support the audio element.
-                    </audio>
-                  ))}
-                </div>
-              ))}
-            </section>
-          ))
-        }
-      </div>
-      <!-- <Transcripcion /> -->
-    </div>
-  </main>
+  <aside id="columnaOscura">
+    <TituloPagina titulo={pagina.title} slug={pagina.slug} modo="oscuro" />
+    <FiltrosHistoriaOral />
+  </aside>
 </Plantilla>
-
-<style lang="scss">
-  #columnaOscura {
-    position: fixed;
-    left: 0;
-  }
-
-  .historia-oral {
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .col2 {
-    width: 80vw;
-    padding: 2em;
-  }
-</style>

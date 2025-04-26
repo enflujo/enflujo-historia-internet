@@ -45,8 +45,6 @@ async function pedirSeccionDatos(cursorTerminos: string = '', terminosProcesados
     await pedirSeccionDatos(algunosTerminos.pageInfo.endCursor);
   }
 
-  console.log(terminosProcesados.length);
-
   return terminosProcesados;
 }
 

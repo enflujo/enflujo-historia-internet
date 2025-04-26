@@ -1,0 +1,41 @@
+---
+import Plantilla from '@/plantillas/Plantilla.astro';
+import type { Personaje } from '@/tipos';
+import { gql, pedirDatos } from '@/utilidades/ayudas';
+
+const PeticionPersonajes = gql`
+  query {
+    personajes(first: 1000) {
+      nodes {
+        title
+        slug
+        content(format: RENDERED)
+        featuredImage {
+          node {
+            altText
+            sourceUrl
+          }
+        }
+      }
+    }
+  }
+`;
+
+const { personajes } = await pedirDatos<{ personajes: { nodes: Personaje[] } }>(PeticionPersonajes);
+---
+
+<Plantilla titulo="Personajes" descripcion="Personajes de la historia oral">
+  <main class="personajes">
+    <h1>Personajes</h1>
+    <div class="personajes-lista">
+      {
+        personajes.nodes.map((personaje) => (
+          <div class="personaje">
+            <h2><a href={`${import.meta.env.BASE_URL}/personajes/${personaje.slug}`}>{personaje.title}</a></h2>
+            <p set:html={personaje.content} />
+          </div>
+        ))
+      }
+    </div>
+  </main>
+</Plantilla>

@@ -1,0 +1,228 @@
+---
+import FichaPersonajes from '@/componentes/FichaPersonajes.astro';
+import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
+import TituloPagina from '@/componentes/TituloPagina.astro';
+import Plantilla from '@/plantillas/Plantilla.astro';
+import type {
+  Categoria,
+  CategoriaWP,
+  EntrevistaPersonaje,
+  Personaje,
+  Entrevista,
+  EntrevistasProcesadas,
+  EntrevistaSingularProcesada,
+} from '@/tipos';
+import { convertirTextoAHTML, esquemaPagina, gql, pedirDatos } from '@/utilidades/ayudas';
+import { apiBase } from '@/utilidades/constantes';
+
+export async function getStaticPaths() {
+  const Personajes = gql`
+    query {
+      personajes(first: 200) {
+        nodes {
+          title
+          slug
+        }
+      }
+    }
+  `;
+  const { personajes } = await pedirDatos<{ personajes: { nodes: Personaje[] } }>(Personajes);
+
+  return personajes.nodes.map(({ slug }) => {
+    return { params: { slug } };
+  });
+}
+
+const { slug } = Astro.params;
+
+const PeticionEntrevistaCompleta = gql`
+  query {
+    personaje(id: "${slug}", idType: SLUG) {
+      title
+      slug
+      content(format: RENDERED)
+      featuredImage {
+        node {
+          altText
+          sourceUrl
+        }
+      }
+
+      entrevistas {
+        nodes {
+          fecha
+          transcripciones(first: 200) {
+            nodes {
+              transcripcion(format: RAW)
+              categories {
+                nodes {
+                  slug
+                  name
+                  children {
+                    nodes {
+                      slug
+                      name
+                    }
+                  }
+                }
+              }
+              audios(first: 200) {
+                nodes {
+                  archivos {
+                    node {
+                      filePath
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const entrevista = await pedirDatos<EntrevistaPersonaje>(PeticionEntrevistaCompleta);
+const entrevistaProcesada = procesarEntrevistasPersonaje(entrevista.personaje.entrevistas.nodes);
+
+function procesarEntrevistasPersonaje(entrevistas: Entrevista[]): EntrevistasProcesadas {
+  const categoriasPersonaje: Categoria[] = [];
+  const entrevistasPersonaje: EntrevistaSingularProcesada[] = [];
+
+  entrevistas.forEach((entrevista) => {
+    const { fecha, transcripciones } = entrevista;
+    const fechaEntrevista = new Date(fecha);
+    let entrevistaActual = entrevistasPersonaje.find((entrevista) => entrevista.fecha === fechaEntrevista);
+
+    if (!entrevistaActual) {
+      entrevistaActual = {
+        fecha: fechaEntrevista,
+        secciones: [],
+      };
+      entrevistasPersonaje.push(entrevistaActual);
+    }
+
+    transcripciones.nodes.forEach((transcripcion) => {
+      const { transcripcion: textoTranscripcion, audios } = transcripcion;
+
+      const audiosTranscripcion = audios.nodes.map((audio) => {
+        return {
+          url: `${apiBase}${audio.archivos.node.filePath}`,
+          titulo: audio.archivos.node.title,
+        };
+      });
+
+      entrevistaActual.secciones.push({
+        contenido: convertirTextoAHTML(textoTranscripcion),
+        audios: audiosTranscripcion,
+      });
+
+      transcripcion.categories.nodes.forEach((categoria: CategoriaWP) => {
+        if (categoria.slug === 'sin-categoria') return;
+
+        const { slug, name, children } = categoria;
+        let existe = categoriasPersonaje.find((cat) => cat.slug === slug);
+
+        if (!existe) {
+          existe = {
+            nombre: name,
+            slug,
+            conteo: 1,
+            hijos: [],
+          };
+          categoriasPersonaje.push(existe);
+        } else {
+          existe.conteo++;
+        }
+
+        if (children.nodes.length > 0) {
+          children.nodes.forEach((hijo) => {
+            if (hijo.slug === 'sin-categoria') return;
+            const existeHijo = existe.hijos.find((cat) => cat.slug === hijo.slug);
+
+            if (!existeHijo) {
+              existe.hijos.push({
+                nombre: hijo.name,
+                slug: hijo.slug,
+                conteo: 1,
+              });
+            } else {
+              existeHijo.conteo++;
+            }
+          });
+        }
+      });
+    });
+  });
+
+  categoriasPersonaje.sort((a, b) => b.conteo - a.conteo);
+  categoriasPersonaje.forEach((categoria) => {
+    categoria.hijos.sort((a, b) => b.conteo - a.conteo);
+  });
+
+  return { categoriasPersonaje, entrevistas: entrevistasPersonaje };
+}
+
+const opcionesFecha: Intl.DateTimeFormatOptions = {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+};
+
+//POR HACER: cambiar descripcion por bio procesada del personaje
+---
+
+<Plantilla titulo={entrevista.personaje.title} descripcion={'entrevista.personaje'}>
+  <main class="historia-oral">
+    <aside id="columnaOscura">
+      <TituloPagina titulo="Historia Oral" slug="historia-oral" modo="oscuro" />
+      <FiltrosHistoriaOral />
+    </aside>
+
+    <div class="col2">
+      <FichaPersonajes
+        nombre={entrevista.personaje.title}
+        slug={entrevista.personaje.slug}
+        bio={entrevista.personaje.content}
+        foto={entrevista.personaje.featuredImage}
+        categorias={entrevistaProcesada.categoriasPersonaje}
+      />
+
+      <div id="contenedorEntrevistas">
+        {
+          entrevistaProcesada.entrevistas.map((entrevista) => (
+            <section class="entrevista">
+              <h3>Entrevista: {entrevista.fecha.toLocaleDateString('es-CO', opcionesFecha)}</h3>
+              {entrevista.secciones.map((seccion) => (
+                <div class="seccion">
+                  <div set:html={seccion.contenido} />
+                  {seccion.audios.map((audio) => (
+                    <audio controls>
+                      <source src={audio.url} type="audio/mpeg" />
+                      Your browser does not support the audio element.
+                    </audio>
+                  ))}
+                </div>
+              ))}
+            </section>
+          ))
+        }
+      </div>
+      <!-- <Transcripcion /> -->
+    </div>
+  </main>
+</Plantilla>
+
+<style lang="scss">
+  .historia-oral {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .col2 {
+    width: 80vw;
+    padding: 2em;
+  }
+</style>

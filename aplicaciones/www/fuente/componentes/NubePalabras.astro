@@ -1,0 +1,129 @@
+---
+interface Props {
+  terminos: Array<{
+    termino: string;
+    peso: number;
+  }>;
+}
+
+const { terminos } = Astro.props;
+
+// Sort terms by weight for better placement (largest first)
+const terminosOrdenados = [...terminos].sort((a, b) => b.peso - a.peso);
+
+// Calculate relative font sizes
+const pesoMax = Math.max(...terminosOrdenados.map((t) => t.peso));
+const pesoMin = Math.min(...terminosOrdenados.map((t) => t.peso));
+const rango = pesoMax - pesoMin;
+
+function calcularTamanoFuente(peso: number): number {
+  // Scale between 1-5em based on weight
+  const minSize = 1;
+  const maxSize = 4;
+  if (rango === 0) return (minSize + maxSize) / 2;
+  return minSize + ((peso - pesoMin) / rango) * (maxSize - minSize);
+}
+
+const posiciones: Array<{ x: number; y: number; tamano: number }> = [];
+const padding = 8;
+
+function posicionDisponible(x: number, y: number, tamano: number): boolean {
+  for (const pos of posiciones) {
+    const distX = Math.abs(x - pos.x);
+    const distY = Math.abs(y - pos.y);
+    const minDistancia = (tamano + pos.tamano) / 2 + padding;
+
+    if (distX < minDistancia && distY < minDistancia) {
+      return false; // Collision detected
+    }
+  }
+  return true;
+}
+
+// Generate positions
+terminosOrdenados.forEach((term) => {
+  const tamanio = calcularTamanoFuente(term.peso);
+  let x, y;
+  let intentos = 0;
+  const maxIntentos = 100;
+
+  do {
+    x = Math.random() * 80 + 10;
+    y = Math.random() * 80 + 10;
+    intentos++;
+
+    if (intentos >= maxIntentos) {
+      break;
+    }
+  } while (!posicionDisponible(x, y, tamanio));
+
+  posiciones.push({ x, y, tamano: tamanio });
+});
+---
+
+<div class="nube-palabras">
+  {
+    terminosOrdenados.map((item, index) => {
+      const tamanio = calcularTamanoFuente(item.peso);
+      const pos = posiciones[index];
+      return (
+        <span
+          class="termino"
+          style={`
+          font-size: ${tamanio}em; 
+          left: ${pos.x}%; 
+          top: ${pos.y}%; 
+          transform: translate(-50%, -50%) rotate(${Math.random() * 20 - 10}deg);
+          opacity: ${0.5 + tamanio / 5};
+        `}
+          data-peso={item.peso}
+        >
+          {item.termino}
+        </span>
+      );
+    })
+  }
+</div>
+
+<style>
+  .nube-palabras {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    background-color: var(--crema, #fff5ee);
+    overflow: hidden;
+    padding: 20px;
+  }
+
+  .termino {
+    position: absolute;
+    display: inline-block;
+    font-family: var(--fuenteTexto);
+    font-weight: bold;
+    color: var(--cobalto, #0808ff);
+    cursor: pointer;
+    transition:
+      transform 0.3s,
+      color 0.3s;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .termino:hover {
+    transform: translate(-50%, -50%) scale(1.1) !important;
+    color: var(--rojo);
+    z-index: 10;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const terminos = document.querySelectorAll('.termino');
+
+    terminos.forEach((termino) => {
+      termino.addEventListener('click', () => {
+        const peso = termino.getAttribute('data-peso');
+        console.log(`Término: ${termino.textContent}, Peso: ${peso}`);
+      });
+    });
+  });
+</script>
