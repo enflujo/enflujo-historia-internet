@@ -1,24 +1,23 @@
 ---
+import type { Termino } from '@/tipos';
+
 interface Props {
-  terminos: Array<{
-    termino: string;
-    peso: number;
-  }>;
+  terminos: Termino[];
 }
 
 const { terminos } = Astro.props;
 
 // Sort terms by weight for better placement (largest first)
-const terminosOrdenados = [...terminos].sort((a, b) => b.peso - a.peso);
+const terminosOrdenados = [...terminos].sort((a, b) => b.conteo - a.conteo);
 
 // Calculate relative font sizes
-const pesoMax = Math.max(...terminosOrdenados.map((t) => t.peso));
-const pesoMin = Math.min(...terminosOrdenados.map((t) => t.peso));
+const pesoMax = Math.max(...terminosOrdenados.map((t) => t.conteo));
+const pesoMin = Math.min(...terminosOrdenados.map((t) => t.conteo));
 const rango = pesoMax - pesoMin;
 
 function calcularTamanoFuente(peso: number): number {
   // Scale between 1-5em based on weight
-  const minSize = 1;
+  const minSize = 0.2;
   const maxSize = 4;
   if (rango === 0) return (minSize + maxSize) / 2;
   return minSize + ((peso - pesoMin) / rango) * (maxSize - minSize);
@@ -42,7 +41,7 @@ function posicionDisponible(x: number, y: number, tamano: number): boolean {
 
 // Generate positions
 terminosOrdenados.forEach((term) => {
-  const tamanio = calcularTamanoFuente(term.peso);
+  const tamanio = calcularTamanoFuente(term.conteo);
   let x, y;
   let intentos = 0;
   const maxIntentos = 100;
@@ -64,7 +63,7 @@ terminosOrdenados.forEach((term) => {
 <div class="nube-palabras">
   {
     terminosOrdenados.map((item, index) => {
-      const tamanio = calcularTamanoFuente(item.peso);
+      const tamanio = calcularTamanoFuente(item.conteo);
       const pos = posiciones[index];
       return (
         <span
@@ -76,7 +75,7 @@ terminosOrdenados.forEach((term) => {
           transform: translate(-50%, -50%) rotate(${Math.random() * 20 - 10}deg);
           opacity: ${0.5 + tamanio / 5};
         `}
-          data-peso={item.peso}
+          data-peso={item.conteo}
         >
           {item.termino}
         </span>
@@ -89,7 +88,7 @@ terminosOrdenados.forEach((term) => {
   .nube-palabras {
     position: relative;
     width: 100%;
-    height: 600px;
+    height: 300px;
     background-color: var(--crema, #fff5ee);
     overflow: hidden;
     padding: 20px;

@@ -1,10 +1,10 @@
-import type { Categorias, PaginaMenu } from '@/tipos';
+import type { CategoriasWP, PaginaMenu } from '@/tipos';
 import { gql, pedirDatos } from '@/utilidades/ayudas';
 import { atom, map } from 'nanostores';
 
 export const menuAbierto = atom(false);
 export const datosPaginas = map<PaginaMenu[]>([]);
-export const arbolCategorias = atom<Categorias | null>(null);
+export const arbolCategorias = atom<{ categories: CategoriasWP } | null>(null);
 export const categoriasTodas = atom<{ [categoria: string]: string }[]>([]);
 
 export async function listaCategorias() {
@@ -17,10 +17,12 @@ export async function listaCategorias() {
         nodes {
           name
           slug
+          count
           children(where: { hideEmpty: true }, first: 200) {
             nodes {
               name
               slug
+              count
             }
           }
         }
@@ -28,7 +30,7 @@ export async function listaCategorias() {
     }
   `;
 
-  const respuesta = await pedirDatos<Categorias>(EsquemaCategorias);
+  const respuesta = await pedirDatos<{ categories: CategoriasWP }>(EsquemaCategorias);
   arbolCategorias.set(respuesta);
   // const aplanadas: any = respuesta.categories.nodes.flatMap((categoria) => {
   //   return categoria.children.nodes.map((subcategoria) => {

@@ -62,7 +62,7 @@ terminos.sort((a, b) => a.slug.localeCompare(b.slug));
   <main class="glosario">
     <TituloPagina titulo={pagina.title} slug={pagina.slug} />
 
-    <section id="contenedorGlosario">
+    <div id="contenedorGlosario">
       {
         terminos.map((glosario) => (
           <article class="termino" id={glosario.slug}>
@@ -71,22 +71,32 @@ terminos.sort((a, b) => a.slug.localeCompare(b.slug));
           </article>
         ))
       }
-    </section>
+    </div>
   </main>
 </Plantilla>
 
 <style lang="scss">
   #contenedorGlosario {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
     justify-content: center;
     margin: 0;
     padding-bottom: 8em;
+
+    .termino {
+      width: 30vw;
+      margin: 1em;
+      position: relative;
+    }
+
+    .tituloTermino {
+      padding-left: 10px;
+    }
   }
 
   .contenidoTermino {
-    width: 30vw;
     border: 2px solid var(--bordePrimario, #f21d44);
     padding: 10px;
     background-color: var(--superficieClaro);

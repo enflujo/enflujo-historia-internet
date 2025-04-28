@@ -1,5 +1,6 @@
+import type { Termino } from '@/tipos';
 import { apiBase } from './constantes';
-
+import slugificar from 'slug';
 export const gql = String.raw;
 
 export async function pedirDatos<Esquema>(query: string) {
@@ -37,36 +38,40 @@ page(id: "${slug}", idType: URI) {
   content(format: RENDERED)
 }`;
 
-function extraerTerminos(texto: string): string[] {
+function extraerTerminos(texto: string, terminos: Termino[]): string {
   const regex = /\*([^\*]+?)\*/g;
-  const frases: string[] = [];
   let match;
 
   while ((match = regex.exec(texto)) !== null) {
-    // const slug = slugificar(match[1].trim());
+    const termino = match[1].trim();
+    const slug = slugificar(termino);
+    const existe = terminos.find((frase) => frase.slug === slug);
 
-    frases.push(match[1].trim());
+    if (!existe) {
+      terminos.push({ termino, slug, conteo: 1 });
+    } else {
+      existe.conteo++;
+    }
+
+    const regex = new RegExp(`\\*${termino}\\*`, 'g');
+    texto = texto.replace(regex, `<span class="terminoAnotado">${termino}</span>`);
   }
 
-  return frases;
+  return texto;
 }
 
-export function convertirTextoAHTML(input: string): string {
-  const terminos = extraerTerminos(input);
-
-  terminos.forEach((termino) => {
-    const regex = new RegExp(`\\*${termino}\\*`, 'g');
-    input = input.replace(regex, `<span class="terminoAnotado">${termino}</span>`);
-  });
-
-  return input
+export function convertirTextoAHTML(
+  textoSinProcesar: string,
+  terminos: Termino[] = []
+): { texto: string; terminos: Termino[] } {
+  const texto = extraerTerminos(textoSinProcesar, terminos)
     .split(/\r?\n\r?\n/) // divide por párrafos dobles
     .map((parrafo) => {
       // convertir saltos de línea dentro del párrafo en <br>
       const conSaltos = parrafo.replace(/\r?\n/g, '<br>');
 
       // buscar patrón desde el inicio hasta el primer ] con timestamp
-      const match = conSaltos.match(/^(.{0,100}?\[\d{2}:\d{2}:\d{2}\])/);
+      const match = conSaltos.match(/^([^\[]*\[\d{1,}:\d{1,}:\d{1,}\])/);
 
       if (match) {
         const personaTiempo = match[1];
@@ -77,4 +82,11 @@ export function convertirTextoAHTML(input: string): string {
       }
     })
     .join('\n');
+
+  return { texto, terminos };
+}
+
+export function extraerNumeroDesdeTitulo(texto: string): number {
+  const busqueda = texto.match(/\d+/); // Busca la primera secuencia de dígitos
+  return busqueda ? parseInt(busqueda[0], 10) : Infinity; // Si no encuentra número, lo manda al final
 }

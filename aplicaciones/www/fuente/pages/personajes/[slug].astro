@@ -1,18 +1,19 @@
 ---
 import FichaPersonajes from '@/componentes/FichaPersonajes.astro';
 import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
+import NubePalabras from '@/componentes/NubePalabras.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import type {
   Categoria,
-  CategoriaWP,
   EntrevistaPersonaje,
   Personaje,
   Entrevista,
   EntrevistasProcesadas,
   EntrevistaSingularProcesada,
+  Termino,
 } from '@/tipos';
-import { convertirTextoAHTML, esquemaPagina, gql, pedirDatos } from '@/utilidades/ayudas';
+import { convertirTextoAHTML, extraerNumeroDesdeTitulo, gql, pedirDatos } from '@/utilidades/ayudas';
 import { apiBase } from '@/utilidades/constantes';
 
 export async function getStaticPaths() {
@@ -53,15 +54,18 @@ const PeticionEntrevistaCompleta = gql`
           fecha
           transcripciones(first: 200) {
             nodes {
+              title
               transcripcion(format: RAW)
               categories {
                 nodes {
                   slug
                   name
+                  count
                   children {
                     nodes {
                       slug
                       name
+                      count
                     }
                   }
                 }
@@ -84,6 +88,7 @@ const PeticionEntrevistaCompleta = gql`
 `;
 
 const entrevista = await pedirDatos<EntrevistaPersonaje>(PeticionEntrevistaCompleta);
+const terminosPersonaje: Termino[] = [];
 const entrevistaProcesada = procesarEntrevistasPersonaje(entrevista.personaje.entrevistas.nodes);
 
 function procesarEntrevistasPersonaje(entrevistas: Entrevista[]): EntrevistasProcesadas {
@@ -103,22 +108,33 @@ function procesarEntrevistasPersonaje(entrevistas: Entrevista[]): EntrevistasPro
       entrevistasPersonaje.push(entrevistaActual);
     }
 
+    transcripciones.nodes.sort((a, b) => {
+      const numA = extraerNumeroDesdeTitulo(a.title);
+      const numB = extraerNumeroDesdeTitulo(b.title);
+      return numA - numB;
+    });
+
     transcripciones.nodes.forEach((transcripcion) => {
       const { transcripcion: textoTranscripcion, audios } = transcripcion;
 
-      const audiosTranscripcion = audios.nodes.map((audio) => {
-        return {
-          url: `${apiBase}${audio.archivos.node.filePath}`,
-          titulo: audio.archivos.node.title,
-        };
-      });
+      const audiosTranscripcion = audios.nodes
+        .filter((audio) => audio.archivos)
+        .map((audio) => {
+          return {
+            url: `${apiBase}${audio.archivos.node.filePath}`,
+            titulo: audio.archivos.node.title,
+          };
+        });
+
+      const textoProcesado = convertirTextoAHTML(textoTranscripcion, terminosPersonaje);
+      // terminosPersonaje.push(...textoProcesado.terminos);
 
       entrevistaActual.secciones.push({
-        contenido: convertirTextoAHTML(textoTranscripcion),
+        contenido: textoProcesado.texto,
         audios: audiosTranscripcion,
       });
 
-      transcripcion.categories.nodes.forEach((categoria: CategoriaWP) => {
+      transcripcion.categories.nodes.forEach((categoria) => {
         if (categoria.slug === 'sin-categoria') return;
 
         const { slug, name, children } = categoria;
@@ -175,54 +191,46 @@ const opcionesFecha: Intl.DateTimeFormatOptions = {
 ---
 
 <Plantilla titulo={entrevista.personaje.title} descripcion={'entrevista.personaje'}>
-  <main class="historia-oral">
-    <aside id="columnaOscura">
+  <div class="paginaConMenuIzquierdo">
+    <aside class="menuIzquierdo">
       <TituloPagina titulo="Historia Oral" slug="historia-oral" modo="oscuro" />
       <FiltrosHistoriaOral />
     </aside>
 
-    <div class="col2">
-      <FichaPersonajes
-        nombre={entrevista.personaje.title}
-        slug={entrevista.personaje.slug}
-        bio={entrevista.personaje.content}
-        foto={entrevista.personaje.featuredImage}
-        categorias={entrevistaProcesada.categoriasPersonaje}
-      />
+    <main class="historia-oral">
+      <div class="col2">
+        <FichaPersonajes
+          nombre={entrevista.personaje.title}
+          slug={entrevista.personaje.slug}
+          bio={entrevista.personaje.content}
+          foto={entrevista.personaje.featuredImage}
+          categorias={entrevistaProcesada.categoriasPersonaje}
+        />
 
-      <div id="contenedorEntrevistas">
-        {
-          entrevistaProcesada.entrevistas.map((entrevista) => (
-            <section class="entrevista">
-              <h3>Entrevista: {entrevista.fecha.toLocaleDateString('es-CO', opcionesFecha)}</h3>
-              {entrevista.secciones.map((seccion) => (
-                <div class="seccion">
-                  <div set:html={seccion.contenido} />
-                  {seccion.audios.map((audio) => (
-                    <audio controls>
-                      <source src={audio.url} type="audio/mpeg" />
-                      Your browser does not support the audio element.
-                    </audio>
-                  ))}
-                </div>
-              ))}
-            </section>
-          ))
-        }
+        <NubePalabras terminos={terminosPersonaje} />
+
+        <div id="contenedorEntrevistas">
+          {
+            entrevistaProcesada.entrevistas.map((entrevista) => (
+              <section class="entrevista">
+                <h3>Entrevista: {entrevista.fecha.toLocaleDateString('es-CO', opcionesFecha)}</h3>
+                {entrevista.secciones.map((seccion) => (
+                  <div class="seccion">
+                    <div set:html={seccion.contenido} />
+                    {seccion.audios.map((audio) => (
+                      <audio controls>
+                        <source src={audio.url} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                      </audio>
+                    ))}
+                  </div>
+                ))}
+              </section>
+            ))
+          }
+        </div>
+        <!-- <Transcripcion /> -->
       </div>
-      <!-- <Transcripcion /> -->
-    </div>
-  </main>
+    </main>
+  </div>
 </Plantilla>
-
-<style lang="scss">
-  .historia-oral {
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .col2 {
-    width: 80vw;
-    padding: 2em;
-  }
-</style>

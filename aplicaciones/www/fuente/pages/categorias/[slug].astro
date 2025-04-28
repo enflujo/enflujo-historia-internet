@@ -2,12 +2,12 @@
 import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
-import type { Categorias } from '@/tipos';
+import type { CategoriasWP } from '@/tipos';
 import { gql, pedirDatos } from '@/utilidades/ayudas';
 
 const categoria = 'Categoría';
 export async function getStaticPaths() {
-  const Categorias = gql`
+  const PeticionCategorias = gql`
     query {
       categories(where: { hideEmpty: true }, first: 200) {
         nodes {
@@ -17,7 +17,7 @@ export async function getStaticPaths() {
       }
     }
   `;
-  const { categories } = await pedirDatos<Categorias>(Categorias);
+  const { categories } = await pedirDatos<{ categories: CategoriasWP }>(PeticionCategorias);
 
   return categories.nodes.map(({ slug }) => {
     return { params: { slug } };
@@ -38,16 +38,16 @@ const { category } = await pedirDatos<{ category: { name: string } }>(Categoria)
 ---
 
 <Plantilla titulo={category.name} descripcion={categoria}>
-  <main class="paginaCategorias">
-    <aside id="columnaOscura">
-      <TituloPagina titulo="Historia Oral" slug="historia-oral" modo="oscuro" />
+  <div class="paginaConMenuIzquierdo">
+    <aside class="menuIzquierdo">
+      <TituloPagina titulo={category.name} slug={slug} modo="oscuro" />
       <FiltrosHistoriaOral />
     </aside>
 
-    <div class="contenido">
+    <main class="col2">
       <h1>{category.name}</h1>
-    </div>
-  </main>
+    </main>
+  </div>
 </Plantilla>
 
 <style lang="scss">

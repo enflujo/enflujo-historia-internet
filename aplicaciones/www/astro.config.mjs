@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   publicDir: './estaticos',
@@ -6,6 +7,7 @@ export default defineConfig({
   srcDir: './fuente',
   outDir: './publico',
   base: '/enflujo-historia-internet',
+  integrations: [sitemap()],
   vite: {
     server: {
       watch: {

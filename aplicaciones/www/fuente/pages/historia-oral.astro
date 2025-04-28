@@ -1,10 +1,11 @@
 ---
+import { listaCategorias } from '@/cerebros/general';
 import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
+import VisualizacionCategorias from '@/componentes/VisualizacionCategorias.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 // import Transcripcion from '@/componentes/Transcripcion.astro';
-
-import type { Pagina } from '@/tipos';
+import type { Categoria, Pagina } from '@/tipos';
 import { esquemaPagina, gql, pedirDatos } from '@/utilidades/ayudas';
 
 const PeticionPagina = gql`
@@ -13,7 +14,18 @@ const PeticionPagina = gql`
   }
 `;
 const { page: pagina } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
-
+const categorias: Categoria[] = await listaCategorias().then((categorias) =>
+  categorias.map((categoria) => ({
+    nombre: categoria.name,
+    slug: categoria.slug,
+    conteo: categoria.count,
+    hijos: categoria.children.nodes.map((hijo) => ({
+      nombre: hijo.name,
+      slug: hijo.slug,
+      conteo: hijo.count,
+    })),
+  })),
+);
 // const terminosEjemplo = [
 //   { termino: 'Internet', peso: 10 },
 //   { termino: 'Web', peso: 8 },
@@ -33,11 +45,29 @@ const { page: pagina } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
 // ];
 
 // const terminosEntrevista: Termino[] = [];
+
 ---
 
 <Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
-  <aside id="columnaOscura">
-    <TituloPagina titulo={pagina.title} slug={pagina.slug} modo="oscuro" />
-    <FiltrosHistoriaOral />
-  </aside>
+  <div class="paginaConMenuIzquierdo">
+    <aside class="menuIzquierdo">
+      <TituloPagina titulo={pagina.title} slug={pagina.slug} modo="oscuro" />
+      <FiltrosHistoriaOral />
+    </aside>
+
+    <main class="col2">
+      <VisualizacionCategorias categorias={categorias} />
+    </main>
+  </div>
 </Plantilla>
+
+<style lang="scss">
+  main {
+    display: flex;
+    flex-direction: column;
+    padding: 1em 2em 5em 2em;
+    gap: 2em;
+  }
+
+
+  </style>

@@ -28,6 +28,7 @@ export type Audio = {
 export interface CategoriaBasico {
   name: string;
   slug: string;
+  count: number;
 }
 
 export interface Pagina extends CamposGenerales {
@@ -64,38 +65,24 @@ export interface Personaje extends CamposGenerales {
   featuredImage: Imagen | null;
 }
 
-export interface Categorias {
-  categories: {
-    nodes: (CategoriaBasico & {
-      children: {
-        nodes: (CategoriaBasico & {
-          children: { nodes: CategoriaBasico[] };
-        })[];
-      };
-    })[];
-  };
+export interface CategoriasWP {
+  nodes: (CategoriaBasico & {
+    children: {
+      nodes: (CategoriaBasico & {
+        children: { nodes: CategoriaBasico[] };
+      })[];
+    };
+  })[];
 }
 
-export interface CategoriaWP {
-  name: string;
-  slug: string;
-  children: {
-    nodes: {
-      name: string;
-      slug: string;
-    }[];
-  };
-}
-[];
 export interface Entrevista {
   fecha: string;
   content: string;
   transcripciones: {
     nodes: {
+      title: string;
       transcripcion: string;
-      categories: {
-        nodes: CategoriaWP[];
-      };
+      categories: CategoriasWP;
       audios: {
         nodes: {
           archivos: Audio;
@@ -128,6 +115,7 @@ export interface Categoria {
 
 export interface Termino {
   termino: string;
+  slug: string;
   conteo: number;
 }
 
