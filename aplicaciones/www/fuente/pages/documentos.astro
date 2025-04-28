@@ -1,0 +1,182 @@
+---
+import type { Pagina } from '@/tipos';
+import TituloPagina from '@/componentes/TituloPagina.astro';
+import { esquemaPagina, gql, pedirDatos } from '../utilidades/ayudas';
+import Plantilla from '@/plantillas/Plantilla.astro';
+
+interface Documento {
+  id: string;
+  slug: string;
+  title: string;
+  descripcion: string;
+  fecha: string;
+  autores: string;
+  fuente: string;
+  identificador: string;
+  archivos: {
+    nodes: {
+      filePath: string;
+    }[];
+  };
+}
+
+const PeticionPagina = gql`
+  query {
+    ${esquemaPagina('documentos')}
+  }
+`;
+
+const { pagina } = await pedirDatos<{ page: Pagina }>(PeticionPagina).then(async (respuesta) => ({
+  pagina: respuesta.page,
+}));
+
+const PeticionDocumentos = gql`
+  query Documentos {
+    documentos(first: 100) {
+      nodes {
+        id
+        slug
+        title
+        descripcion
+        fecha
+        autores
+        fuente
+        identificador
+        archivos {
+          nodes {
+            filePath
+          }
+        }
+      }
+    }
+  }
+`;
+
+const { documentos } = await pedirDatos<{ documentos: { nodes: Documento[] } }>(PeticionDocumentos);
+const documentosArray = documentos?.nodes || [];
+---
+
+<Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
+  <main class="documentos">
+    <TituloPagina titulo={pagina.title} slug={pagina.slug} />
+
+    <div class="contenedor-documentos">
+      {
+        documentosArray.map((documento) => (
+          <article class="documento">
+            <h2>{documento.title}</h2>
+            <div class="metadatos">
+              {documento.fecha && (
+                <p class="fecha">
+                  <span class="subtitulo"> Fecha:</span> {documento.fecha}
+                </p>
+              )}
+              {documento.autores && (
+                <p class="autores">
+                  <span class="subtitulo">Autores:</span> {documento.autores}
+                </p>
+              )}
+              {documento.fuente && (
+                <p class="fuente">
+                  <span class="subtitulo">Fuente:</span> <span set:html={documento.fuente} />
+                </p>
+              )}
+              {documento.identificador && (
+                <p class="identificador">
+                  <span class="subtitulo">Identificador:</span> {documento.identificador}
+                </p>
+              )}
+            </div>
+
+            <div class="descripcion" set:html={documento.descripcion} />
+
+            {documento.archivos && documento.archivos.nodes && documento.archivos.nodes.length > 0 && (
+              <div class="archivos">
+                <h3 class="subtitulo">Archivos</h3>
+                <ul>
+                  {documento.archivos.nodes.map((archivo) => (
+                    <li>
+                      <a href={`https://wordpress.enflujo.com${archivo.filePath}`}>
+                        {archivo.filePath.split('/').pop() || 'Descargar archivo'}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </main>
+</Plantilla>
+
+<style>
+  .contenedor-documentos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+  }
+
+  .documento {
+    padding: 1.5rem;
+    background-color: var(--superficieClaro);
+    border: 2px solid var(--bordePrimario);
+    border-radius: 0.5rem;
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .documento:hover {
+    transform: translateY(-40px);
+  }
+
+  .documento h2 {
+    margin-top: 0;
+    color: var(--colorTexto);
+    font-family: var(--fuenteTitulos);
+  }
+
+  .metadatos {
+    font-size: 0.9rem;
+    color: var(--colorTexto);
+    opacity: 0.8;
+    margin-bottom: 1rem;
+  }
+
+  .metadatos p {
+    margin: 0.3rem 0;
+  }
+
+  .archivos {
+    margin-top: 1.5rem;
+  }
+
+  .archivos ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .archivos li {
+    margin-bottom: 0.5rem;
+  }
+
+  .archivos a {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: var(--cobalto);
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+
+  .archivos a:hover {
+    background-color: var(--rojo);
+  }
+
+  .subtitulo {
+    display: block;
+  }
+</style>
