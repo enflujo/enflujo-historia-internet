@@ -127,8 +127,13 @@ datosPaginas.set(paginas);
 
 <style lang="scss">
   a,
-  a:link {
+  a:link,
+  a:visited {
     color: var(--textoInvertido);
+
+    &:hover {
+      text-decoration: none;
+    }
   }
 
   #menuPrincipal {

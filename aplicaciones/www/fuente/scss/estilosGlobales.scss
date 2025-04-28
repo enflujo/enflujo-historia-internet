@@ -41,8 +41,14 @@ h1 {
 }
 
 a,
-a:link {
+a:link,
+a:visited {
   text-decoration: none;
+  color: var(--colorEnlace);
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .titulo {

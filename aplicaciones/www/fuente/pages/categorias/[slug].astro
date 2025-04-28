@@ -3,7 +3,7 @@ import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import type { CategoriasWP } from '@/tipos';
-import { gql, pedirDatos } from '@/utilidades/ayudas';
+import { convertirTextoAHTML, gql, pedirDatos } from '@/utilidades/ayudas';
 
 const categoria = 'Categoría';
 export async function getStaticPaths() {
@@ -35,6 +35,72 @@ const Categoria = gql`
 `;
 
 const { category } = await pedirDatos<{ category: { name: string } }>(Categoria);
+
+const PeticionTranscripcionesCategoria = gql`
+  query {
+  transcripciones(where: {categoryName: "${slug}"}) {
+    nodes {
+      transcripcion(format: RAW)
+      categories {
+        nodes {
+          name
+          slug
+          count
+          children {
+            nodes {
+              count
+              slug
+              name
+            }
+          }
+        }
+      }
+      audios {
+        edges {
+          node {
+            id
+          }
+        }
+      }
+      entrevista {
+        node {
+          personajes {
+            nodes {
+              title
+              slug
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`;
+console.log(PeticionTranscripcionesCategoria)
+const { transcripciones } = await pedirDatos<{ transcripciones: { nodes: any[] } }>(PeticionTranscripcionesCategoria);
+const transcripcionesProcesadas = transcripciones.nodes.map((transcripcion) => {
+  const { transcripcion: textoTranscripcion } = transcripcion;
+  const proceso = convertirTextoAHTML(textoTranscripcion);
+  return {
+    texto: proceso.texto,
+    personajes: transcripcion.entrevista.node.personajes.nodes,
+    categorias: transcripcion.categories.nodes.map((categoria) => {
+      return {
+        nombre: categoria.name,
+        slug: categoria.slug,
+        conteo: categoria.count,
+        subcategorias: categoria.children.nodes.map((subcategoria) => {
+          return {
+            nombre: subcategoria.name,
+            slug: subcategoria.slug,
+            conteo: subcategoria.count
+          };
+        })
+      };
+    }),
+  }
+
+});
 ---
 
 <Plantilla titulo={category.name} descripcion={categoria}>
@@ -46,6 +112,45 @@ const { category } = await pedirDatos<{ category: { name: string } }>(Categoria)
 
     <main class="col2">
       <h1>{category.name}</h1>
+
+      <div class="transcripciones">
+        {
+          transcripcionesProcesadas.map((transcripcion) => {
+            const { texto, personajes } = transcripcion;
+  
+
+            return (
+              <div class="transcripcion">
+                <div class="personajes">
+                  {personajes.map((personaje: any) => {
+                    const { title, slug } = personaje;
+                    return (
+                      <span class="personaje">
+                        <a href={`${import.meta.env.BASE_URL}/personajes/${slug}`}>{title}</a>
+                      </span>
+                    );
+                  })}
+                </div>
+                <div set:html={texto} />
+
+                {/* <div class="audios">
+                  {audios.edges.map((audio) => {
+                    const slugAudio = audio.node.id;
+
+                    return (
+                      <audio controls>
+                        <source src={`${import.meta.env.BASE_URL}/audios/${audio.}`} type="audio/mp3" />
+                        Your browser does not support the audio element.
+                      </audio>
+                    );
+                  })}
+                </div> */}
+                
+              </div>
+            );
+          })
+        }
+      </div>
     </main>
   </div>
 </Plantilla>

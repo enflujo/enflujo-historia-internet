@@ -32,8 +32,15 @@ const categorias = await listaCategorias();
 </div>
 
 <style lang="scss">
-  a {
+  a,
+  a:link,
+  a:visited {
+    text-decoration: none;
     color: var(--crema);
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   ul {

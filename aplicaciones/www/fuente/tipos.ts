@@ -126,5 +126,5 @@ export interface EntrevistasProcesadas {
 
 export interface EntrevistaSingularProcesada {
   fecha: Date;
-  secciones: { contenido: string; audios: { url: string; titulo: string }[] }[];
+  secciones: { contenido: string; audios: { url: string; titulo: string }[]; categorias: Categoria[] }[];
 }

@@ -8,14 +8,15 @@ interface Props {
   bio: string;
   foto: Imagen | null;
   categorias: Categoria[];
+  enlace?: boolean;
 }
 
-const { slug, nombre, bio, foto, categorias } = Astro.props;
+const { slug, nombre, bio, foto, categorias, enlace } = Astro.props;
 ---
 
 <section class="personaje" id={slug}>
   <div class="contenido">
-    <h2 class="tituloPersonaje">{nombre}</h2>
+    <h2 class="tituloPersonaje">{enlace ? (<a href=`${import.meta.env.BASE_URL}/personajes/${slug}`>{nombre}</a>) : nombre}</h2>
     <div class="contenidoPersonaje" set:html={bio} />
 
     {
@@ -73,7 +74,7 @@ const { slug, nombre, bio, foto, categorias } = Astro.props;
     gap: 10px;
     margin-top: 20px;
     flex-wrap: wrap;
-    font-size: 0.85em;
+    font-size: 0.95em;
     font-family: var(--fuenteTextos2);
   }
 
