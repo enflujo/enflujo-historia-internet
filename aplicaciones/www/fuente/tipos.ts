@@ -128,3 +128,44 @@ export interface EntrevistaSingularProcesada {
   fecha: Date;
   secciones: { contenido: string; audios: { url: string; titulo: string }[]; categorias: Categoria[] }[];
 }
+
+export interface Documento {
+  id: string;
+  slug: string;
+  title: string;
+  descripcion: string;
+  fecha: string;
+  autores: string;
+  fuente: string;
+  identificador: string;
+  archivos: {
+    nodes: {
+      filePath: string;
+    }[];
+  };
+  tiposDeDocumentos: {
+    nodes: {
+      slug: string;
+      name: string;
+    }[];
+  };
+  featuredImage: {
+    node: {
+      filePath: string;
+    };
+  };
+  categories: {
+    nodes: {
+      slug: string;
+      name: string;
+      count: number;
+      children: {
+        nodes: {
+          slug: string;
+          name: string;
+          count: number;
+        }[];
+      };
+    }[];
+  };
+}
