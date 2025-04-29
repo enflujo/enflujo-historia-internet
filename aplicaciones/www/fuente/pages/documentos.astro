@@ -1,49 +1,8 @@
 ---
-import type { Pagina } from '@/tipos';
+import type { Pagina, Documento } from '@/tipos';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import { esquemaPagina, gql, pedirDatos } from '../utilidades/ayudas';
 import Plantilla from '@/plantillas/Plantilla.astro';
-
-interface Documento {
-  id: string;
-  slug: string;
-  title: string;
-  descripcion: string;
-  fecha: string;
-  autores: string;
-  fuente: string;
-  identificador: string;
-  archivos: {
-    nodes: {
-      filePath: string;
-    }[];
-  };
-  tiposDeDocumentos: {
-    nodes: {
-      slug: string;
-      name: string;
-    }[];
-  };
-  featuredImage: {
-        node: {
-          filePath: string;
-        }
-      };
-  categories: {
-    nodes: {
-      slug: string;
-      name: string;
-      count: number;
-      children: {
-        nodes: {
-          slug: string;
-          name: string;
-          count: number;
-        }[];
-      };
-    }[];
-  };
-}
 
 const PeticionPagina = gql`
   query {
@@ -110,7 +69,7 @@ const documentosArray = documentos?.nodes || [];
   <main class="documentos">
     <TituloPagina titulo={pagina.title} slug={pagina.slug} />
 
-    <div class="contenedor-documentos">
+    <div class="contenedorDocumentos">
       {
         documentosArray.map((documento) => (
           <article class="documento">
@@ -147,30 +106,12 @@ const documentosArray = documentos?.nodes || [];
                 </p>
               )}
 
-              {/* <p class="categorias">
-                <span class="subtitulo">Categorías:</span>
-                <div class="categorias-contenedor">
-                  {documento.categories.nodes.map((categoria) => (
-                    <div>
-                      - <span class="metadato categoria">{categoria.name}</span>
-                      {categoria.children && categoria.children.nodes.length > 0 && (
-                        <div class="subcategorias">
-                          {categoria.children.nodes.map((subcategoria) => (
-                            <span class="subcategoria">{subcategoria.name}, </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </p> */}
-
               {documento.categories && documento.categories.nodes && documento.categories.nodes.length > 0 && (
                 <p class="categorias">
                   <span class="subtitulo">Categorías:</span>
-                  <div class="categorias-contenedor">
+                  <div class="contenedorCategorias">
                     {documento.categories.nodes.map((categoria) => (
-                      <div class="categoria-grupo">
+                      <div class="categoriaGrupo">
                         <span class="categoria metadato">
                           <a href={`${import.meta.env.BASE_URL}/categorias/${categoria.slug}`}>{categoria.name}</a>
                         </span>
@@ -196,7 +137,7 @@ const documentosArray = documentos?.nodes || [];
             <div class="descripcion" set:html={documento.descripcion} />
 
             {documento.featuredImage && documento.featuredImage.node && documento.featuredImage.node.filePath && (
-              <div class="imagen-destacada">
+              <div class="imagenDestacada">
 
                 {documento.archivos && documento.archivos.nodes && documento.archivos.nodes.length > 0 ? (
                       <a href={`https://wordpress.enflujo.com${documento.archivos.nodes[0].filePath}`} title="Ver documento">
@@ -238,7 +179,7 @@ const documentosArray = documentos?.nodes || [];
 </Plantilla>
 
 <style>
-  .contenedor-documentos {
+  .contenedorDocumentos {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
     gap: 2rem;
@@ -305,13 +246,13 @@ const documentosArray = documentos?.nodes || [];
     font-weight: 600;
   }
 
-  .imagen-destacada {
+  .imagenDestacada {
   margin: 1.5rem 0;
   padding: 4px;
   overflow: hidden;
 }
 
-.imagen-destacada img {
+.imagenDestacada img {
   max-width: 100%;
   height: auto;
   display: block;
