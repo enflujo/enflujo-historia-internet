@@ -15,7 +15,6 @@ const PeticionPagina = gql`
 `;
 const { page: pagina } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
 
-
 const PeticionPersonajes = gql`
   query {
     personajes(first: 1000) {
@@ -68,7 +67,7 @@ personajes.nodes.sort((a, b) => {
   if (nombreA > nombreB) return 1;
   return 0;
 });
-const categorias: {[slug: string]: Categoria[]} = {};
+const categorias: { [slug: string]: Categoria[] } = {};
 // personajes.nodes.forEach((personaje) => {
 //   const categoriasEntrevista = personaje.
 // });

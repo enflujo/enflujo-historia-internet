@@ -104,7 +104,6 @@ function procesarEntrevistasPersonaje(entrevistas: Entrevista[]): EntrevistasPro
       entrevistaActual = {
         fecha: fechaEntrevista,
         secciones: [],
-
       };
       entrevistasPersonaje.push(entrevistaActual);
     }
@@ -233,37 +232,40 @@ const opcionesFecha: Intl.DateTimeFormatOptions = {
                   <div class="seccion">
                     <div class="colEntrevista">
                       <div set:html={seccion.contenido} />
-                    {seccion.audios.map((audio) => (
-                      <audio controls>
-                        <source src={audio.url} type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                      </audio>
-                    ))}
+                      {seccion.audios.map((audio) => (
+                        <audio controls>
+                          <source src={audio.url} type="audio/mpeg" />
+                          Your browser does not support the audio element.
+                        </audio>
+                      ))}
                     </div>
-                    
+
                     <div class="colMetadatos">
-                      {
-                        seccion.categorias.length > 0 ? (
-                        <h4>Categorias</h4>
-                        <div class="categorias">
-                          {seccion.categorias.map((categoria) => (
-                            <span class="categoria">
-                              <a href={`${import.meta.env.BASE_URL}/categorias/${categoria.slug}`}>{categoria.nombre}</a>
-                              {categoria.hijos.length > 0 ? (
-                                <div class="hijos">
-                                  {categoria.hijos.map((hijo) => (
-                                    <span class="hijo">
-                                      <a href={`${import.meta.env.BASE_URL}/categorias/${hijo.slug}`}>{hijo.nombre}</a>
-                                    </span>
-                                  ))}
-                                </div>
-                              ) : null}
-                            </span>
-                          ))}
-                        </div>
-                        ) : null
-                      }
-                      
+                      {seccion.categorias.length > 0 ? (
+                        <>
+                          <h4>Categorias</h4>
+                          <div class="categorias">
+                            {seccion.categorias.map((categoria) => (
+                              <span class="categoria">
+                                <a href={`${import.meta.env.BASE_URL}/categorias/${categoria.slug}`}>
+                                  {categoria.nombre}
+                                </a>
+                                {categoria.hijos.length > 0 && (
+                                  <div class="hijos">
+                                    {categoria.hijos.map((hijo) => (
+                                      <span class="hijo">
+                                        <a href={`${import.meta.env.BASE_URL}/categorias/${hijo.slug}`}>
+                                          {hijo.nombre}
+                                        </a>
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </span>
+                            ))}
+                          </div>
+                        </>
+                      ) : null}
                     </div>
                   </div>
                 ))}
@@ -310,7 +312,8 @@ const opcionesFecha: Intl.DateTimeFormatOptions = {
     margin-left: 10px;
   }
 
-  .categoria, .hijo {
+  .categoria,
+  .hijo {
     display: block;
     margin-bottom: 5px;
   }

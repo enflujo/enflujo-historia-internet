@@ -31,7 +31,9 @@ const { personajes } = await pedirDatos<{ personajes: { nodes: Personaje[] } }>(
       {
         personajes.nodes.map((personaje) => (
           <div class="personaje">
-            <h2><a href={`${import.meta.env.BASE_URL}/personajes/${personaje.slug}`}>{personaje.title}</a></h2>
+            <h2>
+              <a href={`${import.meta.env.BASE_URL}/personajes/${personaje.slug}`}>{personaje.title}</a>
+            </h2>
             <p set:html={personaje.content} />
           </div>
         ))

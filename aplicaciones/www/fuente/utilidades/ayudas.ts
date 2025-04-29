@@ -29,14 +29,14 @@ export const crearTitulo = (tituloPagina: string) => {
 };
 
 export const esquemaPagina = (slug: string) => gql`
-page(id: "${slug}", idType: URI) {
-  title
-  status
-  slug
-  iconoA
-  descripcion(format: RAW)
-  content(format: RENDERED)
-}`;
+  page(id: "${slug}", idType: URI) {
+    title
+    status
+    slug
+    iconoA
+    descripcion(format: RAW)
+    content(format: RENDERED)
+  }`;
 
 function extraerTerminos(texto: string, terminos: Termino[]): string {
   const regex = /\*([^\*]+?)\*/g;

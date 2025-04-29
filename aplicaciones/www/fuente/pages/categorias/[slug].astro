@@ -76,7 +76,7 @@ const PeticionTranscripcionesCategoria = gql`
   }
 }
 `;
-console.log(PeticionTranscripcionesCategoria)
+console.log(PeticionTranscripcionesCategoria);
 const { transcripciones } = await pedirDatos<{ transcripciones: { nodes: any[] } }>(PeticionTranscripcionesCategoria);
 const transcripcionesProcesadas = transcripciones.nodes.map((transcripcion) => {
   const { transcripcion: textoTranscripcion } = transcripcion;
@@ -84,22 +84,21 @@ const transcripcionesProcesadas = transcripciones.nodes.map((transcripcion) => {
   return {
     texto: proceso.texto,
     personajes: transcripcion.entrevista.node.personajes.nodes,
-    categorias: transcripcion.categories.nodes.map((categoria) => {
+    categorias: transcripcion.categories.nodes.map((categoria: any) => {
       return {
         nombre: categoria.name,
         slug: categoria.slug,
         conteo: categoria.count,
-        subcategorias: categoria.children.nodes.map((subcategoria) => {
+        subcategorias: categoria.children.nodes.map((subcategoria: any) => {
           return {
             nombre: subcategoria.name,
             slug: subcategoria.slug,
-            conteo: subcategoria.count
+            conteo: subcategoria.count,
           };
-        })
+        }),
       };
     }),
-  }
-
+  };
 });
 ---
 
@@ -117,7 +116,6 @@ const transcripcionesProcesadas = transcripciones.nodes.map((transcripcion) => {
         {
           transcripcionesProcesadas.map((transcripcion) => {
             const { texto, personajes } = transcripcion;
-  
 
             return (
               <div class="transcripcion">
@@ -145,7 +143,6 @@ const transcripcionesProcesadas = transcripciones.nodes.map((transcripcion) => {
                     );
                   })}
                 </div> */}
-                
               </div>
             );
           })

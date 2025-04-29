@@ -30,7 +30,11 @@ function procesarDocumentos(documentos: DocumentoSimple[]): EventoLinea[] {
     contenido: documento.descripcion,
     tipo: 'documento',
     fecha: new Date(documento.fecha).getFullYear(),
-    categories: documento.categories.nodes.map((categoria) => ({ name: categoria.name, slug: categoria.slug, count: categoria.count })),
+    categories: documento.categories.nodes.map((categoria) => ({
+      name: categoria.name,
+      slug: categoria.slug,
+      count: categoria.count,
+    })),
   }));
 }
 
@@ -42,7 +46,11 @@ function procesarEventos(eventos: Evento[]): EventoLinea[] {
     contenido: evento.content,
     tipo: evento.tipo,
     fecha: new Date(evento.fecha).getFullYear(),
-    categories: evento.categories.nodes.map((categoria) => ({ name: categoria.name, slug: categoria.slug, count: categoria.count })),
+    categories: evento.categories.nodes.map((categoria) => ({
+      name: categoria.name,
+      slug: categoria.slug,
+      count: categoria.count,
+    })),
   }));
 }
 

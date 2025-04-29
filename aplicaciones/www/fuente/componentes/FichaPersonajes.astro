@@ -16,7 +16,9 @@ const { slug, nombre, bio, foto, categorias, enlace } = Astro.props;
 
 <section class="personaje" id={slug}>
   <div class="contenido">
-    <h2 class="tituloPersonaje">{enlace ? (<a href=`${import.meta.env.BASE_URL}/personajes/${slug}`>{nombre}</a>) : nombre}</h2>
+    <h2 class="tituloPersonaje">
+      {enlace ? <a href={`${import.meta.env.BASE_URL}/personajes/${slug}`}>{nombre}</a> : nombre}
+    </h2>
     <div class="contenidoPersonaje" set:html={bio} />
 
     {
