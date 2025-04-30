@@ -50,7 +50,8 @@ export async function listaTerminos() {
     extraerTerminos(transcripcion, terminosProcesados);
   });
 
-  terminos.set(terminosProcesados);
+  terminos.set(terminosProcesados.filter((termino) => termino.conteo > 2));
+
   return terminosProcesados;
 }
 

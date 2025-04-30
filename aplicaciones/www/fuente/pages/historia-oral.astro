@@ -7,6 +7,8 @@ import FichaPersonajes from '@/componentes/FichaPersonajes.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import type { Categoria, Pagina, Personaje } from '@/tipos';
 import { esquemaPagina, gql, pedirDatos } from '@/utilidades/ayudas';
+import NubePalabras from '@/componentes/NubePalabras.astro';
+import { listaTerminos } from '@/cerebros/general';
 
 const PeticionPagina = gql`
   query {
@@ -67,10 +69,8 @@ personajes.nodes.sort((a, b) => {
   if (nombreA > nombreB) return 1;
   return 0;
 });
-const categorias: { [slug: string]: Categoria[] } = {};
-// personajes.nodes.forEach((personaje) => {
-//   const categoriasEntrevista = personaje.
-// });
+
+const terminosGlobales = await listaTerminos();
 ---
 
 <Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
@@ -81,6 +81,7 @@ const categorias: { [slug: string]: Categoria[] } = {};
     </aside>
 
     <main class="col2">
+      {terminosGlobales ? <NubePalabras terminos={terminosGlobales} /> : null}
       <!-- <VisualizacionCategorias categorias={categorias} /> -->
 
       <div class="personajes">
