@@ -110,5 +110,37 @@ const categorias: { [slug: string]: Categoria[] } = {};
       padding: 1em 2em 5em 2em;
       gap: 2em;
     }
+
+    section .personaje {
+      padding: 100px;
+    }
+
+    .personajes-lista {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .personajes-lista {
+        grid-template-columns: 1fr; // Switch to single column on small screens
+      }
+    }
+
+    // Additional styling for personajes section
+    .personajes {
+      width: 100%;
+
+      h2 {
+        margin-bottom: 1.5rem;
+        font-family: var(--fuenteTitulos);
+        color: var(--colorTexto);
+      }
+    }
+
+    section .personaje {
+      padding: 1rem;
+    }
   </style>
 </Plantilla>
