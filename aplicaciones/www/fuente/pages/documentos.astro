@@ -37,11 +37,11 @@ const PeticionDocumentos = gql`
             name
           }
         }
-          featuredImage {
-        node {
-          filePath
+        featuredImage {
+          node {
+            filePath
+          }
         }
-      }
         categories {
           nodes {
             slug
@@ -121,8 +121,9 @@ const documentosArray = documentos?.nodes || [];
                             {categoria.children.nodes.map((hijo, index) => (
                               <span class="hijo">
                                 <a href={`${import.meta.env.BASE_URL}/categorias/${hijo.slug}`}>
-                                {hijo.name}{index < categoria.children.nodes.length - 1 ? ',' : ''}
-                              </a>
+                                  {hijo.name}
+                                  {index < categoria.children.nodes.length - 1 ? ',' : ''}
+                                </a>
                               </span>
                             ))}
                           </div>
@@ -138,22 +139,22 @@ const documentosArray = documentos?.nodes || [];
 
             {documento.featuredImage && documento.featuredImage.node && documento.featuredImage.node.filePath && (
               <div class="imagenDestacada">
-
                 {documento.archivos && documento.archivos.nodes && documento.archivos.nodes.length > 0 ? (
-                      <a href={`https://wordpress.enflujo.com${documento.archivos.nodes[0].filePath}`} title="Ver documento">
-                        <img 
-                          src={`https://wordpress.enflujo.com${documento.featuredImage.node.filePath}`} 
-                          alt={`Imagen para ${documento.title}`}
-                        />
-                      </a>
-                    ) : (
-                      <img 
-                        src={`https://wordpress.enflujo.com${documento.featuredImage.node.filePath}`} 
-                        alt={`Imagen para ${documento.title}`}
-                        
-                      />
-                    )}
-
+                  <a
+                    href={`https://wordpress.enflujo.com${documento.archivos.nodes[0].filePath}`}
+                    title="Ver documento"
+                  >
+                    <img
+                      src={`https://wordpress.enflujo.com${documento.featuredImage.node.filePath}`}
+                      alt={`Imagen para ${documento.title}`}
+                    />
+                  </a>
+                ) : (
+                  <img
+                    src={`https://wordpress.enflujo.com${documento.featuredImage.node.filePath}`}
+                    alt={`Imagen para ${documento.title}`}
+                  />
+                )}
               </div>
             )}
 
@@ -247,15 +248,15 @@ const documentosArray = documentos?.nodes || [];
   }
 
   .imagenDestacada {
-  margin: 1.5rem 0;
-  padding: 4px;
-  overflow: hidden;
-}
+    margin: 1.5rem 0;
+    padding: 4px;
+    overflow: hidden;
+  }
 
-.imagenDestacada img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-}
+  .imagenDestacada img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
 </style>
