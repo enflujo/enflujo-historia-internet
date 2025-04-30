@@ -76,7 +76,7 @@ const PeticionTranscripcionesCategoria = gql`
   }
 }
 `;
-console.log(PeticionTranscripcionesCategoria);
+
 const { transcripciones } = await pedirDatos<{ transcripciones: { nodes: any[] } }>(PeticionTranscripcionesCategoria);
 const transcripcionesProcesadas = transcripciones.nodes.map((transcripcion) => {
   const { transcripcion: textoTranscripcion } = transcripcion;

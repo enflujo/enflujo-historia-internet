@@ -1,17 +1,17 @@
-import type { CategoriasWP, PaginaMenu } from '@/tipos';
-import { gql, pedirDatos } from '@/utilidades/ayudas';
+import type { CategoriasWP, MetaInfo, PaginaMenu, Termino } from '@/tipos';
+import { extraerTerminos, gql, pedirDatos } from '@/utilidades/ayudas';
 import { atom, map } from 'nanostores';
 
 export const menuAbierto = atom(false);
 export const datosPaginas = map<PaginaMenu[]>([]);
 export const arbolCategorias = atom<{ categories: CategoriasWP } | null>(null);
-export const categoriasTodas = atom<{ [categoria: string]: string }[]>([]);
+export const terminos = atom<Termino[]>([]);
 
 export async function listaCategorias() {
   const categorias = arbolCategorias.get();
   if (categorias) return categorias.categories.nodes;
 
-  const EsquemaCategorias = gql`
+  const PeticionCategorias = gql`
     query {
       categories(where: { hideEmpty: true, parent: 0 }, first: 200) {
         nodes {
@@ -30,58 +30,58 @@ export async function listaCategorias() {
     }
   `;
 
-  const respuesta = await pedirDatos<{ categories: CategoriasWP }>(EsquemaCategorias);
+  const respuesta = await pedirDatos<{ categories: CategoriasWP }>(PeticionCategorias);
   arbolCategorias.set(respuesta);
-  // const aplanadas: any = respuesta.categories.nodes.flatMap((categoria) => {
-  //   return categoria.children.nodes.map((subcategoria) => {
-  //     return { ...subcategoria, parent: categoria.slug };
-  //   });
-  // });
-  // console.log(aplanadas);
-
-  // Guardar las subcategorías en el store
-  // categoriasTodas.set(respuesta.categories.nodes.flatMap((categoria) => {
-  //   return categoria.children.nodes.map((subcategoria) => {
-  //     return {
-  //       ...subcategoria,
-  //     };
-  //   });
-  // };
 
   return respuesta.categories.nodes;
 }
 
-export async function relaciones() {
-  interface ITranscripciones {
-    transcripciones: {
-      nodes: {
-        title: string;
-        transcripcion: string;
-        slug: string;
-      }[];
-    };
-  }
-  const EsquemaTranscripciones = gql`
+export async function listaTerminos() {
+  const terminosActuales = terminos.get();
+
+  if (terminosActuales.length > 0) return terminosActuales;
+
+  const transcripciones = await extrearTranscripciones();
+  const terminosProcesados: Termino[] = [];
+
+  if (!transcripciones) return;
+
+  transcripciones.forEach((transcripcion) => {
+    extraerTerminos(transcripcion, terminosProcesados);
+  });
+
+  terminos.set(terminosProcesados);
+  return terminosProcesados;
+}
+
+async function extrearTranscripciones(cursorTranscripciones: string = '', transcripciones: string[] = []) {
+  const PeticionTranscripciones = gql`
     query {
-      transcripciones {
+      transcripciones(first: 1000${cursorTranscripciones ? `, after: "${cursorTranscripciones}"` : ''}) {
+        pageInfo {
+          hasNextPage
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
+        }
+        
         nodes {
-          title
-          transcripcion(format: RENDERED)
-          slug
+          transcripcion(format: RAW)
         }
       }
     }
   `;
-  const { transcripciones } = await pedirDatos<ITranscripciones>(EsquemaTranscripciones);
 
-  if (transcripciones.nodes.length) {
-    transcripciones.nodes.forEach((transcripcion) => {
-      const { transcripcion: contenido } = transcripcion;
-      //const terminos = contenido.match(/\*(.*?)\*/g);
-      let parrafos = contenido.split('\r\n');
-      parrafos = parrafos.map((parrafo) => `<p>${parrafo}</p>`);
-      transcripcion.transcripcion = parrafos.join('');
-    });
+  const { transcripciones: algunasTranscripciones } = await pedirDatos<{
+    transcripciones: { pageInfo: MetaInfo; nodes: { transcripcion: string }[] };
+  }>(PeticionTranscripciones);
+
+  transcripciones.push(...algunasTranscripciones.nodes.map((transcripcion) => transcripcion.transcripcion));
+
+  if (algunasTranscripciones.pageInfo.hasNextPage) {
+    return await extrearTranscripciones(algunasTranscripciones.pageInfo.endCursor, transcripciones);
+  } else {
+    return transcripciones;
   }
-  //console.log(transcripciones.nodes);
 }

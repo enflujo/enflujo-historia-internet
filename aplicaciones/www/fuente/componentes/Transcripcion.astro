@@ -41,14 +41,13 @@ const EsquemaTranscripcion = gql`
 const { transcripcion } = await pedirDatos<Transcripcion>(EsquemaTranscripcion);
 async function procesarTranscripcion(texto: string) {
   const cosas = texto.match(/\*(.*?)\*/g);
-  // console.log(cosas);
   const categorias = await listaCategorias();
-  // console.log(categorias);
+
   if (cosas) {
     cosas.forEach((entrada) => {
       const nombre = entrada.replace(/\*/g, '');
       const categoria = categorias.find((cat) => cat.name === nombre);
-      // console.log(categoria);
+
       if (categoria) {
         texto = texto.replace(entrada, `<a href="${base}/categorias/${categoria.slug}">${nombre}</a>`);
       }
