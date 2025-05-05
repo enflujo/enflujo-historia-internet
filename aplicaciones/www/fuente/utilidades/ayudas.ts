@@ -38,6 +38,10 @@ export const esquemaPagina = (slug: string) => gql`
     content(format: RENDERED)
   }`;
 
+function escaparRegex(texto: string): string {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export function extraerTerminos(texto: string, terminos: Termino[]): string {
   const regex = /\*([^\*]+?)\*/g;
   let match;
@@ -53,8 +57,9 @@ export function extraerTerminos(texto: string, terminos: Termino[]): string {
     } else {
       existe.conteo++;
     }
+    const terminoEscapado = escaparRegex(terminoOriginal);
 
-    const regex = new RegExp(`\\*${terminoOriginal}\\*`, 'g');
+    const regex = new RegExp(`\\*${terminoEscapado}\\*`, 'g');
     texto = texto.replace(regex, `<span class="terminoAnotado">${terminoOriginal}</span>`);
   }
 

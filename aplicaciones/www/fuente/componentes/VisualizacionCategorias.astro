@@ -1,18 +1,19 @@
 ---
-import type { Categoria } from '@/tipos';
+import { listaCategorias } from '@/cerebros/general';
+// import type { Categoria } from '@/tipos';
 
-interface Props {
-  categorias: Categoria[];
-}
+// interface Props {
+//   categorias: Categoria[];
+// }
 
-const { categorias } = Astro.props as Props;
+// const { categorias } = Astro.props as Props;
+
+const categorias = await listaCategorias();
+console.log(categorias);
 ---
 
-<div id="hola" style="width:100%; height:100%; position:relative;">
-  <svg
-    style="width:100%; height:100%; border:1px solid black;"
-    data-categorias={JSON.stringify(categorias)}
-    preserveAspectRatio="xMidYMid meet"></svg>
+<div style="width:100%; height:100%; position:relative;">
+  <svg style="width:100%; height:100%; border:1px solid black;" preserveAspectRatio="xMidYMid meet"></svg>
 </div>
 
 <script></script>
