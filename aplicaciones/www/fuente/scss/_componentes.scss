@@ -13,10 +13,12 @@
 
   &:active,
   &.activo {
-    border-right: 4px solid var(--bordeOscuro);
-    border-bottom: 4px solid var(--bordeOscuro);
+    border-right: 4px solid #fff;
+    border-top: 4px solid var(--bordeOscuro);
+    border-bottom: 4px solid #fff;
+    border-left: 4px solid var(--bordeOscuro);
     background: var(--rojo);
-    box-shadow: 0px 0px 2px 2px #0e074a inset;
+    // box-shadow: 0px 0px 2px 2px #0e074a inset;
     color: var(--textoInvertido);
   }
 }

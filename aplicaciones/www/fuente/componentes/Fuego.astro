@@ -1,0 +1,169 @@
+---
+
+---
+
+<div class="contenedorFuego">
+  <div class="particulas">
+    <div class="particula">1</div>
+    <div class="particula">0</div>
+    <div class="particula">1</div>
+    <div class="particula">0</div>
+    <div class="particula">1</div>
+    <div class="particula">0</div>
+    <div class="particula">1</div>
+    <div class="particula">0</div>
+    <div class="particula">1</div>
+    <div class="particula">0</div>
+    <div class="particula">1</div>
+  </div>
+
+  <svg id="fuego" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="turb" x="-100%" y="-100%" width="300%" height="300%">
+        <feTurbulence type="turbulence" baseFrequency="0.06" numOctaves="2.5" result="turbulence" seed="69"
+        ></feTurbulence>
+        <feDisplacementMap in2="turbulence" in="SourceGraphic" scale="35"></feDisplacementMap>
+      </filter>
+      <filter id="turb2" x="-100%" y="-100%" width="300%" height="300%">
+        <feTurbulence type="turbulence" baseFrequency="0.08" numOctaves="1" result="turbulence" seed="169"
+        ></feTurbulence>
+        <feDisplacementMap in2="turbulence" in="SourceGraphic" scale="35"></feDisplacementMap>
+      </filter>
+      <radialGradient id="grad" cx="50%" cy="100%">
+        <stop offset="0%" stop-color="#5bd0f7"></stop>
+        <stop offset="20%" stop-color="#5bd0f7"></stop>
+        <stop offset="60%" stop-color="#3498db"></stop>
+        <stop offset="100%" stop-color="var(--cobalto)"></stop>
+      </radialGradient>
+    </defs>
+    <g>
+      <path d="M70 200 h60 l-30 -90z" filter="url(#turb)" fill="url(#grad)">
+        <animate
+          attributeName="d"
+          values="M70 200 h60 l-30 -90z; M70 7200 h60 l-30 -90z"
+          dur="100s"
+          begin="0s"
+          repeatCount="indefinite"></animate>
+      </path>
+      <animateTransform
+        attributeName="transform"
+        attributeType="XML"
+        type="translate"
+        values="0 0; 0 -7000"
+        dur="100s"
+        begin="0s"
+        repeatCount="indefinite"></animateTransform>
+    </g>
+  </svg>
+</div>
+
+<style>
+  /* body {
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 30vh;
+    overflow: hidden;
+    font-family: monospace;
+  } */
+
+  .contenedorFuego {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+
+  #fuego {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+  }
+
+  .particulas {
+    position: absolute;
+    width: 120px;
+    height: 200px;
+    bottom: 0;
+    left: 60%;
+    transform: translateX(-50%);
+  }
+
+  .particula {
+    position: absolute;
+    bottom: 80px;
+    color: #5bd0f7;
+    font-size: 16px;
+    animation: fuego 2s linear infinite;
+    opacity: 0;
+  }
+
+  @keyframes fuego {
+    0% {
+      transform: translateX(20px) translateY(0) scale(0.8);
+      opacity: 1;
+      color: var(--cobalto);
+      filter: blur(0);
+    }
+
+    50% {
+      transform: translateX(-10px) translateY(-80px) scale(1.2);
+      color: #5bd0f7;
+      filter: blur(1px);
+    }
+
+    100% {
+      transform: translateX(10px) translateY(-160px) scale(0.8);
+      opacity: 0;
+      color: var(--cobalto);
+      filter: blur(2px);
+    }
+  }
+
+  .particula:nth-child(1) {
+    left: 6%;
+    animation-delay: 0s;
+  }
+  .particula:nth-child(2) {
+    left: 2;
+    animation-delay: 0.2s;
+  }
+  .particula:nth-child(3) {
+    left: 7%;
+    animation-delay: 0.4s;
+  }
+  .particula:nth-child(4) {
+    left: 20%;
+    animation-delay: 0.6s;
+  }
+  .particula:nth-child(5) {
+    left: 5%;
+    animation-delay: 0.8s;
+  }
+  .particula:nth-child(6) {
+    left: 10%;
+    animation-delay: 1s;
+  }
+  .particula:nth-child(7) {
+    left: 12%;
+    animation-delay: 1.2s;
+  }
+  .particula:nth-child(8) {
+    left: 8%;
+    animation-delay: 1.4s;
+  }
+  .particula:nth-child(9) {
+    left: 15%;
+    animation-delay: 1.6s;
+  }
+  .particula:nth-child(10) {
+    left: 15%;
+    animation-delay: 1.8s;
+  }
+</style>
