@@ -1,4 +1,5 @@
 ---
+import Fuego from '@/componentes/Fuego.astro';
 import Plantilla from '../plantillas/Plantilla.astro';
 import { esquemaPagina, gql, pedirDatos } from '../utilidades/ayudas';
 import type { Pagina } from '@/tipos';
@@ -13,5 +14,64 @@ const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
 ---
 
 <Plantilla titulo="" descripcion={page.descripcion}>
-  <main class="inicio"></main>
+  <main class="inicio">
+    <h1>Historia del internet en Colombia</h1>
+
+    <div class="contenedorLinks">
+      <div class="boton">
+        <a href="/enflujo-historia-internet/linea-de-tiempo/" class="link">Linea de tiempo</a>
+      </div>
+      <div class="boton">
+        <a href="/enflujo-historia-internet/historia-oral/" class="link">Historia Oral</a>
+      </div>
+      <div class="boton">
+        <a href="/enflujo-historia-internet/documentos/" class="link">Documentos</a>
+      </div>
+      <div class="boton">
+        <a href="/enflujo-historia-internet/glosario/" class="link">Glosario</a>
+      </div>
+    </div>
+
+    <div class="fuegoContainer">
+      <Fuego />
+    </div>
+  </main>
+
+  <style>
+    .inicio {
+      display: flex;
+      align-items: start;
+      justify-content: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    h1 {
+      font-family: var(--fuenteTitulos);
+      font-size: 54px;
+      position: absolute;
+      top: 25vh;
+    }
+
+    .contenedorLinks {
+      align-items: center;
+      position: absolute;
+      top: 50vh;
+      font-size: 25px;
+    }
+
+    .boton {
+      display: inline;
+      margin: 2vw;
+    }
+
+    a.link {
+      z-index: 100;
+      cursor: pointer;
+    }
+
+    .link:hover {
+      text-decoration: none;
+    }
+  </style>
 </Plantilla>
