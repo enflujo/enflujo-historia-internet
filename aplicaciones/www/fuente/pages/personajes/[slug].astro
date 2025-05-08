@@ -59,10 +59,12 @@ const PeticionEntrevistaCompleta = gql`
       entrevistas {
         nodes {
           fecha
+          ordenTranscripciones
           transcripciones(first: 200) {
             nodes {
               title
               transcripcion(format: RAW)
+              databaseId
               categories {
                 nodes {
                   slug
@@ -103,7 +105,7 @@ function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): EntrevistasP
   const entrevistasPersonaje: EntrevistaSingularProcesada[] = [];
 
   entrevistas.forEach((entrevista) => {
-    const { fecha, transcripciones } = entrevista;
+    const { fecha, transcripciones, ordenTranscripciones } = entrevista;
     const fechaEntrevista = new Date(fecha);
     let entrevistaActual = entrevistasPersonaje.find((entrevista) => entrevista.fecha === fechaEntrevista);
 
@@ -116,16 +118,8 @@ function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): EntrevistasP
     }
 
     transcripciones.nodes.sort((a, b) => {
-      const numA = extraerNumeroDesdeTitulo(a.title);
-      const numB = extraerNumeroDesdeTitulo(b.title);
-      return numA - numB;
+      return ordenTranscripciones.indexOf(a.databaseId) - ordenTranscripciones.indexOf(b.databaseId);
     });
-
-    // transcripciones.nodes.sort((a, b) => {
-    //   const numA = extraerNumeroDesdeTitulo(a.title);
-    //   const numB = extraerNumeroDesdeTitulo(b.title);
-    //   return numA - numB;
-    // });
 
     transcripciones.nodes.forEach((transcripcion) => {
       const { transcripcion: textoTranscripcion, audios } = transcripcion;
