@@ -37,6 +37,7 @@ const PeticionTranscripcionesCategoria = gql`
       title
       transcripcion(format: RAW)
       ordenAudios
+      databaseId
       categories {
         nodes {
           name
@@ -66,6 +67,7 @@ const PeticionTranscripcionesCategoria = gql`
       entrevista {
         node {
           fecha
+          ordenTranscripciones
           personajes {
             nodes {
               title
@@ -90,13 +92,13 @@ const terminosCategoria: Termino[] = [];
 const personajesCategoria: { nombre: string; slug: string; imagen: Imagen | null }[] = [];
 
 const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcripciones.nodes.map((transcripcion) => {
-  const { transcripcion: textoTranscripcion } = transcripcion;
+  const { transcripcion: textoTranscripcion, audios, ordenAudios, entrevista } = transcripcion;
   const { texto } = convertirTextoAHTML(textoTranscripcion, terminosCategoria);
-  const audios = procesarAudiosTranscripcion(transcripcion.audios, transcripcion.ordenAudios);
+  const audiosProcesados = procesarAudiosTranscripcion(audios, ordenAudios);
 
   return {
     contenido: texto,
-    audios,
+    audios: audiosProcesados,
     categorias: transcripcion.categories.nodes.map((categoria) => {
       return {
         nombre: categoria.name,

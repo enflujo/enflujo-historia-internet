@@ -102,7 +102,11 @@ export interface EntrevistaCruzada {
 
 export interface TranscripcionesCruzadas extends TranscripcionWP {
   entrevista: {
-    node: { fecha: string; personajes: { nodes: { title: string; slug: string; featuredImage: Imagen | null }[] } };
+    node: {
+      fecha: string;
+      ordenTranscripciones: number[];
+      personajes: { nodes: { title: string; slug: string; featuredImage: Imagen | null }[] };
+    };
   };
 }
 
