@@ -44,11 +44,10 @@ function escaparRegex(texto: string): string {
 
 export function extraerTerminos(texto: string, terminos: Termino[]): string {
   const regex = /\*([^\*]+?)\*/g;
-  let match;
+  let terminoEntreAstreiscos;
 
-  while ((match = regex.exec(texto)) !== null) {
-    const terminoOriginal = match[1].trim();
-    // const terminoNormalizado = singularizarFrase(terminoOriginal.toLowerCase());
+  while ((terminoEntreAstreiscos = regex.exec(texto)) !== null) {
+    const terminoOriginal = terminoEntreAstreiscos[1].trim();
     const slug = slugificar(terminoOriginal);
     const existe = terminos.find((frase) => frase.slug === slug);
 
@@ -66,18 +65,19 @@ export function extraerTerminos(texto: string, terminos: Termino[]): string {
   return texto;
 }
 
-export function singularizarFrase(frase: string): string {
-  return frase
-    .split(' ')
-    .map((palabra) => singularizar(palabra))
-    .join(' ');
-}
-
 export function convertirTextoAHTML(
   textoSinProcesar: string,
   terminos: Termino[] = []
 ): { texto: string; terminos: Termino[] } {
-  const texto = extraerTerminos(textoSinProcesar, terminos)
+  let texto = textoSinProcesar
+    .replace(/^### (.*)$/gm, '<h3 class="titulo3">$1</h3>')
+    .replace(/^## (.*)$/gm, '<h2 class="titulo2">$1</h2>')
+    .replace(/^# (.*)$/gm, '<h1 class="titulo1>$1</h1>');
+
+  // Reemplazar $ por doble salto de línea
+  texto = texto.replace(/\$/g, '<span class="division"></span>');
+
+  texto = extraerTerminos(texto, terminos)
     .split(/\r?\n\r?\n/) // divide por párrafos dobles
     .map((parrafo) => {
       // convertir saltos de línea dentro del párrafo en <br>
@@ -102,137 +102,4 @@ export function convertirTextoAHTML(
 export function extraerNumeroDesdeTitulo(texto: string): number {
   const busqueda = texto.match(/\d+/); // Busca la primera secuencia de dígitos
   return busqueda ? parseInt(busqueda[0], 10) : Infinity; // Si no encuentra número, lo manda al final
-}
-
-export function pluralizar(palabra: string): string {
-  let plural;
-
-  const ultimaLetra = palabra[palabra.length - 1];
-  const ultimasDosLetras = palabra.slice(-2);
-  const ultimasTresLetras = palabra.slice(-3);
-  if (ultimaLetra === 'x') {
-    // No hay plural
-    plural = palabra;
-  }
-
-  if (ultimaLetra === 's') {
-    switch (palabra) {
-      case 'pies':
-        plural = 'pieses';
-        break;
-      case 'cafés':
-        plural = 'cafeses';
-        break;
-      case 'acortamientos':
-        plural = 'acortamiento';
-        break;
-      case 'abreviaturas':
-        plural = 'abreviatura';
-        break;
-      case 'siglas':
-        plural = 'sigla';
-        break;
-      case 'símbolos':
-        plural = 'símbolo';
-        break;
-      default:
-        //normally though it doesn't change
-        plural = palabra;
-    }
-  } else if (ultimaLetra === 'z') {
-    //quita la z y pone ces
-    const seccion = palabra.substring(0, palabra.length - 1);
-    plural = seccion + 'ces';
-  } else if (ultimaLetra === 'c') {
-    const seccion = palabra.substring(0, palabra.length - 1);
-    plural = seccion + 'ques';
-  } else if (ultimaLetra === 'g') {
-    plural = palabra + 'ues';
-  } else if (
-    ultimaLetra === 'a' ||
-    ultimaLetra === 'e' ||
-    ultimaLetra === 'é' ||
-    ultimaLetra === 'i' ||
-    ultimaLetra === 'o' ||
-    ultimaLetra === 'u'
-  ) {
-    plural = palabra + 's';
-  } else if (ultimaLetra === 'á') {
-    const seccion = palabra.substring(0, palabra.length - 1);
-    plural = seccion + 'aes';
-  } else if (ultimaLetra === 'ó') {
-    const seccion = palabra.substring(0, palabra.length - 1);
-    plural = seccion + 'oes';
-  } else if (ultimasTresLetras === 'ión') {
-    const seccion = palabra.substring(0, palabra.length - 3);
-    plural = seccion + 'iones';
-  } else if (ultimasDosLetras === 'ín') {
-    const seccion = palabra.substring(0, palabra.length - 2);
-    plural = seccion + 'ines';
-  } else {
-    plural = palabra + 'es';
-  }
-
-  return plural;
-}
-
-export function singularizar(palabra: string): string {
-  const excepciones: Record<string, string> = {
-    pieses: 'pies',
-    pies: 'pie',
-    cafeses: 'cafés',
-    acortamientos: 'acortamiento',
-    abreviaturas: 'abreviatura',
-    siglas: 'sigla',
-    símbolos: 'símbolo',
-  };
-
-  if (excepciones[palabra]) {
-    return excepciones[palabra];
-  }
-
-  if (palabra.endsWith('ciones')) {
-    return palabra.slice(0, -5) + 'ción';
-  }
-
-  if (palabra.endsWith('iones')) {
-    return palabra.slice(0, -5) + 'ión';
-  }
-
-  if (palabra.endsWith('ines')) {
-    return palabra.slice(0, -4) + 'ín';
-  }
-
-  if (palabra.endsWith('ces')) {
-    return palabra.slice(0, -3) + 'z';
-  }
-
-  if (palabra.endsWith('ques')) {
-    return palabra.slice(0, -4) + 'c';
-  }
-
-  if (palabra.endsWith('gues')) {
-    return palabra.slice(0, -4) + 'g';
-  }
-
-  if (palabra.endsWith('aes')) {
-    return palabra.slice(0, -3) + 'á';
-  }
-
-  if (palabra.endsWith('oes')) {
-    return palabra.slice(0, -3) + 'ó';
-  }
-
-  if (palabra.endsWith('es')) {
-    const posibleSingular = palabra.slice(0, -2);
-    // Evita truncar palabras que ya terminaban en 'es'
-    if (posibleSingular.length > 2) return posibleSingular;
-  }
-
-  if (palabra.endsWith('s')) {
-    const posibleSingular = palabra.slice(0, -1);
-    if (posibleSingular.length > 1) return posibleSingular;
-  }
-
-  return palabra;
 }

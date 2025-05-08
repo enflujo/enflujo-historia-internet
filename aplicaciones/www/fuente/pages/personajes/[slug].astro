@@ -114,6 +114,12 @@ function procesarEntrevistasPersonaje(entrevistas: Entrevista[]): EntrevistasPro
       return numA - numB;
     });
 
+    // transcripciones.nodes.sort((a, b) => {
+    //   const numA = extraerNumeroDesdeTitulo(a.title);
+    //   const numB = extraerNumeroDesdeTitulo(b.title);
+    //   return numA - numB;
+    // });
+
     transcripciones.nodes.forEach((transcripcion) => {
       const { transcripcion: textoTranscripcion, audios } = transcripcion;
 
@@ -273,7 +279,6 @@ const opcionesFecha: Intl.DateTimeFormatOptions = {
             ))
           }
         </div>
-        <!-- <Transcripcion /> -->
       </div>
     </main>
   </div>

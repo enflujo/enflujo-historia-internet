@@ -113,16 +113,3 @@ terminosOrdenados.forEach((term) => {
     z-index: 10;
   }
 </style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const terminos = document.querySelectorAll('.termino');
-
-    terminos.forEach((termino) => {
-      termino.addEventListener('click', () => {
-        const peso = termino.getAttribute('data-peso');
-        console.log(`Término: ${termino.textContent}, Peso: ${peso}`);
-      });
-    });
-  });
-</script>
