@@ -75,20 +75,22 @@ export interface CategoriasWP {
   })[];
 }
 
-export interface Entrevista {
+export interface TranscripcionWP {
+  title: string;
+  transcripcion: string;
+  categories: CategoriasWP;
+  audios: {
+    nodes: {
+      archivos: Audio;
+    }[];
+  };
+}
+
+export interface EntrevistaWP {
   fecha: string;
   content: string;
   transcripciones: {
-    nodes: {
-      title: string;
-      transcripcion: string;
-      categories: CategoriasWP;
-      audios: {
-        nodes: {
-          archivos: Audio;
-        }[];
-      };
-    }[];
+    nodes: TranscripcionWP[];
   };
 }
 export interface EntrevistaPersonaje {
@@ -98,10 +100,32 @@ export interface EntrevistaPersonaje {
     featuredImage: Imagen | null;
     content: string;
     entrevistas: {
-      nodes: Entrevista[];
+      nodes: EntrevistaWP[];
     };
   };
 }
+
+export interface EntrevistaCruzada {
+  transcripciones: {
+    nodes: TranscripcionesCruzadas[];
+  };
+}
+
+export interface TranscripcionesCruzadas extends TranscripcionWP {
+  entrevista: {
+    node: {
+      fecha: string;
+      personajes: {
+        nodes: {
+          title: string;
+          slug: string;
+          featuredImage: Imagen | null;
+        }[];
+      };
+    };
+  };
+}
+
 export interface Categoria {
   nombre: string;
   slug: string;
@@ -126,7 +150,21 @@ export interface EntrevistasProcesadas {
 
 export interface EntrevistaSingularProcesada {
   fecha: Date;
-  secciones: { contenido: string; audios: { url: string; titulo: string }[]; categorias: Categoria[] }[];
+  secciones: SeccionEntrevistaProcesada[];
+}
+
+export interface SeccionEntrevistaProcesada {
+  contenido: string;
+  audios: { url: string; titulo: string }[];
+  categorias: Categoria[];
+}
+
+export interface SeccionEntrevistaProcesadaCruzada extends SeccionEntrevistaProcesada {
+  personajes: {
+    nombre: string;
+    slug: string;
+  }[];
+  fechaEntrevista: Date;
 }
 
 export interface Documento {

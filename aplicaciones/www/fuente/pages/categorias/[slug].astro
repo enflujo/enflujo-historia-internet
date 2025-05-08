@@ -1,8 +1,11 @@
 ---
 import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
+import NubePalabras from '@/componentes/NubePalabras.astro';
+import SeccionEntrevista from '@/componentes/SeccionEntrevista.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
+import FiltroFoto from '@/componentes/FiltroFoto.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
-import type { CategoriasWP } from '@/tipos';
+import type { CategoriasWP, SeccionEntrevistaProcesadaCruzada, Imagen, Termino, EntrevistaCruzada } from '@/tipos';
 import { convertirTextoAHTML, gql, pedirDatos } from '@/utilidades/ayudas';
 
 const categoria = 'Categoría';
@@ -19,27 +22,19 @@ export async function getStaticPaths() {
   `;
   const { categories } = await pedirDatos<{ categories: CategoriasWP }>(PeticionCategorias);
 
-  return categories.nodes.map(({ slug }) => {
-    return { params: { slug } };
+  return categories.nodes.map(({ slug, name }) => {
+    return { params: { slug }, props: { nombreCategoria: name } };
   });
 }
 
 const { slug } = Astro.params;
-
-const Categoria = gql`
-  query {
-    category(id: "${slug}", idType: SLUG) {
-      name
-    }
-  }
-`;
-
-const { category } = await pedirDatos<{ category: { name: string } }>(Categoria);
+const { nombreCategoria } = Astro.props;
 
 const PeticionTranscripcionesCategoria = gql`
   query {
   transcripciones(where: {categoryName: "${slug}"}) {
     nodes {
+      title
       transcripcion(format: RAW)
       categories {
         nodes {
@@ -56,18 +51,28 @@ const PeticionTranscripcionesCategoria = gql`
         }
       }
       audios {
-        edges {
-          node {
-            id
+        nodes {
+          archivos {
+            node {
+              title
+              filePath
+            }
           }
         }
       }
       entrevista {
         node {
+          fecha
           personajes {
             nodes {
               title
               slug
+              featuredImage {
+                node {
+                  altText
+                  sourceUrl
+                }
+              }
             }
           }
         }
@@ -77,19 +82,23 @@ const PeticionTranscripcionesCategoria = gql`
 }
 `;
 
-const { transcripciones } = await pedirDatos<{ transcripciones: { nodes: any[] } }>(PeticionTranscripcionesCategoria);
-const transcripcionesProcesadas = transcripciones.nodes.map((transcripcion) => {
+const { transcripciones } = await pedirDatos<EntrevistaCruzada>(PeticionTranscripcionesCategoria);
+const terminosCategoria: Termino[] = [];
+const personajesCategoria: { nombre: string; slug: string; imagen: Imagen | null }[] = [];
+
+const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcripciones.nodes.map((transcripcion) => {
   const { transcripcion: textoTranscripcion } = transcripcion;
-  const proceso = convertirTextoAHTML(textoTranscripcion);
+  const { texto } = convertirTextoAHTML(textoTranscripcion, terminosCategoria);
+
   return {
-    texto: proceso.texto,
-    personajes: transcripcion.entrevista.node.personajes.nodes,
-    categorias: transcripcion.categories.nodes.map((categoria: any) => {
+    contenido: texto,
+    audios: [],
+    categorias: transcripcion.categories.nodes.map((categoria) => {
       return {
         nombre: categoria.name,
         slug: categoria.slug,
         conteo: categoria.count,
-        subcategorias: categoria.children.nodes.map((subcategoria: any) => {
+        hijos: categoria.children.nodes.map((subcategoria) => {
           return {
             nombre: subcategoria.name,
             slug: subcategoria.slug,
@@ -98,66 +107,134 @@ const transcripcionesProcesadas = transcripciones.nodes.map((transcripcion) => {
         }),
       };
     }),
+    personajes: transcripcion.entrevista.node.personajes.nodes.map((personaje) => {
+      // Guardar los personajes que aparecen en esta categoría
+      const existe = personajesCategoria.find((p) => p.slug === personaje.slug);
+      if (!existe) {
+        personajesCategoria.push({
+          nombre: personaje.title,
+          slug: personaje.slug,
+          imagen: personaje.featuredImage
+            ? {
+                node: {
+                  altText: personaje.featuredImage.node.altText,
+                  sourceUrl: personaje.featuredImage.node.sourceUrl,
+                },
+              }
+            : null,
+        });
+      }
+
+      return {
+        nombre: personaje.title,
+        slug: personaje.slug,
+      };
+    }),
+
+    fechaEntrevista: new Date(transcripcion.entrevista.node.fecha),
   };
 });
 ---
 
-<Plantilla titulo={category.name} descripcion={categoria}>
+<Plantilla titulo={nombreCategoria} descripcion={categoria}>
   <div class="paginaConMenuIzquierdo">
     <aside class="menuIzquierdo">
-      <TituloPagina titulo={category.name} slug={slug} modo="oscuro" />
+      <TituloPagina titulo="Historia Oral" slug={slug} modo="oscuro" />
       <FiltrosHistoriaOral />
     </aside>
 
     <main class="col2">
-      <h1>{category.name}</h1>
+      <h1 class="tituloCategoria">{nombreCategoria}</h1>
 
-      <div class="transcripciones">
-        {
-          transcripcionesProcesadas.map((transcripcion) => {
-            const { texto, personajes } = transcripcion;
+      <section id="resumenPersonajes">
+        <div class="cajaPersonajes">
+          {
+            personajesCategoria.map((personaje) => {
+              const { nombre, slug, imagen } = personaje;
+              return (
+                <a class="personaje" href={`${import.meta.env.BASE_URL}/personajes/${slug}`}>
+                  {imagen && <FiltroFoto ruta={imagen.node.sourceUrl} alt={imagen.node.altText} />}
+                  <p class="nombrePersonaje">{nombre}</p>
+                </a>
+              );
+            })
+          }
+        </div>
 
-            return (
-              <div class="transcripcion">
-                <div class="personajes">
-                  {personajes.map((personaje: any) => {
-                    const { title, slug } = personaje;
-                    return (
-                      <span class="personaje">
-                        <a href={`${import.meta.env.BASE_URL}/personajes/${slug}`}>{title}</a>
-                      </span>
-                    );
-                  })}
+        <NubePalabras terminos={terminosCategoria} />
+
+        <div class="transcripciones">
+          {
+            transcripcionesProcesadas.map((transcripcion) => {
+              const { personajes } = transcripcion;
+
+              return (
+                <div class="transcripcion">
+                  <div class="personajes">
+                    {personajes.map((personaje) => {
+                      const { nombre, slug } = personaje;
+                      return (
+                        <div class="personaje">
+                          <h2 class="nombrePersonaje">
+                            <a href={`${import.meta.env.BASE_URL}/personajes/${slug}`}>{nombre}</a>
+                          </h2>
+                          <p class="fecha">
+                            {transcripcion.fechaEntrevista.toLocaleDateString('es-ES', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <SeccionEntrevista seccion={transcripcion} />
                 </div>
-                <div set:html={texto} />
-
-                {/* <div class="audios">
-                  {audios.edges.map((audio) => {
-                    const slugAudio = audio.node.id;
-
-                    return (
-                      <audio controls>
-                        <source src={`${import.meta.env.BASE_URL}/audios/${audio.}`} type="audio/mp3" />
-                        Your browser does not support the audio element.
-                      </audio>
-                    );
-                  })}
-                </div> */}
-              </div>
-            );
-          })
-        }
-      </div>
+              );
+            })
+          }
+        </div>
+      </section>
     </main>
   </div>
+
+  <style lang="scss">
+    .tituloCategoria {
+      text-align: center;
+      font-size: 2.5em;
+      font-family: var(--fuenteTitulos);
+    }
+
+    .paginaCategorias {
+      display: flex;
+    }
+
+    .contenido {
+      padding: 1em 2em 5em 2em;
+    }
+
+    #resumenPersonajes {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .cajaPersonajes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+      margin-bottom: 2em;
+    }
+
+    .nombrePersonaje {
+      margin-bottom: 4px;
+    }
+
+    .fecha {
+      font-size: 0.8em;
+      font-style: italic;
+      margin-top: 0;
+    }
+  </style>
 </Plantilla>
-
-<style lang="scss">
-  .paginaCategorias {
-    display: flex;
-  }
-
-  .contenido {
-    padding: 1em 2em 5em 2em;
-  }
-</style>

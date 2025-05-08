@@ -1,4 +1,4 @@
-import type { Termino } from '@/tipos';
+import type { Audio, Termino } from '@/tipos';
 import { apiBase } from './constantes';
 import slugificar from 'slug';
 export const gql = String.raw;
@@ -102,4 +102,19 @@ export function convertirTextoAHTML(
 export function extraerNumeroDesdeTitulo(texto: string): number {
   const busqueda = texto.match(/\d+/); // Busca la primera secuencia de dígitos
   return busqueda ? parseInt(busqueda[0], 10) : Infinity; // Si no encuentra número, lo manda al final
+}
+
+export function procesarAudiosTranscripcion(audios: { nodes: { archivos: Audio }[] }) {
+  console.log('Audios:', audios);
+
+  if (!audios || !audios.nodes || audios.nodes.length === 0) {
+    return [];
+  }
+
+  return audios.nodes.map((audio) => {
+    return {
+      url: `${apiBase}${audio.archivos.node.filePath}`,
+      titulo: audio.archivos.node.title,
+    };
+  });
 }

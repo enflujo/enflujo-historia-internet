@@ -1,14 +1,10 @@
 ---
-import { listaCategorias } from '@/cerebros/general';
 import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
-import VisualizacionCategorias from '@/componentes/VisualizacionCategorias.astro';
 import FichaPersonajes from '@/componentes/FichaPersonajes.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
-import type { Categoria, Pagina, Personaje } from '@/tipos';
+import type { Pagina, Personaje } from '@/tipos';
 import { esquemaPagina, gql, pedirDatos } from '@/utilidades/ayudas';
-import NubePalabras from '@/componentes/NubePalabras.astro';
-import { listaTerminos } from '@/cerebros/general';
 
 const PeticionPagina = gql`
   query {
@@ -125,11 +121,10 @@ personajes.nodes.sort((a, b) => {
 
     @media (max-width: 768px) {
       .personajes-lista {
-        grid-template-columns: 1fr; // Switch to single column on small screens
+        grid-template-columns: 1fr;
       }
     }
 
-    // Additional styling for personajes section
     .personajes {
       width: 100%;
 
