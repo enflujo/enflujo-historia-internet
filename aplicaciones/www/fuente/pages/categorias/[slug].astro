@@ -6,7 +6,7 @@ import TituloPagina from '@/componentes/TituloPagina.astro';
 import FiltroFoto from '@/componentes/FiltroFoto.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import type { CategoriasWP, SeccionEntrevistaProcesadaCruzada, Imagen, Termino, EntrevistaCruzada } from '@/tipos';
-import { convertirTextoAHTML, gql, pedirDatos } from '@/utilidades/ayudas';
+import { convertirTextoAHTML, gql, pedirDatos, procesarAudiosTranscripcion } from '@/utilidades/ayudas';
 
 const categoria = 'Categoría';
 export async function getStaticPaths() {
@@ -92,10 +92,11 @@ const personajesCategoria: { nombre: string; slug: string; imagen: Imagen | null
 const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcripciones.nodes.map((transcripcion) => {
   const { transcripcion: textoTranscripcion } = transcripcion;
   const { texto } = convertirTextoAHTML(textoTranscripcion, terminosCategoria);
+  const audios = procesarAudiosTranscripcion(transcripcion.audios, transcripcion.ordenAudios);
 
   return {
     contenido: texto,
-    audios: [],
+    audios,
     categorias: transcripcion.categories.nodes.map((categoria) => {
       return {
         nombre: categoria.name,
