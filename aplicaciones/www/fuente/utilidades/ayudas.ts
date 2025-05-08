@@ -105,16 +105,17 @@ export function extraerNumeroDesdeTitulo(texto: string): number {
 }
 
 export function procesarAudiosTranscripcion(audios: { nodes: { archivos: Audio }[] }) {
-  console.log('Audios:', audios);
-
+  // Si no hay audios o no tienen nodos, devolver un array vacío
   if (!audios || !audios.nodes || audios.nodes.length === 0) {
     return [];
   }
 
-  return audios.nodes.map((audio) => {
-    return {
-      url: `${apiBase}${audio.archivos.node.filePath}`,
-      titulo: audio.archivos.node.title,
-    };
-  });
+  return audios.nodes
+    .filter((audio) => audio.archivos)
+    .map((audio) => {
+      return {
+        url: `${apiBase}${audio.archivos.node.filePath}`,
+        titulo: audio.archivos.node.title,
+      };
+    });
 }

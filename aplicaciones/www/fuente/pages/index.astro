@@ -1,5 +1,4 @@
 ---
-import Fuego from '@/componentes/Fuego.astro';
 import Plantilla from '../plantillas/Plantilla.astro';
 import { esquemaPagina, gql, pedirDatos } from '../utilidades/ayudas';
 import type { Pagina } from '@/tipos';
@@ -45,7 +44,7 @@ const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
     h1 {
       font-family: var(--fuenteTitulos);
       font-size: 54px;
-      margin: 25vh auto 2em auto;
+      margin: 20vh auto 2em auto;
     }
 
     .contenedorEnlaces {

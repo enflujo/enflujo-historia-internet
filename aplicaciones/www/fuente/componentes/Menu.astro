@@ -139,14 +139,14 @@ datosPaginas.set(paginas);
   #menuPrincipal {
     position: fixed;
     top: 0;
-    right: 0;
+    right: -22vw;
     z-index: 99;
     height: 100vh;
     width: 22vw;
     overflow-y: auto;
     overflow-x: hidden;
     pointer-events: auto;
-    //background-color: var(--superficieOscura);
+    transition: all 0.45s ease-out;
 
     #botonMenu {
       position: fixed;
@@ -162,10 +162,7 @@ datosPaginas.set(paginas);
       opacity: 1;
       color: var(--textoInvertido);
       pointer-events: auto;
-
-      // #botonMenu {
-      //   color: var(--textoInvertido);
-      // }
+      right: 0;
     }
   }
 
@@ -191,7 +188,6 @@ datosPaginas.set(paginas);
     display: flex;
     flex-direction: column;
     transition: transform 0.45s ease-out;
-    transform: translateX(100%);
     background-color: var(--superficieOscura);
     z-index: 2;
     min-height: 100vh;
@@ -200,11 +196,6 @@ datosPaginas.set(paginas);
     color: var(--textoInvertido);
     justify-content: center;
     font-size: 1.2em;
-    // line-height: 2em;
-
-    &.visible {
-      transform: translateX(0);
-    }
 
     .botonPagina {
       display: flex;
@@ -217,7 +208,7 @@ datosPaginas.set(paginas);
         border: 1px dotted;
         background-color: var(--superficiePrimario);
         color: var(--colorTexto);
-        //pointer-events: none;
+        pointer-events: none;
       }
     }
 
