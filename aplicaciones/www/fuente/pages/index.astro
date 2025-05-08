@@ -17,7 +17,7 @@ const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
   <main class="inicio">
     <h1>Historia del internet en Colombia</h1>
 
-    <div class="contenedorLinks">
+    <div class="contenedorEnlaces">
       <div class="boton">
         <a href="/enflujo-historia-internet/linea-de-tiempo/" class="link">Linea de tiempo</a>
       </div>
@@ -31,33 +31,28 @@ const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
         <a href="/enflujo-historia-internet/glosario/" class="link">Glosario</a>
       </div>
     </div>
-
-    <div class="fuegoContainer">
-      <Fuego />
-    </div>
   </main>
 
   <style>
     .inicio {
       display: flex;
+      flex-direction: column;
       align-items: start;
       justify-content: center;
-      height: 100vh;
-      position: relative;
+      width: 100%;
     }
 
     h1 {
       font-family: var(--fuenteTitulos);
       font-size: 54px;
-      position: absolute;
-      top: 25vh;
+      margin: 25vh auto 2em auto;
     }
 
-    .contenedorLinks {
-      align-items: center;
-      position: absolute;
-      top: 50vh;
+    .contenedorEnlaces {
+      display: flex;
+      justify-content: center;
       font-size: 25px;
+      width: 100%;
     }
 
     .boton {
