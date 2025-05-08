@@ -66,7 +66,7 @@ const transcripcionProcesada = await procesarTranscripcion(transcripcion.transcr
     transcripcion.audios.nodes.map((entradaAudio) => (
       <>
         <h3>{entradaAudio.title}</h3>
-        <ReproductorAudio ruta={`${apiBase}${entradaAudio.archivos.node.filePath}`} />
+        <ReproductorAudio ruta={entradaAudio.archivos.node.link} />
       </>
     ))
   }

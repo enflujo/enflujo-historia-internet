@@ -36,6 +36,7 @@ const PeticionTranscripcionesCategoria = gql`
     nodes {
       title
       transcripcion(format: RAW)
+      ordenAudios
       categories {
         nodes {
           name
@@ -52,10 +53,12 @@ const PeticionTranscripcionesCategoria = gql`
       }
       audios {
         nodes {
+          databaseId
           archivos {
             node {
               title
-              filePath
+              link
+              mimeType
             }
           }
         }

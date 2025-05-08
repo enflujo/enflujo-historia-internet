@@ -14,7 +14,7 @@ const { seccion } = Astro.props as props;
     {
       seccion.audios.map((audio) => (
         <audio controls>
-          <source src={audio.url} type="audio/mp3" />
+          <source src={audio.url} type={audio.tipo} />
         </audio>
       ))
     }

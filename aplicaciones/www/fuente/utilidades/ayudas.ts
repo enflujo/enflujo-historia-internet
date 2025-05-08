@@ -1,4 +1,4 @@
-import type { Audio, Termino } from '@/tipos';
+import type { AudiosWP, Termino } from '@/tipos';
 import { apiBase } from './constantes';
 import slugificar from 'slug';
 export const gql = String.raw;
@@ -104,18 +104,23 @@ export function extraerNumeroDesdeTitulo(texto: string): number {
   return busqueda ? parseInt(busqueda[0], 10) : Infinity; // Si no encuentra número, lo manda al final
 }
 
-export function procesarAudiosTranscripcion(audios: { nodes: { archivos: Audio }[] }) {
+export function procesarAudiosTranscripcion(audios: AudiosWP, orden: number[]) {
   // Si no hay audios o no tienen nodos, devolver un array vacío
   if (!audios || !audios.nodes || audios.nodes.length === 0) {
     return [];
   }
 
-  return audios.nodes
-    .filter((audio) => audio.archivos)
-    .map((audio) => {
-      return {
-        url: `${apiBase}${audio.archivos.node.filePath}`,
-        titulo: audio.archivos.node.title,
-      };
-    });
+  const respuesta = audios.nodes.filter((audio) => audio.archivos);
+
+  if (respuesta.length === 0) {
+    return [];
+  }
+
+  respuesta.sort((a, b) => {
+    return orden.indexOf(a.databaseId) - orden.indexOf(b.databaseId);
+  });
+
+  return respuesta.map((audio) => {
+    return { url: audio.archivos.node.link, titulo: audio.archivos.node.title, tipo: audio.archivos.node.mimeType };
+  });
 }

@@ -14,13 +14,7 @@ import type {
   EntrevistaSingularProcesada,
   Termino,
 } from '@/tipos';
-import {
-  convertirTextoAHTML,
-  extraerNumeroDesdeTitulo,
-  gql,
-  pedirDatos,
-  procesarAudiosTranscripcion,
-} from '@/utilidades/ayudas';
+import { convertirTextoAHTML, gql, pedirDatos, procesarAudiosTranscripcion } from '@/utilidades/ayudas';
 import { opcionesFecha } from '@/utilidades/constantes';
 
 export async function getStaticPaths() {
@@ -65,6 +59,7 @@ const PeticionEntrevistaCompleta = gql`
               title
               transcripcion(format: RAW)
               databaseId
+              ordenAudios
               categories {
                 nodes {
                   slug
@@ -81,9 +76,12 @@ const PeticionEntrevistaCompleta = gql`
               }
               audios(first: 200) {
                 nodes {
+                  databaseId
                   archivos {
                     node {
-                      filePath
+                      link
+                      mimeType
+                      title
                     }
                   }
                 }
@@ -122,9 +120,9 @@ function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): EntrevistasP
     });
 
     transcripciones.nodes.forEach((transcripcion) => {
-      const { transcripcion: textoTranscripcion, audios } = transcripcion;
+      const { transcripcion: textoTranscripcion, audios, ordenAudios } = transcripcion;
 
-      const audiosTranscripcion = procesarAudiosTranscripcion(audios);
+      const audiosTranscripcion = procesarAudiosTranscripcion(audios, ordenAudios);
       const textoProcesado = convertirTextoAHTML(textoTranscripcion, terminosPersonaje);
       // terminosPersonaje.push(...textoProcesado.terminos);
 

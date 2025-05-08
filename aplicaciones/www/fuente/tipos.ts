@@ -19,7 +19,7 @@ export interface PaginaMenu extends CamposGenerales {
 
 export type Imagen = { node: { altText: string; sourceUrl: string } };
 
-export type Audio = { node: { title: string; filePath: string } };
+export type Audio = { node: { title: string; link: string; mimeType: string } };
 
 export interface CategoriaBasico {
   name: string;
@@ -71,8 +71,13 @@ export interface TranscripcionWP {
   title: string;
   transcripcion: string;
   databaseId: number;
+  ordenAudios: number[];
   categories: CategoriasWP;
-  audios: { nodes: { archivos: Audio }[] };
+  audios: AudiosWP;
+}
+
+export interface AudiosWP {
+  nodes: { databaseId: number; archivos: Audio }[];
 }
 
 export interface EntrevistaWP {
@@ -126,7 +131,7 @@ export interface EntrevistaSingularProcesada {
 
 export interface SeccionEntrevistaProcesada {
   contenido: string;
-  audios: { url: string; titulo: string }[];
+  audios: { url: string; titulo: string; tipo: string }[];
   categorias: Categoria[];
 }
 
