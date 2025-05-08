@@ -17,13 +17,9 @@ export interface PaginaMenu extends CamposGenerales {
   iconoB: string;
 }
 
-export type Imagen = {
-  node: { altText: string; sourceUrl: string };
-};
+export type Imagen = { node: { altText: string; sourceUrl: string } };
 
-export type Audio = {
-  node: { title: string; filePath: string };
-};
+export type Audio = { node: { title: string; filePath: string } };
 
 export interface CategoriaBasico {
   name: string;
@@ -67,31 +63,23 @@ export interface Personaje extends CamposGenerales {
 
 export interface CategoriasWP {
   nodes: (CategoriaBasico & {
-    children: {
-      nodes: (CategoriaBasico & {
-        children: { nodes: CategoriaBasico[] };
-      })[];
-    };
+    children: { nodes: (CategoriaBasico & { children: { nodes: CategoriaBasico[] } })[] };
   })[];
 }
 
 export interface TranscripcionWP {
   title: string;
   transcripcion: string;
+  databaseId: number;
   categories: CategoriasWP;
-  audios: {
-    nodes: {
-      archivos: Audio;
-    }[];
-  };
+  audios: { nodes: { archivos: Audio }[] };
 }
 
 export interface EntrevistaWP {
   fecha: string;
   content: string;
-  transcripciones: {
-    nodes: TranscripcionWP[];
-  };
+  ordenTranscripciones: number[];
+  transcripciones: { nodes: TranscripcionWP[] };
 }
 export interface EntrevistaPersonaje {
   personaje: {
@@ -99,30 +87,17 @@ export interface EntrevistaPersonaje {
     slug: string;
     featuredImage: Imagen | null;
     content: string;
-    entrevistas: {
-      nodes: EntrevistaWP[];
-    };
+    entrevistas: { nodes: EntrevistaWP[] };
   };
 }
 
 export interface EntrevistaCruzada {
-  transcripciones: {
-    nodes: TranscripcionesCruzadas[];
-  };
+  transcripciones: { nodes: TranscripcionesCruzadas[] };
 }
 
 export interface TranscripcionesCruzadas extends TranscripcionWP {
   entrevista: {
-    node: {
-      fecha: string;
-      personajes: {
-        nodes: {
-          title: string;
-          slug: string;
-          featuredImage: Imagen | null;
-        }[];
-      };
-    };
+    node: { fecha: string; personajes: { nodes: { title: string; slug: string; featuredImage: Imagen | null }[] } };
   };
 }
 
@@ -130,11 +105,7 @@ export interface Categoria {
   nombre: string;
   slug: string;
   conteo: number;
-  hijos: {
-    nombre: string;
-    slug: string;
-    conteo: number;
-  }[];
+  hijos: { nombre: string; slug: string; conteo: number }[];
 }
 
 export interface Termino {
@@ -160,10 +131,7 @@ export interface SeccionEntrevistaProcesada {
 }
 
 export interface SeccionEntrevistaProcesadaCruzada extends SeccionEntrevistaProcesada {
-  personajes: {
-    nombre: string;
-    slug: string;
-  }[];
+  personajes: { nombre: string; slug: string }[];
   fechaEntrevista: Date;
 }
 
@@ -176,34 +144,15 @@ export interface Documento {
   autores: string;
   fuente: string;
   identificador: string;
-  archivos: {
-    nodes: {
-      filePath: string;
-    }[];
-  };
-  tiposDeDocumentos: {
-    nodes: {
-      slug: string;
-      name: string;
-    }[];
-  };
-  featuredImage: {
-    node: {
-      filePath: string;
-    };
-  };
+  archivos: { nodes: { filePath: string }[] };
+  tiposDeDocumentos: { nodes: { slug: string; name: string }[] };
+  featuredImage: { node: { filePath: string } };
   categories: {
     nodes: {
       slug: string;
       name: string;
       count: number;
-      children: {
-        nodes: {
-          slug: string;
-          name: string;
-          count: number;
-        }[];
-      };
+      children: { nodes: { slug: string; name: string; count: number }[] };
     }[];
   };
 }
