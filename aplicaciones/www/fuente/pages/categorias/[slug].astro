@@ -92,14 +92,14 @@ const terminosCategoria: Termino[] = [];
 const personajesCategoria: { nombre: string; slug: string; imagen: Imagen | null }[] = [];
 
 const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcripciones.nodes.map((transcripcion) => {
-  const { transcripcion: textoTranscripcion, audios, ordenAudios, entrevista } = transcripcion;
+  const { transcripcion: textoTranscripcion, audios, ordenAudios, entrevista, categories } = transcripcion;
   const { texto } = convertirTextoAHTML(textoTranscripcion, terminosCategoria);
   const audiosProcesados = procesarAudiosTranscripcion(audios, ordenAudios);
 
   return {
     contenido: texto,
     audios: audiosProcesados,
-    categorias: transcripcion.categories.nodes.map((categoria) => {
+    categorias: categories.nodes.map((categoria) => {
       return {
         nombre: categoria.name,
         slug: categoria.slug,
@@ -113,7 +113,8 @@ const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcrip
         }),
       };
     }),
-    personajes: transcripcion.entrevista.node.personajes.nodes.map((personaje) => {
+
+    personajes: entrevista.node.personajes.nodes.map((personaje) => {
       // Guardar los personajes que aparecen en esta categoría
       const existe = personajesCategoria.find((p) => p.slug === personaje.slug);
       if (!existe) {
@@ -137,7 +138,7 @@ const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcrip
       };
     }),
 
-    fechaEntrevista: new Date(transcripcion.entrevista.node.fecha),
+    fechaEntrevista: new Date(entrevista.node.fecha),
   };
 });
 ---

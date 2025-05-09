@@ -38,10 +38,6 @@ export const esquemaPagina = (slug: string) => gql`
     content(format: RENDERED)
   }`;
 
-function escaparRegex(texto: string): string {
-  return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 export function extraerTerminos(texto: string, terminos: Termino[]): string {
   // Expresión que captura términos entre asteriscos, ignorando espacios extra
   const regex = /\*\s*([^\*]+?)\s*\*/g;
@@ -89,28 +85,32 @@ export function convertirTextoAHTML(
   textoSinProcesar: string,
   terminos: Termino[] = []
 ): { texto: string; terminos: Termino[] } {
+  // Expresiones unificadas para títulos y divisiones
   let texto = textoSinProcesar
     .replace(/^### (.*)$/gm, '<h3 class="titulo3">$1</h3>')
     .replace(/^## (.*)$/gm, '<h2 class="titulo2">$1</h2>')
-    .replace(/^# (.*)$/gm, '<h1 class="titulo1>$1</h1>');
+    .replace(/^# (.*)$/gm, '<h1 class="titulo1">$1</h1>')
+    .replace(/\$/g, '<span class="division"></span>');
 
-  // Reemplazar $ por doble salto de línea
-  texto = texto.replace(/\$/g, '<span class="division"></span>');
+  // Procesamiento de términos anotados
+  texto = extraerTerminos(texto, terminos);
 
-  texto = extraerTerminos(texto, terminos)
-    .split(/\r?\n\r?\n/) // divide por párrafos dobles
+  // Transformación de párrafos
+  texto = texto
+    .split(/\r?\n\r?\n/)
     .map((parrafo) => {
-      // convertir saltos de línea dentro del párrafo en <br>
+      // Reemplazar saltos de línea por `<br>` y detectar timestamps
       const conSaltos = parrafo.replace(/\r?\n/g, '<br>');
 
-      // buscar patrón desde el inicio hasta el primer ] con timestamp
+      // Expresión para capturar "[min:seg:ms]" al inicio
       const match = conSaltos.match(/^([^\[]*\[\d{1,}:\d{1,}:\d{1,}\])/);
 
       if (match) {
-        const personaTiempo = match[1];
-        const resto = conSaltos.slice(personaTiempo.length).trim();
-        return `<p><span class="personaTiempo">${personaTiempo}</span> ${resto}</p>`;
+        // Si hay timestamp, se formatea el contenido
+        const [personaTiempo, ...resto] = conSaltos.split(']');
+        return `<p><span class="personaTiempo">${personaTiempo}]</span> ${resto.join(']').trim()}</p>`;
       } else {
+        // Si no, se devuelve el párrafo directo
         return `<p>${conSaltos.trim()}</p>`;
       }
     })
