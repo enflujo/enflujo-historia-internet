@@ -12,13 +12,13 @@ const { ruta, alt } = Astro.props;
 </div>
 
 <style lang="scss">
-  $dimPunto: 0.15em;
-  $color: var(--superficieOscura);
-  $contrasteEfecto: 1000%;
-  $brillo: 45%;
-  $contrasteFoto: 130%;
-  $difuminado: 1px;
-  $tipoComposicion: soft-light;
+  // $dimPunto: 0.15em;
+  // $color: var(--superficieOscura);
+  // $contrasteEfecto: 1000%;
+  // $brillo: 45%;
+  // $contrasteFoto: 130%;
+  // $difuminado: 1px;
+  // $tipoComposicion: soft-light;
 
   .marco {
     width: 200px;
@@ -28,7 +28,7 @@ const { ruta, alt } = Astro.props;
     top: 0;
     right: 0;
 
-    filter: contrast($contrasteEfecto);
+    // filter: contrast($contrasteEfecto);
     overflow: hidden;
 
     img {
@@ -39,20 +39,21 @@ const { ruta, alt } = Astro.props;
       height: 100%;
       object-fit: cover;
       object-position: center;
-      mix-blend-mode: $tipoComposicion;
-      filter: grayscale(1) brightness($brillo) contrast($contrasteFoto) blur($difuminado);
+      // mix-blend-mode: $tipoComposicion;
+      // filter: grayscale(1) brightness($brillo) contrast($contrasteFoto) blur($difuminado);
+      filter: sepia(100%) saturate(110%) brightness(79%) hue-rotate(140deg);
     }
 
-    &::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      bottom: -50%;
-      right: -50%;
-      background: radial-gradient(circle at center, $color, var(--crema));
-      background-size: $dimPunto $dimPunto;
-      transform: rotate(20deg);
-    }
+    // &::before {
+    //   content: '';
+    //   position: absolute;
+    //   top: -50%;
+    //   left: -50%;
+    //   bottom: -50%;
+    //   right: -50%;
+    //   background: radial-gradient(circle at center, $color, var(--crema));
+    //   background-size: $dimPunto $dimPunto;
+    //   transform: rotate(20deg);
+    // }
   }
 </style>
