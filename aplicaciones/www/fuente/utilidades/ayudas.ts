@@ -43,24 +43,44 @@ function escaparRegex(texto: string): string {
 }
 
 export function extraerTerminos(texto: string, terminos: Termino[]): string {
-  const regex = /\*([^\*]+?)\*/g;
+  // Expresión que captura términos entre asteriscos, ignorando espacios extra
+  const regex = /\*\s*([^\*]+?)\s*\*/g;
   let terminoEntreAstreiscos;
+
+  // Mapa para acceso rápido a los términos por su slug
+  const terminosMap = new Map<string, Termino>();
+
+  // Poblar el mapa inicial
+  terminos.forEach((termino) => {
+    terminosMap.set(termino.slug, termino);
+  });
+
+  // Almacenaremos los reemplazos para hacerlos al final
+  const reemplazos: { original: string; anotado: string }[] = [];
 
   while ((terminoEntreAstreiscos = regex.exec(texto)) !== null) {
     const terminoOriginal = terminoEntreAstreiscos[1].trim();
     const slug = slugificar(terminoOriginal);
-    const existe = terminos.find((frase) => frase.slug === slug);
 
-    if (!existe) {
-      terminos.push({ termino: terminoOriginal, slug, conteo: 1 });
+    if (!terminosMap.has(slug)) {
+      const nuevoTermino = { termino: terminoOriginal, slug, conteo: 1 };
+      terminos.push(nuevoTermino);
+      terminosMap.set(slug, nuevoTermino);
     } else {
-      existe.conteo++;
+      terminosMap.get(slug)!.conteo++;
     }
-    const terminoEscapado = escaparRegex(terminoOriginal);
 
-    const regex = new RegExp(`\\*${terminoEscapado}\\*`, 'g');
-    texto = texto.replace(regex, `<span class="terminoAnotado">${terminoOriginal}</span>`);
+    // Preparamos el reemplazo
+    reemplazos.push({
+      original: terminoEntreAstreiscos[0], // El texto original capturado
+      anotado: `<span class="terminoAnotado">${terminoOriginal}</span>`,
+    });
   }
+
+  // Reemplazo masivo, más eficiente
+  reemplazos.forEach(({ original, anotado }) => {
+    texto = texto.replace(original, anotado);
+  });
 
   return texto;
 }
