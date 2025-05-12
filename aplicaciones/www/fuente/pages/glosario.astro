@@ -42,7 +42,7 @@ async function pedirSeccionDatos(cursorTerminos: string = '', terminosProcesados
   terminosProcesados.push(...algunosTerminos.nodes.filter((termino) => termino.status === 'publish'));
 
   if (algunosTerminos.pageInfo.hasNextPage) {
-    await pedirSeccionDatos(algunosTerminos.pageInfo.endCursor);
+    return await pedirSeccionDatos(algunosTerminos.pageInfo.endCursor);
   }
 
   return terminosProcesados;
@@ -55,7 +55,7 @@ const { pagina, terminos } = await pedirDatos<{ page: Pagina }>(PeticionPagina).
 }));
 
 // Organizar los términos del glosario en orden alfabético
-terminos.sort((a, b) => a.slug.localeCompare(b.slug));
+terminos.sort((a, b) => a.title.localeCompare(b.title));
 ---
 
 <Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
