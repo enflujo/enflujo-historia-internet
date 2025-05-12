@@ -12,6 +12,7 @@ interface Props {
 }
 
 const { slug, nombre, bio, foto, categorias, enlace } = Astro.props;
+console.log(nombre, enlace);
 ---
 
 <section class="personaje" id={slug}>
@@ -41,7 +42,13 @@ const { slug, nombre, bio, foto, categorias, enlace } = Astro.props;
   {
     foto ? (
       <div class="foto">
-        <FiltroFoto ruta={foto.node.sourceUrl} alt={`Foto de ${nombre}`} />
+        {enlace ? (
+          <a class="enlaceFotoPersonaje" href={`${import.meta.env.BASE_URL}/personajes/${slug}`}>
+            <FiltroFoto ruta={foto.node.sourceUrl} alt={`Foto de ${nombre}`} />
+          </a>
+        ) : (
+          <FiltroFoto ruta={foto.node.sourceUrl} alt={`Foto de ${nombre}`} />
+        )}
       </div>
     ) : null
   }
@@ -70,10 +77,11 @@ const { slug, nombre, bio, foto, categorias, enlace } = Astro.props;
     align-self: flex-start;
   }
 
-  .foto :global(img) {
-    max-width: 100%;
-    height: auto;
-    vertical-align: top;
+  .enlaceFotoPersonaje {
+    opacity: 1;
+    &:hover {
+      opacity: 0.8;
+    }
   }
   .contenido {
     width: 70%;
