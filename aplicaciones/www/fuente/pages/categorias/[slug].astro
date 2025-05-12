@@ -91,56 +91,58 @@ const { transcripciones } = await pedirDatos<EntrevistaCruzada>(PeticionTranscri
 const terminosCategoria: Termino[] = [];
 const personajesCategoria: { nombre: string; slug: string; imagen: Imagen | null }[] = [];
 
-const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcripciones.nodes.map((transcripcion) => {
-  const { transcripcion: textoTranscripcion, audios, ordenAudios, entrevista, categories } = transcripcion;
-  const { texto } = convertirTextoAHTML(textoTranscripcion, terminosCategoria);
-  const audiosProcesados = procesarAudiosTranscripcion(audios, ordenAudios);
+const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = await Promise.all(
+  transcripciones.nodes.map(async (transcripcion) => {
+    const { transcripcion: textoTranscripcion, audios, ordenAudios, entrevista, categories } = transcripcion;
+    const { texto } = await convertirTextoAHTML(textoTranscripcion, terminosCategoria);
+    const audiosProcesados = procesarAudiosTranscripcion(audios, ordenAudios);
 
-  return {
-    contenido: texto,
-    audios: audiosProcesados,
-    categorias: categories.nodes.map((categoria) => {
-      return {
-        nombre: categoria.name,
-        slug: categoria.slug,
-        conteo: categoria.count,
-        hijos: categoria.children.nodes.map((subcategoria) => {
-          return {
-            nombre: subcategoria.name,
-            slug: subcategoria.slug,
-            conteo: subcategoria.count,
-          };
-        }),
-      };
-    }),
+    return {
+      contenido: texto,
+      audios: audiosProcesados,
+      categorias: categories.nodes.map((categoria) => {
+        return {
+          nombre: categoria.name,
+          slug: categoria.slug,
+          conteo: categoria.count,
+          hijos: categoria.children.nodes.map((subcategoria) => {
+            return {
+              nombre: subcategoria.name,
+              slug: subcategoria.slug,
+              conteo: subcategoria.count,
+            };
+          }),
+        };
+      }),
 
-    personajes: entrevista.node.personajes.nodes.map((personaje) => {
-      // Guardar los personajes que aparecen en esta categoría
-      const existe = personajesCategoria.find((p) => p.slug === personaje.slug);
-      if (!existe) {
-        personajesCategoria.push({
+      personajes: entrevista.node.personajes.nodes.map((personaje) => {
+        // Guardar los personajes que aparecen en esta categoría
+        const existe = personajesCategoria.find((p) => p.slug === personaje.slug);
+        if (!existe) {
+          personajesCategoria.push({
+            nombre: personaje.title,
+            slug: personaje.slug,
+            imagen: personaje.featuredImage
+              ? {
+                  node: {
+                    altText: personaje.featuredImage.node.altText,
+                    sourceUrl: personaje.featuredImage.node.sourceUrl,
+                  },
+                }
+              : null,
+          });
+        }
+
+        return {
           nombre: personaje.title,
           slug: personaje.slug,
-          imagen: personaje.featuredImage
-            ? {
-                node: {
-                  altText: personaje.featuredImage.node.altText,
-                  sourceUrl: personaje.featuredImage.node.sourceUrl,
-                },
-              }
-            : null,
-        });
-      }
+        };
+      }),
 
-      return {
-        nombre: personaje.title,
-        slug: personaje.slug,
-      };
-    }),
-
-    fechaEntrevista: new Date(entrevista.node.fecha),
-  };
-});
+      fechaEntrevista: new Date(entrevista.node.fecha),
+    };
+  })
+);
 ---
 
 <Plantilla titulo={nombreCategoria} descripcion={categoria}>
@@ -205,43 +207,43 @@ const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcrip
       </section>
     </main>
   </div>
-
-  <style lang="scss">
-    .tituloCategoria {
-      text-align: center;
-      font-size: 2.5em;
-      font-family: var(--fuenteTitulos);
-    }
-
-    .paginaCategorias {
-      display: flex;
-    }
-
-    .contenido {
-      padding: 1em 2em 5em 2em;
-    }
-
-    #resumenPersonajes {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .cajaPersonajes {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1em;
-      margin-bottom: 2em;
-    }
-
-    .nombrePersonaje {
-      margin-bottom: 4px;
-    }
-
-    .fecha {
-      font-size: 0.8em;
-      font-style: italic;
-      margin-top: 0;
-    }
-  </style>
 </Plantilla>
+
+<style lang="scss">
+  .tituloCategoria {
+    text-align: center;
+    font-size: 2.5em;
+    font-family: var(--fuenteTitulos);
+  }
+
+  .paginaCategorias {
+    display: flex;
+  }
+
+  .contenido {
+    padding: 1em 2em 5em 2em;
+  }
+
+  #resumenPersonajes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cajaPersonajes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    margin-bottom: 2em;
+  }
+
+  .nombrePersonaje {
+    margin-bottom: 4px;
+  }
+
+  .fecha {
+    font-size: 0.8em;
+    font-style: italic;
+    margin-top: 0;
+  }
+</style>

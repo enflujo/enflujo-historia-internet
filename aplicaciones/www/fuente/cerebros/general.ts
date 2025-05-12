@@ -1,4 +1,4 @@
-import type { CategoriasWP, MetaInfo, PaginaMenu, Termino } from '@/tipos';
+import type { CategoriasWP, MetaInfo, PaginaMenu, Termino, TerminoGlosario } from '@/tipos';
 import { extraerTerminos, gql, pedirDatos } from '@/utilidades/ayudas';
 import { atom, map } from 'nanostores';
 
@@ -6,6 +6,7 @@ export const menuAbierto = atom(false);
 export const datosPaginas = map<PaginaMenu[]>([]);
 export const arbolCategorias = atom<{ categories: CategoriasWP } | null>(null);
 export const terminos = atom<Termino[]>([]);
+export const glosario = atom<TerminoGlosario[]>([]);
 
 export async function listaCategorias() {
   const categorias = arbolCategorias.get();
@@ -84,5 +85,43 @@ async function extrearTranscripciones(cursorTranscripciones: string = '', transc
     return await extrearTranscripciones(algunasTranscripciones.pageInfo.endCursor, transcripciones);
   } else {
     return transcripciones;
+  }
+}
+
+export async function listaGlosario(cursorGlosario: string = '', glosarioProcesado: TerminoGlosario[] = []) {
+  const glosarioActual = glosario.get();
+
+  if (glosarioActual.length > 0) return glosarioActual;
+
+  const PeticionGlosario = gql`
+    query {
+      terminos(first: 1000${cursorGlosario ? `, after: "${cursorGlosario}"` : ''}) {
+        pageInfo {
+          hasNextPage
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
+        }
+
+        nodes {
+          title
+          slug
+        }
+      }
+    }
+  `;
+
+  const { terminos: algunasDefiniciones } = await pedirDatos<{
+    terminos: { nodes: TerminoGlosario[]; pageInfo: MetaInfo };
+  }>(PeticionGlosario);
+
+  glosarioProcesado.push(...algunasDefiniciones.nodes);
+
+  if (algunasDefiniciones.pageInfo.hasNextPage) {
+    return await listaGlosario(algunasDefiniciones.pageInfo.endCursor, glosarioProcesado);
+  } else {
+    glosario.set(glosarioProcesado);
+    return glosarioProcesado;
   }
 }

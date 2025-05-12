@@ -90,6 +90,16 @@ a:visited {
   border-bottom: 1px dotted var(--rojo);
 }
 
+.terminoGlosario,
+.terminoGlosario:link {
+  font-weight: bold;
+
+  &:hover {
+    border-bottom: 2px solid var(--colorEnlace);
+    text-decoration: none;
+  }
+}
+
 .paginaConMenuIzquierdo {
   display: flex;
   justify-content: flex-end;

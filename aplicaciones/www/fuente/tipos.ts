@@ -123,6 +123,11 @@ export interface Termino {
   conteo: number;
 }
 
+export interface TerminoGlosario {
+  title: string;
+  slug: string;
+}
+
 export interface EntrevistasProcesadas {
   categoriasPersonaje: Categoria[];
   entrevistas: EntrevistaSingularProcesada[];

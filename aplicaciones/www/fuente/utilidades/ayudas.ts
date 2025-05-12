@@ -1,6 +1,7 @@
-import type { AudiosWP, Termino } from '@/tipos';
+import type { AudiosWP, Termino, TerminoGlosario } from '@/tipos';
 import { apiBase } from './constantes';
 import slugificar from 'slug';
+import { listaGlosario } from '@/cerebros/general';
 export const gql = String.raw;
 
 export async function pedirDatos<Esquema>(query: string) {
@@ -38,7 +39,7 @@ export const esquemaPagina = (slug: string) => gql`
     content(format: RENDERED)
   }`;
 
-export function extraerTerminos(texto: string, terminos: Termino[]): string {
+export function extraerTerminos(texto: string, terminos: Termino[], glosario?: TerminoGlosario[]): string {
   // Expresión que captura términos entre asteriscos, ignorando espacios extra
   const regex = /\*\s*([^\*]+?)\s*\*/g;
   let terminoEntreAstreiscos;
@@ -66,10 +67,16 @@ export function extraerTerminos(texto: string, terminos: Termino[]): string {
       terminosMap.get(slug)!.conteo++;
     }
 
+    const existeEnGlosario = glosario?.some((termino) => termino.slug === slug);
+    const htmlBasico = `<span class="terminoAnotado">${terminoOriginal}</span>`;
+    const textoAnotado = existeEnGlosario
+      ? `<a class="terminoGlosario" href="${import.meta.env.BASE_URL}/glosario#${slug}">${terminoOriginal}</a>`
+      : htmlBasico;
+
     // Preparamos el reemplazo
     reemplazos.push({
       original: terminoEntreAstreiscos[0], // El texto original capturado
-      anotado: `<span class="terminoAnotado">${terminoOriginal}</span>`,
+      anotado: textoAnotado,
     });
   }
 
@@ -81,10 +88,10 @@ export function extraerTerminos(texto: string, terminos: Termino[]): string {
   return texto;
 }
 
-export function convertirTextoAHTML(
+export async function convertirTextoAHTML(
   textoSinProcesar: string,
   terminos: Termino[] = []
-): { texto: string; terminos: Termino[] } {
+): Promise<{ texto: string; terminos: Termino[] }> {
   // Expresiones unificadas para títulos y divisiones
   let texto = textoSinProcesar
     .replace(/^### (.*)$/gm, '<h3 class="titulo3">$1</h3>')
@@ -93,7 +100,14 @@ export function convertirTextoAHTML(
     .replace(/\$/g, '<span class="division"></span>');
 
   // Procesamiento de términos anotados
-  texto = extraerTerminos(texto, terminos);
+  let glosario: TerminoGlosario[] | undefined;
+  try {
+    glosario = await listaGlosario();
+  } catch (error) {
+    console.error('Error al obtener el glosario:', error);
+  }
+
+  texto = extraerTerminos(texto, terminos, glosario);
 
   // Transformación de párrafos
   texto = texto
@@ -117,11 +131,6 @@ export function convertirTextoAHTML(
     .join('\n');
 
   return { texto, terminos };
-}
-
-export function extraerNumeroDesdeTitulo(texto: string): number {
-  const busqueda = texto.match(/\d+/); // Busca la primera secuencia de dígitos
-  return busqueda ? parseInt(busqueda[0], 10) : Infinity; // Si no encuentra número, lo manda al final
 }
 
 export function procesarAudiosTranscripcion(audios: AudiosWP, orden: number[]) {
