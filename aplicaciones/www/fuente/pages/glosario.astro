@@ -42,7 +42,7 @@ async function pedirSeccionDatos(cursorTerminos: string = '', terminosProcesados
   terminosProcesados.push(...algunosTerminos.nodes.filter((termino) => termino.status === 'publish'));
 
   if (algunosTerminos.pageInfo.hasNextPage) {
-    return await pedirSeccionDatos(algunosTerminos.pageInfo.endCursor);
+    return await pedirSeccionDatos(algunosTerminos.pageInfo.endCursor, terminosProcesados);
   }
 
   return terminosProcesados;
