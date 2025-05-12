@@ -18,54 +18,50 @@ const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
 
     <div class="contenedorEnlaces">
       <div class="boton">
-        <a href="/enflujo-historia-internet/linea-de-tiempo/" class="link">Linea de tiempo</a>
+        <a class="enlace" href="/enflujo-historia-internet/linea-de-tiempo/">Linea de tiempo</a>
       </div>
       <div class="boton">
-        <a href="/enflujo-historia-internet/historia-oral/" class="link">Historia Oral</a>
+        <a class="enlace" href="/enflujo-historia-internet/historia-oral/">Historia Oral</a>
       </div>
       <div class="boton">
-        <a href="/enflujo-historia-internet/documentos/" class="link">Documentos</a>
+        <a class="enlace" href="/enflujo-historia-internet/documentos/">Documentos</a>
       </div>
       <div class="boton">
-        <a href="/enflujo-historia-internet/glosario/" class="link">Glosario</a>
+        <a class="enlace" href="/enflujo-historia-internet/glosario/">Glosario</a>
       </div>
     </div>
   </main>
-
-  <style>
-    .inicio {
-      display: flex;
-      flex-direction: column;
-      align-items: start;
-      justify-content: center;
-      width: 100%;
-    }
-
-    h1 {
-      font-family: var(--fuenteTitulos);
-      font-size: 54px;
-      margin: 20vh auto 2em auto;
-    }
-
-    .contenedorEnlaces {
-      display: flex;
-      justify-content: center;
-      font-size: 25px;
-      width: 100%;
-    }
-
-    .boton {
-      display: inline;
-      margin: 2vw;
-    }
-
-    a.link {
-      z-index: 100;
-      cursor: pointer;
-    }
-
-    .link:hover {
-      text-decoration: none;
-    }
-  </style>
 </Plantilla>
+
+<style lang="scss">
+  .inicio {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    width: 100%;
+  }
+
+  h1 {
+    font-family: var(--fuenteTitulos);
+    font-size: 54px;
+    margin: 20vh auto 2em auto;
+  }
+
+  .contenedorEnlaces {
+    display: flex;
+    justify-content: center;
+    font-size: 25px;
+    width: 100%;
+  }
+
+  .boton {
+    display: inline;
+    margin: 2vw;
+  }
+
+  .enlace,
+  .enlace:hover {
+    text-decoration: none;
+  }
+</style>
