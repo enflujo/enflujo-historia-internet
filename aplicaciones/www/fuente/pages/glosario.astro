@@ -75,6 +75,16 @@ terminos.sort((a, b) => a.title.localeCompare(b.title));
   </main>
 </Plantilla>
 
+<script>
+  const idTermino = window.location.hash;
+  if (idTermino) {
+    const elemento = document.querySelector(idTermino);
+    if (elemento) {
+      elemento.classList.add('terminoEnfocado');
+    }
+  }
+</script>
+
 <style lang="scss">
   #contenedorGlosario {
     display: flex;
@@ -102,5 +112,17 @@ terminos.sort((a, b) => a.title.localeCompare(b.title));
     background-color: var(--superficieClaro);
     position: relative;
     margin-bottom: 2em;
+  }
+
+  .terminoEnfocado {
+    h2 {
+      border-bottom: 2px solid var(--colorTexto);
+    }
+
+    .contenidoTermino {
+      background-color: var(--amarillo);
+      border: 2px solid var(--colorTexto);
+      box-shadow: 0 0 10px var(--colorTexto);
+    }
   }
 </style>
