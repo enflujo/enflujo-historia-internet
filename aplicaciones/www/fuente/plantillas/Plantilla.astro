@@ -6,9 +6,10 @@ interface Props {
   titulo: string;
   descripcion?: string;
   imagen?: string;
+  sinFuego?: boolean;
 }
 
-const { titulo, descripcion, imagen } = Astro.props;
+const { titulo, descripcion, imagen, sinFuego } = Astro.props;
 const ruta = new URL(Astro.url.pathname, Astro.site);
 const urlBase = new URL(`${import.meta.env.BASE_URL}/`, Astro.site);
 const img = { url: '', titulo: '', ancho: '1200', alto: '630' };
@@ -57,11 +58,17 @@ if (imagen) {
     <meta name="twitter:image:alt" content={img.titulo} />
     <meta name="generator" content={Astro.generator} />
   </head>
-  <body>
+  <body class={sinFuego ? 'sinFuego' : ''}>
     <Menu />
     <slot />
 
-    <div class="guardaescobas"><Fuego /></div>
+    {
+      !sinFuego && (
+        <div class="guardaescobas">
+          <Fuego />
+        </div>
+      )
+    }
   </body>
 </html>
 
@@ -76,6 +83,10 @@ if (imagen) {
   body {
     padding-bottom: 300px;
     min-height: 100vh;
+
+    &.sinFuego {
+      padding-bottom: 0;
+    }
   }
 
   .guardaescobas {

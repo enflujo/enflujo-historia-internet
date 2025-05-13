@@ -133,7 +133,7 @@ const decadas = eventos.reduce(
 );
 ---
 
-<Plantilla titulo="Línea de tiempo" descripcion="">
+<Plantilla titulo="Línea de tiempo" descripcion="" sinFuego={true}>
   <main class="lineaTiempo">
     <TituloPagina titulo={page.title} slug={page.slug} />
 
@@ -211,6 +211,8 @@ const decadas = eventos.reduce(
   let anchoContenedorEventos = 0;
   let pasoDeslizador = 0;
   let filtroActual = 'todos';
+  let posX = 0;
+
   window.addEventListener('resize', escalar);
   escalar();
   definirEventosVisibles();
@@ -242,8 +244,26 @@ const decadas = eventos.reduce(
   if (deslizador) {
     let puntoXInicio = 0;
     let espacioRecorrido = 0;
-    let desplazamientoAcumulado = 0;
+    let desplazamientoAcumulado = window.innerWidth;
     let arrastrando = false;
+
+    function desplazar(desplazamiento: number) {
+      if (desplazamiento < 0) {
+        desplazamientoAcumulado = 0;
+      } else if (desplazamiento > anchoContenedorEventos - window.innerWidth) {
+        desplazamientoAcumulado = anchoContenedorEventos - window.innerWidth;
+      } else {
+        desplazamientoAcumulado = desplazamiento;
+      }
+
+      if (!eventos || !deslizador) return;
+      eventos.style.left = `${-desplazamientoAcumulado}px`;
+      const _x = (desplazamientoAcumulado / anchoContenedorEventos) * window.innerWidth;
+
+      deslizador.style.left = `${_x - 10}px`;
+
+      limitarDeslizador();
+    }
 
     deslizador.addEventListener('mousedown', (evento) => {
       puntoXInicio = evento.clientX;
@@ -254,10 +274,7 @@ const decadas = eventos.reduce(
       if (!arrastrando) return;
       const _x = evento.clientX;
       espacioRecorrido = _x - puntoXInicio;
-      deslizador.style.left = `${desplazamientoAcumulado + espacioRecorrido}px`;
-      if (!eventos) return;
-      eventos.style.left = `${-mapearXDeslizadorAXEventos(desplazamientoAcumulado + espacioRecorrido)}px`;
-      limitarDeslizador();
+      desplazar(desplazamientoAcumulado + espacioRecorrido);
     });
 
     document.addEventListener('mouseup', (evento) => {
@@ -276,12 +293,26 @@ const decadas = eventos.reduce(
       const anchoDeslizador = deslizador.getBoundingClientRect().width;
       const centroDeslizador = anchoDeslizador / 2;
       const _x = evento.clientX - centroDeslizador;
-      desplazamientoAcumulado = _x;
       deslizador.style.left = `${_x}px`;
       if (!eventos) return;
-      eventos.style.left = `${-mapearXDeslizadorAXEventos(_x)}px`;
+      const desplazamiento = mapearXDeslizadorAXEventos(_x);
+      eventos.style.left = `${-desplazamiento}px`;
+      desplazamientoAcumulado = desplazamiento;
       limitarDeslizador();
     });
+
+    contenedorEventos?.addEventListener(
+      'wheel',
+      (evento: WheelEvent) => {
+        if (!contenedorEventos) return;
+
+        if (evento.deltaY !== 0) {
+          evento.preventDefault();
+          desplazar(desplazamientoAcumulado + evento.deltaY);
+        }
+      },
+      { passive: false }
+    );
   }
 
   function mapearXDeslizadorAXEventos(x: number) {
@@ -404,9 +435,12 @@ const decadas = eventos.reduce(
       background-color: white;
       margin-right: 4px;
       font-size: 0.7em;
+      border: 2px transparent;
+      opacity: 0.5;
 
       &.visible {
-        border: 1px solid var(--colorTexto);
+        border: 2px solid var(--colorTexto);
+        opacity: 1;
       }
     }
 
