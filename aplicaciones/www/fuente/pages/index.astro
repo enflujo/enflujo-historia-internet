@@ -14,54 +14,184 @@ const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
 
 <Plantilla titulo="" descripcion={page.descripcion}>
   <main class="inicio">
-    <h1>Historia del internet en Colombia</h1>
+    <div class="contenidoInicio" set:html={page.content} />
 
     <div class="contenedorEnlaces">
-      <div class="boton">
-        <a class="enlace" href="/enflujo-historia-internet/linea-de-tiempo/">Linea de tiempo</a>
-      </div>
-      <div class="boton">
-        <a class="enlace" href="/enflujo-historia-internet/historia-oral/">Historia Oral</a>
-      </div>
-      <div class="boton">
-        <a class="enlace" href="/enflujo-historia-internet/documentos/">Documentos</a>
-      </div>
-      <div class="boton">
-        <a class="enlace" href="/enflujo-historia-internet/glosario/">Glosario</a>
-      </div>
+      <a class="enlace" href="/enflujo-historia-internet/linea-de-tiempo/">
+        <span class="boton">Línea de Tiempo</span>
+      </a>
+
+      <a class="enlace" href="/enflujo-historia-internet/historia-oral/">
+        <span class="boton">Historia Oral</span>
+      </a>
+
+      <a class="enlace" href="/enflujo-historia-internet/documentos/">
+        <span class="boton">Documentos</span>
+      </a>
+
+      <a class="enlace" href="/enflujo-historia-internet/glosario/">
+        <span class="boton">Glosario</span>
+      </a>
     </div>
   </main>
 </Plantilla>
 
-<style lang="scss">
+<style is:global lang="scss">
   .inicio {
     display: flex;
     flex-direction: column;
     align-items: start;
     justify-content: center;
     width: 100%;
-  }
+    text-align: center;
+    overflow: hidden;
+    padding: 0;
 
-  h1 {
-    font-family: var(--fuenteTitulos);
-    font-size: 54px;
-    margin: 20vh auto 2em auto;
+    h1 {
+      font-family: var(--fuenteTitulos);
+      font-size: 54px;
+      margin: 10vh auto 3vh auto;
+    }
+
+    h2 {
+      font-weight: 400;
+      font-size: 40px;
+      width: 100%;
+      margin: 0 0 0.5em 0;
+    }
+
+    h3 {
+      font-weight: 400;
+      font-size: 30px;
+      width: 100%;
+      margin: 0 0 5vh 0;
+    }
+
+    p {
+      width: 38%;
+      font-size: 18px;
+      margin: 0 auto;
+ 
+    }
+
+    @media (max-width: 1200px) {
+      h1 {
+        font-size: 48px;
+        margin: 15vh auto 4vh auto;
+      }
+
+      h2 {
+        font-size: 36px;
+      }
+
+      h3 {
+        font-size: 26px;
+      }
+
+      p {
+        width: 50%;
+      }
+    }
+
+    @media (max-width: 790px) {
+      h1 {
+        font-size: 38px;
+        margin: 16vh auto 3vh auto;
+      }
+
+      h2 {
+        font-size: 28px;
+      }
+
+      h3 {
+        font-size: 22px;
+        margin: 0 0 3vh 0;
+      }
+
+      p {
+        width: 70%;
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 32px;
+        margin: 8vh auto 2vh auto;
+      }
+
+      h2 {
+        font-size: 24px;
+      }
+
+      h3 {
+        font-size: 18px;
+      }
+
+      p {
+        width: 90%;
+        font-size: 14px;
+      }
+    }
+  }
+</style>
+
+<style lang="scss">
+  span {
+    color: var(--colorEnlace);
   }
 
   .contenedorEnlaces {
     display: flex;
     justify-content: center;
-    font-size: 25px;
+    font-size: 22px;
     width: 100%;
+    margin-top: 60px;
+    gap: 20px;
+    margin-bottom: 0;
   }
 
   .boton {
-    display: inline;
-    margin: 2vw;
+    display: inline-block;
+    white-space: nowrap;
   }
 
   .enlace,
   .enlace:hover {
     text-decoration: none;
+  }
+
+  @media (max-width: 950px) {
+    .contenedorEnlaces {
+      flex-direction: row;
+      flex-wrap: wrap;
+      max-width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .boton {
+      margin: 15px;
+    }
+
+    /* Make all buttons take equal width in 2 rows of 2 */
+    .enlace {
+      flex: 0 0 45%; /* Take up roughly half the container width */
+      margin-bottom: 15px; /* Space between rows */
+    }
+  }
+
+  @media (max-width: 500px) {
+    .contenedorEnlaces {
+      font-size: 18px;
+      margin-top: 30px;
+      flex-direction: column;
+    }
+
+    .boton {
+      margin: 10px;
+
+      margin-bottom: 15px;
+    }
   }
 </style>
