@@ -4,6 +4,7 @@ import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
 import NubePalabras from '@/componentes/NubePalabras.astro';
 import SeccionEntrevista from '@/componentes/SeccionEntrevista.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
+import VisualizacionCategorias from '@/componentes/VisualizacionCategorias.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import type {
   Categoria,
@@ -212,7 +213,7 @@ function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): EntrevistasP
           foto={entrevista.personaje.featuredImage}
           categorias={entrevistaProcesada.categoriasPersonaje}
         />
-
+        <VisualizacionCategorias />
         <NubePalabras terminos={terminosPersonaje} />
 
         <div id="contenedorEntrevistas">
