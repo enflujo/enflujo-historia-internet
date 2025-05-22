@@ -142,7 +142,6 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
           });
 
           const categorias = procesarCategorias(transcripcion.categories);
-          console.log(categorias);
 
           categorias.forEach((categoria) => {
             let existe = categoriasPersonaje.find((cat) => cat.slug === categoria.slug);
