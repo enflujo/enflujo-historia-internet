@@ -140,6 +140,7 @@ export interface Documento {
   id: string;
   slug: string;
   title: string;
+  tituloCorto: string;
   descripcion: string;
   fecha: string;
   autores: string;

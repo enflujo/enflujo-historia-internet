@@ -22,6 +22,7 @@ const PeticionDocumentos = gql`
         id
         slug
         title
+        tituloCorto
         descripcion
         fecha
         autores
@@ -81,7 +82,7 @@ const listaDocumentos = documentos?.nodes || [];
         listaDocumentos.map((documento) => (
           <article class="documento">
             <h2 class="nombreDocumento">
-              <a href={`${base}/documentos/${documento.slug}`}>{documento.title}</a>
+              <a href={`${base}/documentos/${documento.slug}`}>{documento.tituloCorto}</a>
             </h2>
 
             <div class="metadatos">
