@@ -6,15 +6,21 @@ import SeccionEntrevista from '@/componentes/SeccionEntrevista.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import type {
-  Categoria,
   EntrevistaPersonaje,
   Personaje,
   EntrevistaWP,
   EntrevistasProcesadas,
   EntrevistaSingularProcesada,
   Termino,
+  CategoriaProcesada,
 } from '@/tipos';
-import { convertirTextoAHTML, gql, pedirDatos, procesarAudiosTranscripcion } from '@/utilidades/ayudas';
+import {
+  convertirTextoAHTML,
+  gql,
+  pedirDatos,
+  procesarAudiosTranscripcion,
+  procesarCategorias,
+} from '@/utilidades/ayudas';
 import { opcionesFecha } from '@/utilidades/constantes';
 
 export async function getStaticPaths() {
@@ -61,15 +67,16 @@ const PeticionEntrevistaCompleta = gql`
               databaseId
               ordenAudios
               categories {
-                nodes {
-                  slug
-                  name
-                  count
-                  children {
-                    nodes {
-                      slug
-                      name
-                      count
+                edges {
+                  node {
+                    name
+                    slug
+                    count
+                    parent {
+                      node {
+                        slug
+                        name
+                      }
                     }
                   }
                 }
@@ -99,7 +106,7 @@ const terminosPersonaje: Termino[] = [];
 const entrevistaProcesada = await procesarEntrevistasPersonaje(entrevista.personaje.entrevistas.nodes);
 
 async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promise<EntrevistasProcesadas> {
-  const categoriasPersonaje: Categoria[] = [];
+  const categoriasPersonaje: CategoriaProcesada[] = [];
   const entrevistasPersonaje: EntrevistaSingularProcesada[] = [];
 
   await Promise.all(
@@ -131,32 +138,19 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
           entrevistaActual.secciones.push({
             contenido: textoProcesado.texto,
             audios: audiosTranscripcion,
-            categorias: transcripcion.categories.nodes.map((categoria) => {
-              return {
-                nombre: categoria.name,
-                slug: categoria.slug,
-                conteo: categoria.count,
-                hijos: categoria.children.nodes.map((hijo) => {
-                  return {
-                    nombre: hijo.name,
-                    slug: hijo.slug,
-                    conteo: hijo.count,
-                  };
-                }),
-              };
-            }),
+            categorias: procesarCategorias(transcripcion.categories),
           });
 
-          transcripcion.categories.nodes.forEach((categoria) => {
-            if (categoria.slug === 'sin-categoria') return;
+          const categorias = procesarCategorias(transcripcion.categories);
+          console.log(categorias);
 
-            const { slug, name, children } = categoria;
-            let existe = categoriasPersonaje.find((cat) => cat.slug === slug);
+          categorias.forEach((categoria) => {
+            let existe = categoriasPersonaje.find((cat) => cat.slug === categoria.slug);
 
             if (!existe) {
               existe = {
-                nombre: name,
-                slug,
+                nombre: categoria.nombre,
+                slug: categoria.slug,
                 conteo: 1,
                 hijos: [],
               };
@@ -165,14 +159,13 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
               existe.conteo++;
             }
 
-            if (children.nodes.length > 0) {
-              children.nodes.forEach((hijo) => {
-                if (hijo.slug === 'sin-categoria') return;
+            if (categoria.hijos.length > 0) {
+              categoria.hijos.forEach((hijo) => {
                 const existeHijo = existe.hijos.find((cat) => cat.slug === hijo.slug);
 
                 if (!existeHijo) {
                   existe.hijos.push({
-                    nombre: hijo.name,
+                    nombre: hijo.nombre,
                     slug: hijo.slug,
                     conteo: 1,
                   });

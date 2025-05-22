@@ -1,10 +1,10 @@
-import type { CategoriasWP, MetaInfo, PaginaMenu, Termino, TerminoGlosario } from '@/tipos';
+import type { CategoriasWPNodos, MetaInfo, PaginaMenu, Termino, TerminoGlosario } from '@/tipos';
 import { extraerTerminos, gql, pedirDatos } from '@/utilidades/ayudas';
 import { atom, map } from 'nanostores';
 
 export const menuAbierto = atom(false);
 export const datosPaginas = map<PaginaMenu[]>([]);
-export const arbolCategorias = atom<{ categories: CategoriasWP } | null>(null);
+export const arbolCategorias = atom<{ categories: CategoriasWPNodos } | null>(null);
 export const terminos = atom<Termino[]>([]);
 export const glosario = atom<TerminoGlosario[]>([]);
 
@@ -31,7 +31,7 @@ export async function listaCategorias() {
     }
   `;
 
-  const respuesta = await pedirDatos<{ categories: CategoriasWP }>(PeticionCategorias);
+  const respuesta = await pedirDatos<{ categories: CategoriasWPNodos }>(PeticionCategorias);
   arbolCategorias.set(respuesta);
 
   return respuesta.categories.nodes;

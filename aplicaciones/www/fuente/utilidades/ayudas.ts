@@ -167,6 +167,7 @@ export function procesarCategorias(categoriasWP: CategoriasWP) {
         categorias.push({
           slug: node.slug,
           nombre: node.name,
+          conteo: node.count || 0,
           hijos: [],
         });
       }
@@ -177,6 +178,7 @@ export function procesarCategorias(categoriasWP: CategoriasWP) {
         padre = {
           slug: node.parent.node.slug,
           nombre: node.parent.node.name,
+          conteo: node.parent.node.count || 0,
           hijos: [],
         };
         categorias.push(padre);
@@ -185,6 +187,7 @@ export function procesarCategorias(categoriasWP: CategoriasWP) {
       padre.hijos.push({
         slug: node.slug,
         nombre: node.name,
+        conteo: node.count || 0,
       });
     }
   });

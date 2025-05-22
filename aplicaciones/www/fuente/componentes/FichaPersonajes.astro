@@ -1,5 +1,5 @@
 ---
-import type { Categoria, Imagen } from '@/tipos';
+import type { CategoriaProcesada, Imagen } from '@/tipos';
 import FiltroFoto from '@/componentes/FiltroFoto.astro';
 
 interface Props {
@@ -7,7 +7,7 @@ interface Props {
   nombre: string;
   bio: string;
   foto: Imagen | null;
-  categorias: Categoria[];
+  categorias: CategoriaProcesada[];
   enlace?: boolean;
 }
 

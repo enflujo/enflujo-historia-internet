@@ -61,12 +61,6 @@ export interface Personaje extends CamposGenerales {
   featuredImage: Imagen | null;
 }
 
-export interface CategoriasWP {
-  nodes: (CategoriaBasico & {
-    children: { nodes: (CategoriaBasico & { children: { nodes: CategoriaBasico[] } })[] };
-  })[];
-}
-
 export interface TranscripcionWP {
   title: string;
   transcripcion: string;
@@ -110,13 +104,6 @@ export interface TranscripcionesCruzadas extends TranscripcionWP {
   };
 }
 
-export interface Categoria {
-  nombre: string;
-  slug: string;
-  conteo: number;
-  hijos: { nombre: string; slug: string; conteo: number }[];
-}
-
 export interface Termino {
   termino: string;
   slug: string;
@@ -129,7 +116,7 @@ export interface TerminoGlosario {
 }
 
 export interface EntrevistasProcesadas {
-  categoriasPersonaje: Categoria[];
+  categoriasPersonaje: CategoriaProcesada[];
   entrevistas: EntrevistaSingularProcesada[];
 }
 
@@ -141,7 +128,7 @@ export interface EntrevistaSingularProcesada {
 export interface SeccionEntrevistaProcesada {
   contenido: string;
   audios: { url: string; titulo: string; tipo: string }[];
-  categorias: Categoria[];
+  categorias: CategoriaProcesada[];
 }
 
 export interface SeccionEntrevistaProcesadaCruzada extends SeccionEntrevistaProcesada {
@@ -168,10 +155,11 @@ export interface Documento {
 export interface CategoriaProcesada {
   slug: string;
   nombre: string;
-
+  conteo: number;
   hijos: {
     slug: string;
     nombre: string;
+    conteo: number;
   }[];
 }
 
@@ -180,7 +168,17 @@ export interface CategoriasWP {
     node: {
       slug: string;
       name: string;
-      parent: { node: { slug: string; name: string } };
+      count: number;
+      parent: { node: { slug: string; name: string; count: number } };
     };
+  }[];
+}
+
+export interface CategoriasWPNodos {
+  nodes: {
+    slug: string;
+    name: string;
+    count: number;
+    children: { nodes: { slug: string; name: string; count: number }[] };
   }[];
 }

@@ -5,14 +5,20 @@ import SeccionEntrevista from '@/componentes/SeccionEntrevista.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import FiltroFoto from '@/componentes/FiltroFoto.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
-import type { CategoriasWP, SeccionEntrevistaProcesadaCruzada, Imagen, Termino, EntrevistaCruzada } from '@/tipos';
-import { convertirTextoAHTML, gql, pedirDatos, procesarAudiosTranscripcion } from '@/utilidades/ayudas';
+import type { SeccionEntrevistaProcesadaCruzada, Imagen, Termino, EntrevistaCruzada } from '@/tipos';
+import {
+  convertirTextoAHTML,
+  gql,
+  pedirDatos,
+  procesarAudiosTranscripcion,
+  procesarCategorias,
+} from '@/utilidades/ayudas';
 
 const categoria = 'Categoría';
 export async function getStaticPaths() {
   const PeticionCategorias = gql`
     query {
-      categories(where: { hideEmpty: true }, first: 200) {
+      categories(where: { hideEmpty: true }, first: 1000) {
         nodes {
           name
           slug
@@ -20,10 +26,12 @@ export async function getStaticPaths() {
       }
     }
   `;
-  const { categories } = await pedirDatos<{ categories: CategoriasWP }>(PeticionCategorias);
+  const { categories } = await pedirDatos<{ categories: { nodes: { name: string; slug: string }[] } }>(
+    PeticionCategorias
+  );
 
   return categories.nodes.map(({ slug, name }) => {
-    return { params: { slug }, props: { nombreCategoria: name } };
+    return { params: { slug: slug }, props: { nombreCategoria: name } };
   });
 }
 
@@ -39,15 +47,15 @@ const PeticionTranscripcionesCategoria = gql`
       ordenAudios
       databaseId
       categories {
-        nodes {
-          name
-          slug
-          count
-          children {
-            nodes {
-              count
-              slug
-              name
+        edges {
+          node {
+            name
+            slug
+            parent {
+              node {
+                slug
+                name
+              }
             }
           }
         }
@@ -100,21 +108,7 @@ const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = await Pro
     return {
       contenido: texto,
       audios: audiosProcesados,
-      categorias: categories.nodes.map((categoria) => {
-        return {
-          nombre: categoria.name,
-          slug: categoria.slug,
-          conteo: categoria.count,
-          hijos: categoria.children.nodes.map((subcategoria) => {
-            return {
-              nombre: subcategoria.name,
-              slug: subcategoria.slug,
-              conteo: subcategoria.count,
-            };
-          }),
-        };
-      }),
-
+      categorias: procesarCategorias(categories),
       personajes: entrevista.node.personajes.nodes.map((personaje) => {
         // Guardar los personajes que aparecen en esta categoría
         const existe = personajesCategoria.find((p) => p.slug === personaje.slug);

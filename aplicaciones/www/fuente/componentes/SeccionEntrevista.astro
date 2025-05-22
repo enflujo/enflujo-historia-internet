@@ -1,5 +1,6 @@
 ---
 import type { SeccionEntrevistaProcesada } from '@/tipos';
+import { base } from '@/utilidades/constantes';
 
 interface props {
   seccion: SeccionEntrevistaProcesada;
@@ -28,12 +29,12 @@ const { seccion } = Astro.props as props;
           <div class="categorias">
             {seccion.categorias.map((categoria) => (
               <span class="categoria">
-                <a href={`${import.meta.env.BASE_URL}/categorias/${categoria.slug}`}>{categoria.nombre}</a>
+                <a href={`${base}/categorias/${categoria.slug}`}>{categoria.nombre}</a>
                 {categoria.hijos.length > 0 && (
                   <div class="hijos">
                     {categoria.hijos.map((hijo) => (
                       <span class="hijo">
-                        <a href={`${import.meta.env.BASE_URL}/categorias/${hijo.slug}`}>{hijo.nombre}</a>
+                        <a href={`${base}/categorias/${hijo.slug}`}>{hijo.nombre}</a>
                       </span>
                     ))}
                   </div>
