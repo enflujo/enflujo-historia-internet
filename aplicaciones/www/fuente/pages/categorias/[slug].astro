@@ -13,6 +13,7 @@ import {
   procesarAudiosTranscripcion,
   procesarCategorias,
 } from '@/utilidades/ayudas';
+import { base } from '@/utilidades/constantes';
 
 const categoria = 'Categoría';
 export async function getStaticPaths() {
@@ -155,7 +156,7 @@ const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = await Pro
             personajesCategoria.map((personaje) => {
               const { nombre, slug, imagen } = personaje;
               return (
-                <a class="personaje" href={`${import.meta.env.BASE_URL}/personajes/${slug}`}>
+                <a class="personaje" href={`${base}/personajes/${slug}`}>
                   {imagen && <FiltroFoto ruta={imagen.node.sourceUrl} alt={imagen.node.altText} />}
                   <p class="nombrePersonaje">{nombre}</p>
                 </a>
@@ -179,7 +180,7 @@ const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = await Pro
                       return (
                         <div class="personaje">
                           <h2 class="nombrePersonaje">
-                            <a href={`${import.meta.env.BASE_URL}/personajes/${slug}`}>{nombre}</a>
+                            <a href={`${base}/personajes/${slug}`}>{nombre}</a>
                           </h2>
                           <p class="fecha">
                             {transcripcion.fechaEntrevista.toLocaleDateString('es-ES', {

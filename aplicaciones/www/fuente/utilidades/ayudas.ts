@@ -1,5 +1,5 @@
 import type { AudiosWP, CategoriaProcesada, CategoriasWP, Termino, TerminoGlosario } from '@/tipos';
-import { apiBase } from './constantes';
+import { apiBase, base } from './constantes';
 import slugificar from 'slug';
 import { listaGlosario } from '@/cerebros/general';
 export const gql = String.raw;
@@ -70,7 +70,7 @@ export function extraerTerminos(texto: string, terminos: Termino[], glosario?: T
     const existeEnGlosario = glosario?.some((termino) => termino.slug === slug);
     const htmlBasico = `<span class="terminoAnotado">${terminoOriginal}</span>`;
     const textoAnotado = existeEnGlosario
-      ? `<a class="terminoGlosario" href="${import.meta.env.BASE_URL}/glosario#${slug}">${terminoOriginal}</a>`
+      ? `<a class="terminoGlosario" href="${base}/glosario#${slug}">${terminoOriginal}</a>`
       : htmlBasico;
 
     // Preparamos el reemplazo

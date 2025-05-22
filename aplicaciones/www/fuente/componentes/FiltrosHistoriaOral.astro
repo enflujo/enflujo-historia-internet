@@ -1,5 +1,6 @@
 ---
 import { listaCategorias } from '@/cerebros/general';
+import { base } from '@/utilidades/constantes';
 const categorias = await listaCategorias();
 ---
 
@@ -13,13 +14,13 @@ const categorias = await listaCategorias();
       {
         categorias.map((categoria) => (
           <li class="categoria categoria0" data-slug={categoria.slug}>
-            <a href={`${import.meta.env.BASE_URL}/categorias/${categoria.slug}`}>{categoria.name}</a>
+            <a href={`${base}/categorias/${categoria.slug}`}>{categoria.name}</a>
 
             {categoria.children.nodes.length > 0 && (
               <ul class="subcategorias">
                 {categoria.children.nodes.map((subcategoria) => (
                   <li class="categoria subcategoria" data-slug={subcategoria.slug}>
-                    <a href={`${import.meta.env.BASE_URL}/categorias/${subcategoria.slug}`}>{subcategoria.name}</a>
+                    <a href={`${base}/categorias/${subcategoria.slug}`}>{subcategoria.name}</a>
                   </li>
                 ))}
               </ul>

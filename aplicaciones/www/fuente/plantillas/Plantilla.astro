@@ -2,6 +2,7 @@
 import Fuego from '@/componentes/Fuego.astro';
 import Menu from '@/componentes/Menu.astro';
 import { crearTitulo } from '@/utilidades/ayudas';
+import { base } from '@/utilidades/constantes';
 interface Props {
   titulo: string;
   descripcion?: string;
@@ -11,7 +12,7 @@ interface Props {
 
 const { titulo, descripcion, imagen, sinFuego } = Astro.props;
 const ruta = new URL(Astro.url.pathname, Astro.site);
-const urlBase = new URL(`${import.meta.env.BASE_URL}/`, Astro.site);
+const urlBase = new URL(`${base}/`, Astro.site);
 const img = { url: '', titulo: '', ancho: '1200', alto: '630' };
 const tituloPagina = crearTitulo(titulo);
 
