@@ -66,6 +66,17 @@ if (imagen) {
     {
       !sinFuego && (
         <div class="guardaescobas">
+          <div class="textoGuardaescobas">
+            <h3>© Historia del Internet y la Web en Colombia</h3>
+            <h4>Un proyecto de documentación histórica digital</h4>
+          </div>
+
+          <div class="logos">
+            <h4>Con el apoyo de:</h4>
+            <img src="" alt="Facultad de artes y humanidades" />
+            <img src="" alt="facultad de ciencias sociales" />
+          </div>
+
           <Fuego />
         </div>
       )
@@ -94,8 +105,40 @@ if (imagen) {
     position: absolute;
     bottom: 0;
     z-index: 1000;
-    height: 200px;
     width: 100%;
     pointer-events: none;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+
+    padding: 0 20px;
+  }
+
+  .textoGuardaescobas {
+    position: absolute; /* Position absolutely within guardaescobas */
+    left: 20px; /* Position from the left edge */
+    text-align: left; /* Align text to the left */
+    max-width: 40%; /* Limit width so it doesn't overlap with Fuego */
+  }
+
+  .logos {
+    position: absolute; /* Position absolutely within guardaescobas */
+    right: 20px; /* Position from the left edge */
+    text-align: right; /* Align text to the left */
+    max-width: 40%;
+  }
+
+  h3 {
+    font-weight: 600;
+    font-size: 1em;
+  }
+
+  h4 {
+    font-weight: 400;
+    font-size: 0.92em;
   }
 </style>
