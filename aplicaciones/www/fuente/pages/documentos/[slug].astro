@@ -1,0 +1,241 @@
+---
+import TituloPagina from '@/componentes/TituloPagina.astro';
+import Plantilla from '@/plantillas/Plantilla.astro';
+import type { Documento } from '@/tipos';
+import { gql, pedirDatos, procesarCategorias } from '@/utilidades/ayudas';
+import { apiBase, base } from '@/utilidades/constantes';
+
+export async function getStaticPaths() {
+  const PeticionDocumentos = gql`
+    query {
+      documentos(first: 200) {
+        nodes {
+          title
+          slug
+        }
+      }
+    }
+  `;
+  const { documentos } = await pedirDatos<{ documentos: { nodes: { title: string; slug: string }[] } }>(
+    PeticionDocumentos
+  );
+
+  return documentos.nodes.map(({ slug }) => {
+    return { params: { slug } };
+  });
+}
+const { slug } = Astro.params;
+
+const PeticionDocumentos = gql`
+  query Documentos {
+    documento(id: "${slug}", idType: SLUG) {
+      id
+      slug
+      title
+      descripcion
+      fecha
+      autores
+      fuente(format: RAW)
+      identificador
+      archivos {
+        nodes {
+          filePath
+        }
+      }
+      tiposDeDocumentos {
+        nodes {
+          slug
+          name
+        }
+      }
+      featuredImage {
+        node {
+          filePath
+        }
+      }
+      categories {
+        edges {
+          node {
+            name
+            slug
+            parent {
+              node {
+                slug
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const { documento } = await pedirDatos<{ documento: Documento }>(PeticionDocumentos);
+const categorias = procesarCategorias(documento.categories);
+documento.categorias = categorias;
+---
+
+<Plantilla
+  titulo={documento.title}
+  descripcion={documento.descripcion}
+  imagen={documento.featuredImage?.node?.filePath}
+>
+  <TituloPagina titulo="Documentos" slug="documentos" />
+
+  <article class="documento">
+    <div class="col1">
+      <h2 class="nombreDocumento">{documento.title}</h2>
+
+      <div class="metadatos">
+        {
+          documento.fecha && (
+            <p class="fecha">
+              <span class="subtitulo"> Fecha:</span> <span class="metadato">{documento.fecha}</span>
+            </p>
+          )
+        }
+        {
+          documento.autores && (
+            <p class="autores">
+              <span class="subtitulo">Autores:</span> <span class="metadato">{documento.autores}</span>
+            </p>
+          )
+        }
+        {
+          documento.fuente && (
+            <p class="fuente">
+              <span class="subtitulo">Fuente:</span> <span class="metadato">{documento.fuente} </span>
+            </p>
+          )
+        }
+        {
+          documento.identificador && (
+            <p class="identificador">
+              <span class="subtitulo">Identificador:</span> <span class="metadato">{documento.identificador}</span>
+            </p>
+          )
+        }
+
+        {
+          documento.tiposDeDocumentos && documento.tiposDeDocumentos.nodes && (
+            <p class="tipos">
+              <span class="subtitulo">Tipo de documento:</span>
+
+              {documento.tiposDeDocumentos.nodes.map((tipo) => (
+                <span class="metadato">{tipo.name}</span>
+              ))}
+            </p>
+          )
+        }
+
+        {
+          documento.categorias && documento.categorias.length > 0 && (
+            <p class="categorias">
+              <span class="subtitulo">Categorías:</span>
+              <div class="contenedorCategorias">
+                {documento.categorias.map((categoria) => (
+                  <div class="categoriaGrupo">
+                    <span class="categoria metadato">
+                      <a href={`${base}/categorias/${categoria.slug}`}>{categoria.nombre}</a>
+                    </span>
+
+                    {categoria.hijos && categoria.hijos.length > 0 && (
+                      <div class="hijos">
+                        {categoria.hijos.map((hijo, indice) => (
+                          <span class="hijo">
+                            <a href={`${base}/categorias/${hijo.slug}`}>{hijo.nombre}</a>
+                            <span>{indice < categoria.hijos.length - 1 ? '|' : ''}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </p>
+          )
+        }
+      </div>
+
+      <div class="descripcion" set:html={documento.descripcion} />
+    </div>
+
+    <div class="col2">
+      {
+        documento.featuredImage && documento.featuredImage.node && documento.featuredImage.node.filePath && (
+          <div class="imagenDestacada">
+            {documento.archivos && documento.archivos.nodes && documento.archivos.nodes.length > 0 ? (
+              <a href={`${apiBase}/${documento.archivos.nodes[0].filePath}`} title="Ver documento">
+                <img
+                  src={`${apiBase}/${documento.featuredImage.node.filePath}`}
+                  alt={`Imagen para ${documento.title}`}
+                />
+              </a>
+            ) : (
+              <img src={`${apiBase}/${documento.featuredImage.node.filePath}`} alt={`Imagen para ${documento.title}`} />
+            )}
+          </div>
+        )
+      }
+
+      {
+        documento.archivos && documento.archivos.nodes && documento.archivos.nodes.length > 0 && (
+          <div class="archivos">
+            <h3 class="subtitulo">Archivos</h3>
+            <ul class="listaArchivos">
+              {documento.archivos.nodes.map((archivo) => (
+                <li class="archivoDescarga">
+                  <a href={`${apiBase}/${archivo.filePath}`}>
+                    <img class="iconoDescarga" src={`${base}/iconos/descarga.gif`} alt="Icono descarga" />
+                    <span class="nombreArchivo">{archivo.filePath.split('/').pop() || 'Descargar archivo'}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </article>
+</Plantilla>
+
+<style lang="scss">
+  .documento {
+    display: flex;
+    padding: 0 2rem;
+  }
+
+  .col1 {
+    flex: 1;
+    padding: 2rem;
+    margin-right: 2rem;
+    box-shadow: var(--sombra);
+  }
+
+  .listaArchivos {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .archivoDescarga {
+    display: flex;
+    align-items: center;
+
+    .iconoDescarga {
+      height: 1.2em;
+      width: auto;
+      margin-right: 0.2em;
+    }
+  }
+
+  .categoria {
+    font-weight: 600;
+  }
+
+  .hijos {
+    font-size: 0.9em;
+    margin-bottom: 0.5em;
+  }
+</style>

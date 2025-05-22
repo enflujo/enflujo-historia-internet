@@ -1,4 +1,4 @@
-import type { AudiosWP, Termino, TerminoGlosario } from '@/tipos';
+import type { AudiosWP, CategoriaProcesada, CategoriasWP, Termino, TerminoGlosario } from '@/tipos';
 import { apiBase } from './constantes';
 import slugificar from 'slug';
 import { listaGlosario } from '@/cerebros/general';
@@ -152,4 +152,44 @@ export function procesarAudiosTranscripcion(audios: AudiosWP, orden: number[]) {
   return respuesta.map((audio) => {
     return { url: audio.archivos.node.link, titulo: audio.archivos.node.title, tipo: audio.archivos.node.mimeType };
   });
+}
+
+export function procesarCategorias(categoriasWP: CategoriasWP) {
+  const categorias: CategoriaProcesada[] = [];
+
+  categoriasWP.edges.forEach(({ node }) => {
+    const tienePariente = node.parent && node.parent.node;
+
+    // Las categorías principales no tienen padre
+    if (!tienePariente) {
+      const existe = categorias.find((categoria) => categoria.slug === node.slug);
+      if (!existe) {
+        categorias.push({
+          slug: node.slug,
+          nombre: node.name,
+          hijos: [],
+        });
+      }
+    } else {
+      // Si tiene padre, lo agregamos a la lista de hijos
+      let padre = categorias.find((categoria) => categoria.slug === node.parent.node.slug);
+      if (!padre) {
+        padre = {
+          slug: node.parent.node.slug,
+          nombre: node.parent.node.name,
+          hijos: [],
+        };
+        categorias.push(padre);
+      }
+
+      padre.hijos.push({
+        slug: node.slug,
+        nombre: node.name,
+      });
+    }
+  });
+
+  categorias.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+  return categorias;
 }

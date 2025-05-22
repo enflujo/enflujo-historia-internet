@@ -1,0 +1,228 @@
+---
+import type { Pagina, Documento, CategoriaProcesada } from '@/tipos';
+import TituloPagina from '@/componentes/TituloPagina.astro';
+import { esquemaPagina, gql, pedirDatos, procesarCategorias } from '@/utilidades/ayudas';
+import Plantilla from '@/plantillas/Plantilla.astro';
+import { apiBase, base } from '@/utilidades/constantes';
+
+const PeticionPagina = gql`
+  query {
+    ${esquemaPagina('documentos')}
+  }
+`;
+
+const { pagina } = await pedirDatos<{ page: Pagina }>(PeticionPagina).then(async (respuesta) => ({
+  pagina: respuesta.page,
+}));
+
+const PeticionDocumentos = gql`
+  query Documentos {
+    documentos(first: 100) {
+      nodes {
+        id
+        slug
+        title
+        descripcion
+        fecha
+        autores
+        fuente(format: RAW)
+        identificador
+        archivos {
+          nodes {
+            filePath
+          }
+        }
+        tiposDeDocumentos {
+          nodes {
+            slug
+            name
+          }
+        }
+        featuredImage {
+          node {
+            filePath
+          }
+        }
+        categories {
+          edges {
+            node {
+              name
+              slug
+              parent {
+                node {
+                  slug
+                  name
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const { documentos } = await pedirDatos<{ documentos: { nodes: Documento[] } }>(PeticionDocumentos);
+
+documentos.nodes.forEach((documento) => {
+  const categorias = procesarCategorias(documento.categories);
+  documento.categorias = categorias;
+});
+
+const listaDocumentos = documentos?.nodes || [];
+---
+
+<Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
+  <main class="documentos">
+    <TituloPagina titulo={pagina.title} slug={pagina.slug} />
+
+    <div class="contenedorDocumentos">
+      {
+        listaDocumentos.map((documento) => (
+          <article class="documento">
+            <h2 class="nombreDocumento">
+              <a href={`${base}/documentos/${documento.slug}`}>{documento.title}</a>
+            </h2>
+
+            <div class="metadatos">
+              {documento.categorias && documento.categorias.length > 0 && (
+                <p class="categorias">
+                  <span class="subtitulo">Categorías:</span>
+                  <div class="contenedorCategorias">
+                    {documento.categorias.map((categoria) => (
+                      <div class="categoriaGrupo">
+                        <span class="categoria metadato">
+                          <a href={`${base}/categorias/${categoria.slug}`}>{categoria.nombre}</a>
+                        </span>
+
+                        {categoria.hijos && categoria.hijos.length > 0 && (
+                          <div class="hijos">
+                            {categoria.hijos.map((hijo, indice) => (
+                              <span class="hijo">
+                                <a href={`${base}/categorias/${hijo.slug}`}>{hijo.nombre}</a>
+                                <span>{indice < categoria.hijos.length - 1 ? '|' : ''}</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </p>
+              )}
+            </div>
+
+            <div class="descripcion" set:html={documento.descripcion} />
+
+            {documento.featuredImage && documento.featuredImage.node && documento.featuredImage.node.filePath && (
+              <div class="imagenDestacada">
+                {documento.archivos && documento.archivos.nodes && documento.archivos.nodes.length > 0 ? (
+                  <a href={`${apiBase}/${documento.archivos.nodes[0].filePath}`} title="Ver documento">
+                    <img
+                      src={`${apiBase}/${documento.featuredImage.node.filePath}`}
+                      alt={`Imagen para ${documento.title}`}
+                    />
+                  </a>
+                ) : (
+                  <img
+                    src={`${apiBase}/${documento.featuredImage.node.filePath}`}
+                    alt={`Imagen para ${documento.title}`}
+                  />
+                )}
+              </div>
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </main>
+</Plantilla>
+
+<style lang="scss">
+  .nombreDocumento {
+    font-size: 1.2em;
+  }
+
+  .contenedorDocumentos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+  }
+
+  .documento {
+    padding: 1.5rem;
+    background-color: var(--superficieClaro);
+    border: 2px solid var(--bordePrimario);
+    transition: transform 0.2s ease-in-out;
+
+    h2 {
+      margin-top: 0;
+      color: var(--colorTexto);
+      font-family: var(--fuenteTitulos);
+    }
+  }
+
+  .metadatos {
+    font-size: 0.9rem;
+    color: var(--colorTexto);
+    opacity: 0.8;
+    margin-bottom: 1rem;
+
+    p {
+      margin: 0.3rem 0;
+    }
+  }
+
+  .archivos {
+    margin-top: 1.5rem;
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    a {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background-color: var(--cobalto);
+      text-decoration: none;
+      max-width: 100%;
+      word-wrap: break-word;
+
+      &:hover {
+        background-color: var(--rojo);
+      }
+    }
+  }
+
+  .subtitulo {
+    display: block;
+  }
+
+  .categoria {
+    font-weight: 600;
+  }
+
+  .hijos {
+    font-size: 0.9em;
+    margin-bottom: 0.5em;
+  }
+
+  .imagenDestacada {
+    margin: 1.5rem 0;
+    padding: 4px;
+    overflow: hidden;
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+  }
+</style>

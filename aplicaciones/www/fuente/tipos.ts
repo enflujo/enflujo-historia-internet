@@ -161,12 +161,26 @@ export interface Documento {
   archivos: { nodes: { filePath: string }[] };
   tiposDeDocumentos: { nodes: { slug: string; name: string }[] };
   featuredImage: { node: { filePath: string } };
-  categories: {
-    nodes: {
+  categories: CategoriasWP;
+  categorias: CategoriaProcesada[];
+}
+
+export interface CategoriaProcesada {
+  slug: string;
+  nombre: string;
+
+  hijos: {
+    slug: string;
+    nombre: string;
+  }[];
+}
+
+export interface CategoriasWP {
+  edges: {
+    node: {
       slug: string;
       name: string;
-      count: number;
-      children: { nodes: { slug: string; name: string; count: number }[] };
-    }[];
-  };
+      parent: { node: { slug: string; name: string } };
+    };
+  }[];
 }
