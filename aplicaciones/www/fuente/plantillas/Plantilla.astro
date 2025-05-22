@@ -67,14 +67,21 @@ if (imagen) {
       !sinFuego && (
         <div class="guardaescobas">
           <div class="textoGuardaescobas">
-            <h3>© Historia del Internet y la Web en Colombia</h3>
+            <h3>© 2025 Historia del Internet y la Web en Colombia</h3>
             <h4>Un proyecto de documentación histórica digital</h4>
           </div>
 
           <div class="logos">
             <h4>Con el apoyo de:</h4>
-            <img src="" alt="Facultad de artes y humanidades" />
-            <img src="" alt="facultad de ciencias sociales" />
+            <img class="logo" src={`${base}/logos/logo-facartes.svg`} alt="Logo Facultad de artes y humanidades" />
+            <img
+              class="logo"
+              src={`${base}/logos/logo-ciencias-sociales.svg`}
+              alt="Logo Facultad de ciencias sociales"
+            />
+
+            <h4>Desarrollado por:</h4>
+            <img class="logo2" src={`${base}/logos/logo-nombre-lab-enflujo.svg`} alt="Logo laboratorio EnFlujo" />
           </div>
 
           <Fuego />
@@ -119,19 +126,31 @@ if (imagen) {
   }
 
   .textoGuardaescobas {
-    position: absolute; /* Position absolutely within guardaescobas */
-    left: 20px; /* Position from the left edge */
-    text-align: left; /* Align text to the left */
-    max-width: 40%; /* Limit width so it doesn't overlap with Fuego */
-  }
-
-  .logos {
-    position: absolute; /* Position absolutely within guardaescobas */
-    right: 20px; /* Position from the left edge */
-    text-align: right; /* Align text to the left */
+    position: absolute;
+    left: 20px;
+    text-align: left;
     max-width: 40%;
   }
 
+  .logos {
+    position: absolute;
+    right: 20px;
+    text-align: right;
+    max-width: 40%;
+  }
+
+  .logo {
+    width: auto;
+    height: 40px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+
+  .logo2 {
+    width: auto;
+    height: 30px;
+    margin-top: 10px;
+  }
   h3 {
     font-weight: 600;
     font-size: 1em;
@@ -140,5 +159,6 @@ if (imagen) {
   h4 {
     font-weight: 400;
     font-size: 0.92em;
+    margin: 0;
   }
 </style>
