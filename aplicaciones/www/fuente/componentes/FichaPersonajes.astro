@@ -25,7 +25,7 @@ const { slug, nombre, bio, foto, categorias, enlace } = Astro.props;
 
     {
       categorias && categorias.length ? (
-        <div class="categorias">
+        <div class="contenedorCategorias">
           <h3>Categorías</h3>
           <div class="categorias">
             {categorias.map((categoria) => (
@@ -87,13 +87,16 @@ const { slug, nombre, bio, foto, categorias, enlace } = Astro.props;
     width: 70%;
   }
 
+  .contenedorCategorias {
+    font-size: 0.95em;
+  }
+
   .categorias {
     display: flex;
     flex-direction: row;
     gap: 10px;
     margin-top: 20px;
     flex-wrap: wrap;
-    font-size: 0.95em;
     font-family: var(--fuenteTextos2);
   }
 
