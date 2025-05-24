@@ -17,16 +17,16 @@ const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
     <div class="contenidoInicio" set:html={page.content} />
 
     <div class="contenedorEnlaces">
-      <a class="enlace" href="/enflujo-historia-internet/linea-de-tiempo/">
-        <span class="boton">Línea de Tiempo</span>
-      </a>
-
       <a class="enlace" href="/enflujo-historia-internet/historia-oral/">
-        <span class="boton">Historia Oral</span>
+        <span class="boton">Historias Orales</span>
       </a>
 
       <a class="enlace" href="/enflujo-historia-internet/documentos/">
         <span class="boton">Documentos</span>
+      </a>
+
+      <a class="enlace" href="/enflujo-historia-internet/linea-de-tiempo/">
+        <span class="boton">Línea de Tiempo</span>
       </a>
 
       <a class="enlace" href="/enflujo-historia-internet/glosario/">

@@ -193,8 +193,8 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
 <Plantilla titulo={entrevista.personaje.title} descripcion={'entrevista.personaje'}>
   <div class="paginaConMenuIzquierdo">
     <aside class="menuIzquierdo">
-      <TituloPagina titulo="Historia Oral" slug="historia-oral" modo="oscuro" />
-      <FiltrosHistoriaOral />
+      <TituloPagina titulo="Historias Orales" slug="historia-oral" modo="oscuro" />
+      <FiltrosHistoriaOral personaje={slug} />
     </aside>
 
     <main class="historia-oral">

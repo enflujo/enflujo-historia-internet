@@ -26,30 +26,6 @@ const PeticionPersonajes = gql`
             sourceUrl
           }
         }
-        entrevistas {
-          nodes {
-            fecha
-            transcripciones(first: 200) {
-              nodes {
-                transcripcion(format: RAW)
-                categories {
-                  nodes {
-                    slug
-                    name
-                    count
-                    children {
-                      nodes {
-                        slug
-                        name
-                        count
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
       }
     }
   }

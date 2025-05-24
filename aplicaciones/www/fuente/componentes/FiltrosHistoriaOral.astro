@@ -1,20 +1,60 @@
 ---
 import { listaCategorias } from '@/cerebros/general';
+import type { Personaje } from '@/tipos';
+import { gql, pedirDatos } from '@/utilidades/ayudas';
 import { base } from '@/utilidades/constantes';
+
+interface Props {
+  personaje?: string;
+}
+const { personaje: personajeActual } = Astro.props as Props;
+
 const categorias = await listaCategorias();
+const PeticionPersonajes = gql`
+  query {
+    personajes(first: 1000) {
+      nodes {
+        title
+        slug
+      }
+    }
+  }
+`;
+
+const { personajes } = await pedirDatos<{ personajes: { nodes: Personaje[] } }>(PeticionPersonajes);
+personajes.nodes.sort((a, b) => {
+  const nombreA = a.title.toLowerCase();
+  const nombreB = b.title.toLowerCase();
+
+  if (nombreA < nombreB) return -1;
+  if (nombreA > nombreB) return 1;
+  return 0;
+});
 ---
 
 <div id="filtros" class="textoPixelitos">
-  <h3 class="subtitulo">Filtros</h3>
+  <section>
+    <h4>Personajes</h4>
+    <select id="listaPersonajes" name="personaje">
+      <option value="">Selecciona un personaje</option>
+      {
+        personajes.nodes.map((personaje) => (
+          <option value={personaje.slug} data-slug={personaje.slug} selected={personaje.slug === personajeActual}>
+            {personaje.title}
+          </option>
+        ))
+      }
+    </select>
+  </section>
 
-  <div id="filtroCategorias">
+  <section id="filtroCategorias">
     <h4>Categorías</h4>
 
     <ul>
       {
         categorias.map((categoria) => (
           <li class="categoria categoria0" data-slug={categoria.slug}>
-            <a href={`${base}/categorias/${categoria.slug}`}>{categoria.name}</a>
+            <span class="categoriaPrincipal">{categoria.name}</span>
 
             {categoria.children.nodes.length > 0 && (
               <ul class="subcategorias">
@@ -29,8 +69,39 @@ const categorias = await listaCategorias();
         ))
       }
     </ul>
-  </div>
+  </section>
 </div>
+
+<script>
+  import { base } from '@/utilidades/constantes';
+  const categoriasPrincipales = document.querySelectorAll<HTMLSpanElement>('.categoriaPrincipal');
+  const listaPersonajes = document.querySelector<HTMLSelectElement>('#listaPersonajes');
+
+  categoriasPrincipales.forEach((categoria) => {
+    categoria.addEventListener('click', (evento) => {
+      const elemento = evento.target as HTMLSpanElement;
+      const subcategorias = elemento.nextElementSibling;
+      if (subcategorias) {
+        subcategorias.classList.toggle('visible');
+
+        if (subcategorias.classList.contains('visible')) {
+          categoria.classList.add('abierto');
+        } else {
+          categoria.classList.remove('abierto');
+        }
+      }
+    });
+  });
+
+  listaPersonajes?.addEventListener('change', (evento) => {
+    const elemento = evento.target as HTMLSelectElement;
+    const slug = elemento.value;
+    if (slug) {
+      const url = `${base}/personajes/${slug}`;
+      window.location.href = url;
+    }
+  });
+</script>
 
 <style lang="scss">
   a,
@@ -60,26 +131,61 @@ const categorias = await listaCategorias();
     letter-spacing: 1.2px;
   }
 
+  section {
+    h4 {
+      margin: 0.5em 0;
+      font-family: var(--fuenteTitulos);
+      font-size: 1.2em;
+    }
+  }
+
   #filtros {
     padding: 0 1em 5em 1em;
   }
 
-  .categoria {
+  #listaPersonajes {
+    width: 100%;
+    padding: 0.5em;
+    margin: 1em 0;
+    font-size: 0.8em;
+    border-radius: 0.5em;
+    background-color: white;
+    color: var(--colorTexto);
+    border: none;
+    box-shadow: var(--sombra);
+    border-radius: 0;
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--colorEnlace);
+    }
     &:hover {
-      &::before {
-        background-color: var(--rojo);
-      }
+      cursor: pointer;
+    }
+  }
+
+  .subcategorias {
+    display: none;
+    margin-left: 0;
+
+    &.visible {
+      display: block;
+    }
+  }
+
+  .categoriaPrincipal {
+    cursor: pointer;
+    font-size: 0.8em;
+    font: 600;
+    &:hover {
     }
 
     &::before {
-      content: '';
-      width: 0.6em;
-      height: 0.6em;
-      border: 1px solid var(--blanco);
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 5px;
-      background-color: var(--blanco);
+      content: '▶ ';
+    }
+
+    &.abierto::before {
+      content: '▼ ';
     }
   }
 
@@ -94,6 +200,13 @@ const categorias = await listaCategorias();
   .subcategoria {
     font-size: 0.8em;
     font-weight: 200;
+    margin: 0;
+
+    &::before {
+      content: '-';
+      display: inline-block;
+      vertical-align: middle;
+    }
   }
 
   .subtitulo {
