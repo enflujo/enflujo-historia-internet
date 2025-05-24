@@ -8,9 +8,10 @@ interface Props {
   descripcion?: string;
   imagen?: string;
   sinFuego?: boolean;
+  conMenuIzquierdo?: boolean;
 }
 
-const { titulo, descripcion, imagen, sinFuego } = Astro.props;
+const { titulo, descripcion, imagen, sinFuego, conMenuIzquierdo } = Astro.props;
 const ruta = new URL(Astro.url.pathname, Astro.site);
 const urlBase = new URL(`${base}/`, Astro.site);
 const img = { url: '', titulo: '', ancho: '1200', alto: '630' };
@@ -65,31 +66,50 @@ if (imagen) {
 
     {
       !sinFuego && (
-        <div class="guardaescobas">
+        <footer class={`guardaescobas${conMenuIzquierdo ? ' conMenu' : ''}`}>
           <div class="textoGuardaescobas">
-            <h3>© 2025 Historia del Internet y la Web en Colombia</h3>
+            <h3>
+              © <span id="añoCopia">2025</span> Historia del Internet y la Web en Colombia
+            </h3>
             <h4>Un proyecto de documentación histórica digital</h4>
           </div>
 
+          <Fuego />
+
           <div class="logos">
             <h4>Con el apoyo de:</h4>
-            <img class="logo" src={`${base}/logos/logo-facartes.svg`} alt="Logo Facultad de artes y humanidades" />
-            <img
-              class="logo"
-              src={`${base}/logos/logo-ciencias-sociales.svg`}
-              alt="Logo Facultad de ciencias sociales"
-            />
+            <a href="https://facartes.uniandes.edu.co/" target="_blank">
+              <img class="logo" src={`${base}/logos/logo-facartes.svg`} alt="Logo Facultad de artes y humanidades" />
+            </a>
+
+            <a href="https://cienciassociales.uniandes.edu.co/" target="_blank">
+              <img
+                class="logo"
+                src={`${base}/logos/logo-ciencias-sociales.svg`}
+                alt="Logo Facultad de ciencias sociales"
+              />
+            </a>
 
             <h4>Desarrollado por:</h4>
-            <img class="logo2" src={`${base}/logos/logo-nombre-lab-enflujo.svg`} alt="Logo laboratorio EnFlujo" />
+            <a href="https://enflujo.com" target="_blank">
+              <img
+                class="logo logoEnFlujo"
+                src={`${base}/logos/logo-nombre-lab-enflujo.svg`}
+                alt="Logo laboratorio EnFlujo"
+              />
+            </a>
           </div>
-
-          <Fuego />
-        </div>
+        </footer>
       )
     }
   </body>
 </html>
+
+<script>
+  const añoCopia = document.getElementById('añoCopia') as HTMLSpanElement;
+  const fecha = new Date();
+  añoCopia.innerHTML = `${fecha.getFullYear()}`;
+</script>
 
 <style lang="scss" is:global>
   @use '../scss/estilosGlobales.scss' as *;
@@ -111,29 +131,26 @@ if (imagen) {
   .guardaescobas {
     position: absolute;
     bottom: 0;
-    z-index: 1000;
-    width: 100%;
-    pointer-events: none;
-
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     width: 100%;
     text-align: center;
-
     padding: 0 20px;
+
+    &.conMenu {
+      padding-left: 320px; /* Espacio para el menú lateral */
+    }
   }
 
   .textoGuardaescobas {
-    position: absolute;
     left: 20px;
     text-align: left;
     max-width: 40%;
   }
 
   .logos {
-    position: absolute;
     right: 20px;
     text-align: right;
     max-width: 40%;
@@ -144,10 +161,13 @@ if (imagen) {
     height: 40px;
     margin-top: 5px;
     margin-bottom: 5px;
+
+    &:hover {
+      opacity: 0.7;
+    }
   }
 
-  .logo2 {
-    width: auto;
+  .logoEnFlujo {
     height: 30px;
     margin-top: 10px;
   }
