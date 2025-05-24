@@ -66,6 +66,24 @@ if (imagen) {
     {
       !sinFuego && (
         <div class="guardaescobas">
+          <div class="textoGuardaescobas">
+            <h3>© 2025 Historia del Internet y la Web en Colombia</h3>
+            <h4>Un proyecto de documentación histórica digital</h4>
+          </div>
+
+          <div class="logos">
+            <h4>Con el apoyo de:</h4>
+            <img class="logo" src={`${base}/logos/logo-facartes.svg`} alt="Logo Facultad de artes y humanidades" />
+            <img
+              class="logo"
+              src={`${base}/logos/logo-ciencias-sociales.svg`}
+              alt="Logo Facultad de ciencias sociales"
+            />
+
+            <h4>Desarrollado por:</h4>
+            <img class="logo2" src={`${base}/logos/logo-nombre-lab-enflujo.svg`} alt="Logo laboratorio EnFlujo" />
+          </div>
+
           <Fuego />
         </div>
       )
@@ -94,8 +112,53 @@ if (imagen) {
     position: absolute;
     bottom: 0;
     z-index: 1000;
-    height: 200px;
     width: 100%;
     pointer-events: none;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+
+    padding: 0 20px;
+  }
+
+  .textoGuardaescobas {
+    position: absolute;
+    left: 20px;
+    text-align: left;
+    max-width: 40%;
+  }
+
+  .logos {
+    position: absolute;
+    right: 20px;
+    text-align: right;
+    max-width: 40%;
+  }
+
+  .logo {
+    width: auto;
+    height: 40px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+
+  .logo2 {
+    width: auto;
+    height: 30px;
+    margin-top: 10px;
+  }
+  h3 {
+    font-weight: 600;
+    font-size: 1em;
+  }
+
+  h4 {
+    font-weight: 400;
+    font-size: 0.92em;
+    margin: 0;
   }
 </style>
