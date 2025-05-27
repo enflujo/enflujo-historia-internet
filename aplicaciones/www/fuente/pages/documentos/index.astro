@@ -85,51 +85,14 @@ const listaDocumentos = documentos?.nodes || [];
               <a href={`${base}/documentos/${documento.slug}`}>{documento.tituloCorto}</a>
             </h2>
 
-            <div class="metadatos">
-              {documento.categorias && documento.categorias.length > 0 && (
-                <p class="categorias">
-                  <span class="subtitulo">Categorías:</span>
-                  <div class="contenedorCategorias">
-                    {documento.categorias.map((categoria) => (
-                      <div class="categoriaGrupo">
-                        <span class="categoria metadato">
-                          <a href={`${base}/categorias/${categoria.slug}`}>{categoria.nombre}</a>
-                        </span>
-
-                        {categoria.hijos && categoria.hijos.length > 0 && (
-                          <div class="hijos">
-                            {categoria.hijos.map((hijo, indice) => (
-                              <span class="hijo">
-                                <a href={`${base}/categorias/${hijo.slug}`}>{hijo.nombre}</a>
-                                <span>{indice < categoria.hijos.length - 1 ? '|' : ''}</span>
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </p>
-              )}
-            </div>
-
-            <div class="descripcion" set:html={documento.descripcion} />
-
             {documento.featuredImage && documento.featuredImage.node && documento.featuredImage.node.filePath && (
               <div class="imagenDestacada">
-                {documento.archivos && documento.archivos.nodes && documento.archivos.nodes.length > 0 ? (
-                  <a href={`${apiBase}/${documento.archivos.nodes[0].filePath}`} title="Ver documento">
-                    <img
-                      src={`${apiBase}/${documento.featuredImage.node.filePath}`}
-                      alt={`Imagen para ${documento.title}`}
-                    />
-                  </a>
-                ) : (
+                <a href={`${base}/documentos/${documento.slug}`}>
                   <img
                     src={`${apiBase}/${documento.featuredImage.node.filePath}`}
                     alt={`Imagen para ${documento.title}`}
                   />
-                )}
+                </a>
               </div>
             )}
           </article>
