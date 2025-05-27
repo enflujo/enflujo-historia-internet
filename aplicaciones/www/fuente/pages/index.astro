@@ -3,6 +3,7 @@ import Plantilla from '@/plantillas/Plantilla.astro';
 import { esquemaPagina, gql, pedirDatos } from '@/utilidades/ayudas';
 import type { Pagina } from '@/tipos';
 import { listaPaginas } from '@/cerebros/general';
+import { base } from '@/utilidades/constantes';
 
 const PeticionPagina = gql`
   query {
@@ -23,7 +24,7 @@ const paginas = await listaPaginas().then((paginas) =>
     <div class="contenedorEnlaces">
       {
         paginas.map((pagina) => (
-          <a class="enlace" href={`/${pagina.slug}/`}>
+          <a class="enlace" href={`${base}/${pagina.slug}/`}>
             <span class="boton">{pagina.title}</span>
           </a>
         ))
