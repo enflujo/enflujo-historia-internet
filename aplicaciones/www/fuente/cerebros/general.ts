@@ -125,3 +125,42 @@ export async function listaGlosario(cursorGlosario: string = '', glosarioProcesa
     return glosarioProcesado;
   }
 }
+
+export async function listaPaginas() {
+  if (datosPaginas.get().length > 0) return datosPaginas.get();
+
+  const EsquemaPaginas = gql`
+    query {
+      pages {
+        nodes {
+          title
+          slug
+          menuOrder
+          status
+          iconoA
+          iconoB
+        }
+      }
+    }
+  `;
+
+  const { pages } = await pedirDatos<{ pages: { nodes: PaginaMenu[] } }>(EsquemaPaginas);
+
+  /** Preprocesar el resultado */
+
+  // Ordenar las páginas según el orden que se define en WP
+  const paginas = pages.nodes.sort((a, b) => {
+    if (a.menuOrder < b.menuOrder) return -1;
+    if (a.menuOrder > b.menuOrder) return 1;
+    return 0;
+  });
+
+  // Llenar con valores predeterminados los íconos en caso de que no se llene en WP
+  paginas.forEach((pagina) => {
+    pagina.iconoA = pagina.iconoA.length ? pagina.iconoA : '1';
+    pagina.iconoB = pagina.iconoB.length ? pagina.iconoB : '2';
+  });
+
+  datosPaginas.set(paginas);
+  return paginas;
+}

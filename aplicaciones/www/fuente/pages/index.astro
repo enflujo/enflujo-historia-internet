@@ -2,6 +2,7 @@
 import Plantilla from '@/plantillas/Plantilla.astro';
 import { esquemaPagina, gql, pedirDatos } from '@/utilidades/ayudas';
 import type { Pagina } from '@/tipos';
+import { listaPaginas } from '@/cerebros/general';
 
 const PeticionPagina = gql`
   query {
@@ -10,6 +11,9 @@ const PeticionPagina = gql`
 `;
 
 const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
+const paginas = await listaPaginas().then((paginas) =>
+  paginas.filter((pagina) => pagina.slug !== 'inicio' && pagina.slug !== 'enflujo-historia-internet')
+);
 ---
 
 <Plantilla titulo="" descripcion={page.descripcion}>
@@ -17,21 +21,13 @@ const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
     <div class="contenidoInicio" set:html={page.content} />
 
     <div class="contenedorEnlaces">
-      <a class="enlace" href="/enflujo-historia-internet/historia-oral/">
-        <span class="boton">Historias Orales</span>
-      </a>
-
-      <a class="enlace" href="/enflujo-historia-internet/documentos/">
-        <span class="boton">Documentos</span>
-      </a>
-
-      <a class="enlace" href="/enflujo-historia-internet/linea-de-tiempo/">
-        <span class="boton">Línea de Tiempo</span>
-      </a>
-
-      <a class="enlace" href="/enflujo-historia-internet/glosario/">
-        <span class="boton">Glosario</span>
-      </a>
+      {
+        paginas.map((pagina) => (
+          <a class="enlace" href={`/${pagina.slug}/`}>
+            <span class="boton">{pagina.title}</span>
+          </a>
+        ))
+      }
     </div>
   </main>
 </Plantilla>
@@ -142,10 +138,11 @@ const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
     display: flex;
     justify-content: center;
     font-size: 22px;
-    width: 100%;
+    width: 80%;
     margin-top: 60px;
     gap: 20px;
-    margin-bottom: 0;
+    margin: 3em auto 0 auto;
+    flex-wrap: wrap;
   }
 
   .boton {
