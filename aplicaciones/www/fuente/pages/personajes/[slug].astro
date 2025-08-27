@@ -210,6 +210,16 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
         <NubePalabras terminos={terminosPersonaje} />
 
         <div id="contenedorEntrevistas">
+          <nav class="filtrosCategoriasEntrevista">
+            <ul class="listaCategorias">
+              <li class="filtroCategoria seleccionado">Entrevista completa</li>
+              {
+                entrevistaProcesada.categoriasPersonaje.map((categoria, i) => (
+                  <li class={`categoria${i + 1} filtroCategoria`}>{categoria.nombre}</li>
+                ))
+              }
+            </ul>
+          </nav>
           {
             entrevistaProcesada.entrevistas.map((entrevista) => (
               <section class="entrevista">
@@ -225,3 +235,102 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
     </main>
   </div>
 </Plantilla>
+
+<style lang="scss">
+  .listaCategorias {
+    display: flex;
+    list-style: none;
+    flex-wrap: wrap;
+    flex-direction: column;
+  }
+
+  .filtroCategoria {
+    border: 3px solid;
+    padding: 5px;
+    margin: 5px;
+    font-size: 0.9em;
+    cursor: pointer;
+    user-select: none;
+    border-color: var(--superficieOscura);
+    transition:
+      background-color 0.3s,
+      color 0.3s;
+
+    &.seleccionado {
+      background-color: var(--superficieOscura);
+      color: var(--superficieClaro);
+    }
+  }
+
+  .categoria1 {
+    border-color: var(--categoria1);
+
+    &:hover {
+      background-color: var(--categoria1);
+      color: var(--superficieOscura);
+    }
+  }
+
+  .categoria2 {
+    border-color: var(--categoria2);
+
+    &:hover {
+      background-color: var(--categoria2);
+      color: var(--superficieOscura);
+    }
+  }
+
+  .categoria3 {
+    border-color: var(--categoria3);
+
+    &:hover {
+      background-color: var(--categoria3);
+      color: var(--superficieOscura);
+    }
+  }
+
+  .categoria4 {
+    border-color: var(--categoria4);
+
+    &:hover {
+      background-color: var(--categoria4);
+      color: var(--superficieOscura);
+    }
+  }
+
+  .categoria5 {
+    border-color: var(--categoria5);
+
+    &:hover {
+      background-color: var(--categoria5);
+      color: var(--superficieOscura);
+    }
+  }
+
+  .categoria6 {
+    border-color: var(--categoria6);
+
+    &:hover {
+      background-color: var(--categoria6);
+      color: var(--superficieOscura);
+    }
+  }
+
+  .categoria7 {
+    border-color: var(--categoria7);
+
+    &:hover {
+      background-color: var(--categoria7);
+      color: var(--superficieOscura);
+    }
+  }
+
+  .categoria8 {
+    border-color: var(--categoria8);
+
+    &:hover {
+      background-color: var(--categoria8);
+      color: var(--superficieOscura);
+    }
+  }
+</style>
