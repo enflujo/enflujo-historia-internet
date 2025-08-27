@@ -1,7 +1,7 @@
 {
   "name": "enflujo-historia-internet",
   "private": true,
-  "packageManager": "yarn@4.9.1",
+  "packageManager": "yarn@4.9.4",
   "workspaces": [
     "aplicaciones/*"
   ],
@@ -18,6 +18,6 @@
     "revisar": "yarn workspace www revisar"
   },
   "devDependencies": {
-    "prettier": "^3.5.3"
+    "prettier": "^3.6.2"
   }
 }
