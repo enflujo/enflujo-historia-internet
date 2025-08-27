@@ -136,10 +136,7 @@ export interface SeccionEntrevistaProcesadaCruzada extends SeccionEntrevistaProc
   fechaEntrevista: Date;
 }
 
-export interface Documento {
-  id: string;
-  slug: string;
-  title: string;
+export interface Documento extends CamposGenerales {
   tituloCorto: string;
   descripcion: string;
   fecha: string;

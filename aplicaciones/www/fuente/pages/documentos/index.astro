@@ -1,5 +1,5 @@
 ---
-import type { Pagina, Documento } from '@/tipos';
+import type { Pagina, Documento, MetaInfo } from '@/tipos';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import { esquemaPagina, gql, pedirDatos, procesarCategorias } from '@/utilidades/ayudas';
 import Plantilla from '@/plantillas/Plantilla.astro';
@@ -11,48 +11,55 @@ const PeticionPagina = gql`
   }
 `;
 
-const { pagina } = await pedirDatos<{ page: Pagina }>(PeticionPagina).then(async (respuesta) => ({
-  pagina: respuesta.page,
-}));
-
-const PeticionDocumentos = gql`
-  query Documentos {
-    documentos(first: 100) {
-      nodes {
-        id
-        slug
-        title
-        tituloCorto
-        descripcion
-        fecha
-        autores
-        fuente(format: RAW)
-        identificador
-        archivos {
-          nodes {
-            filePath
-          }
+async function pedirSeccionDatos(cursorDocumentos: string = '', documentosProcesados: Documento[] = []) {
+  const EsquemaDocumentos = gql`
+    query Documentos {
+      documentos(first: 1000${cursorDocumentos ? `, after: "${cursorDocumentos}"` : ''}) {
+        pageInfo {
+          hasNextPage
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
         }
-        tiposDeDocumentos {
-          nodes {
-            slug
-            name
+        
+        nodes {
+          id
+          status
+          slug
+          title
+          tituloCorto
+          descripcion
+          fecha
+          autores
+          fuente(format: RAW)
+          identificador
+          archivos {
+            nodes {
+              filePath
+            }
           }
-        }
-        featuredImage {
-          node {
-            filePath
-          }
-        }
-        categories {
-          edges {
-            node {
-              name
+          tiposDeDocumentos {
+            nodes {
               slug
-              parent {
-                node {
-                  slug
-                  name
+              name
+            }
+          }
+          featuredImage {
+            node {
+              filePath
+            }
+          }
+          categories {
+            edges {
+              node {
+                name
+                slug
+                parent {
+                  node {
+                    slug
+                    name
+                  }
                 }
               }
             }
@@ -60,17 +67,29 @@ const PeticionDocumentos = gql`
         }
       }
     }
+  `;
+
+  const { documentos: algunosDocumentos } = await pedirDatos<{
+    documentos: { pageInfo: MetaInfo; nodes: Documento[] };
+  }>(EsquemaDocumentos);
+  documentosProcesados.push(...algunosDocumentos.nodes.filter((documento) => documento.status === 'publish'));
+
+  if (algunosDocumentos.pageInfo.hasNextPage) {
+    return await pedirSeccionDatos(algunosDocumentos.pageInfo.endCursor, documentosProcesados);
   }
-`;
 
-const { documentos } = await pedirDatos<{ documentos: { nodes: Documento[] } }>(PeticionDocumentos);
+  return documentosProcesados;
+}
 
-documentos.nodes.forEach((documento) => {
+const { pagina, documentos } = await pedirDatos<{ page: Pagina }>(PeticionPagina).then(async (respuesta) => ({
+  pagina: respuesta.page,
+  documentos: await pedirSeccionDatos(),
+}));
+
+documentos.forEach((documento) => {
   const categorias = procesarCategorias(documento.categories);
   documento.categorias = categorias;
 });
-
-const listaDocumentos = documentos?.nodes || [];
 ---
 
 <Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
@@ -79,7 +98,7 @@ const listaDocumentos = documentos?.nodes || [];
 
     <div class="contenedorDocumentos">
       {
-        listaDocumentos.map((documento) => (
+        documentos.map((documento) => (
           <article class="documento">
             <h2 class="nombreDocumento">
               <a href={`${base}/documentos/${documento.slug}`}>{documento.tituloCorto}</a>
