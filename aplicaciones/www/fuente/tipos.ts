@@ -15,6 +15,7 @@ export interface PaginaMenu extends CamposGenerales {
   menuOrder: number;
   iconoA: string;
   iconoB: string;
+  principal: boolean;
 }
 
 export type Imagen = { node: { altText: string; sourceUrl: string } };

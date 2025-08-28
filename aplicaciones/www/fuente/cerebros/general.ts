@@ -139,6 +139,7 @@ export async function listaPaginas() {
           status
           iconoA
           iconoB
+          principal
         }
       }
     }

@@ -23,11 +23,27 @@ const paginas = await listaPaginas().then((paginas) =>
 
     <div class="contenedorEnlaces">
       {
-        paginas.map((pagina) => (
-          <a class="enlace" href={`${base}/${pagina.slug}/`}>
-            <span class="boton">{pagina.title}</span>
-          </a>
-        ))
+        paginas.map((pagina) => {
+          if (pagina.principal) {
+            return (
+              <a class="enlace" href={`${base}/${pagina.slug}/`}>
+                <span class="boton">{pagina.title}</span>
+              </a>
+            );
+          }
+        })
+      }
+      <span class="separadorMenu"></span>
+      {
+        paginas.map((pagina) => {
+          if (!pagina.principal) {
+            return (
+              <a class="enlace" href={`${base}/${pagina.slug}/`}>
+                <span class="boton">{pagina.title}</span>
+              </a>
+            );
+          }
+        })
       }
     </div>
   </main>
@@ -66,6 +82,19 @@ const paginas = await listaPaginas().then((paginas) =>
       width: 38%;
       font-size: 18px;
       margin: 0 auto;
+    }
+
+    .separadorMenu {
+      display: flex;
+      flex-basis: 100%;
+      justify-content: center;
+
+      &::before {
+        content: '';
+        display: block;
+        width: 50vw;
+        border-bottom: 2px dotted;
+      }
     }
 
     @media (max-width: 1200px) {
