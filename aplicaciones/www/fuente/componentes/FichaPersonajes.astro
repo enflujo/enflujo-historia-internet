@@ -21,91 +21,143 @@ const { slug, nombre, bio, foto, categorias, enlace } = Astro.props;
       {enlace ? <a href={`${base}/personajes/${slug}`}>{nombre}</a> : nombre}
     </h2>
 
-    <div class="contenidoPersonaje" set:html={bio} />
-
-    {
-      categorias && categorias.length ? (
-        <div class="contenedorCategorias">
-          <h3>Categorías</h3>
-          <div class="categorias">
-            {categorias.map((categoria) => (
-              <span class="categoria">
-                {categoria.nombre} ({categoria.conteo})
-              </span>
-            ))}
+    <div class="contenidoPersonaje">
+      {
+        foto ? (
+          <div class="foto">
+            {enlace ? (
+              <a class="enlaceFotoPersonaje" href={`${base}/personajes/${slug}`}>
+                <FiltroFoto ruta={foto.node.sourceUrl} alt={`Foto de ${nombre}`} />
+              </a>
+            ) : (
+              <FiltroFoto ruta={foto.node.sourceUrl} alt={`Foto de ${nombre}`} />
+            )}
           </div>
-        </div>
-      ) : null
-    }
+        ) : null
+      }
+
+      <div class="bioTexto" set:html={bio} />
+
+      {
+        categorias && categorias.length ? (
+          <div class="contenedorCategorias">
+            <h3>Categorías</h3>
+            <div class="categorias">
+              {categorias.map((categoria) => (
+                <span class="categoria">
+                  {categoria.nombre} ({categoria.conteo})
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : null
+      }
+    </div>
   </div>
 
-  {
-    foto ? (
-      <div class="foto">
-        {enlace ? (
-          <a class="enlaceFotoPersonaje" href={`${base}/personajes/${slug}`}>
-            <FiltroFoto ruta={foto.node.sourceUrl} alt={`Foto de ${nombre}`} />
-          </a>
-        ) : (
-          <FiltroFoto ruta={foto.node.sourceUrl} alt={`Foto de ${nombre}`} />
-        )}
-      </div>
-    ) : null
-  }
-</section>
-
-<style lang="scss">
-  .personaje {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 40px;
-    border: 2px solid var(--rojo, #f21d44);
-    width: 90%;
-    margin: 2em;
-    padding: 20px;
-    background-color: var(--superficieClaro);
-    position: relative;
-    min-height: 220px;
-  }
-
-  .foto {
-    width: 30%;
-    display: flex;
-    justify-content: center;
-    margin-top: 4em;
-    align-self: flex-start;
-  }
-
-  .enlaceFotoPersonaje {
-    opacity: 1;
-    &:hover {
-      opacity: 0.8;
+  <style lang="scss">
+    .personaje {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 40px;
+      border: 2px solid var(--rojo, #f21d44);
+      width: 90%;
+      margin: 1em auto;
+      padding: 20px;
+      background-color: var(--superficieClaro);
+      position: relative;
+      min-height: 220px;
     }
-  }
-  .contenido {
-    width: 70%;
-  }
 
-  .contenedorCategorias {
-    font-size: 0.95em;
-  }
+    .contenidoPersonaje {
+      width: 100%; /* Add this */
+    }
 
-  .categorias {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-    font-family: var(--fuenteTextos2);
-  }
+    .bioTexto {
+      width: 100%;
+    }
 
-  h2 {
-    font-family: var(--fuenteTitulos);
-  }
+    .foto {
+      width: 30%;
+      display: flex;
+      justify-content: flex-start;
+      margin-top: 0;
+      align-self: center;
+      order: 1;
+    }
 
-  h3 {
-    margin-bottom: 0.5em;
-    margin-top: 0;
-  }
-</style>
+    .enlaceFotoPersonaje {
+      opacity: 1;
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+    .contenido {
+      width: 100%;
+      padding-right: 0.5em;
+      padding-left: 0.5;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .contenedorCategorias {
+      font-size: 0.95em;
+    }
+
+    .categorias {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      font-family: var(--fuenteTextos2);
+    }
+
+    h2 {
+      font-family: var(--fuenteTitulos);
+    }
+
+    h3 {
+      margin-bottom: 0.5em;
+      margin-top: 0;
+    }
+
+    @media (max-width: 1200px) {
+      .personaje {
+        width: 100%;
+        margin: 1em auto;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .foto {
+        width: 60%;
+        margin: 0 auto;
+        justify-content: center;
+      }
+
+      .contenido {
+        width: 90%;
+        text-align: center;
+      }
+    }
+
+    .personaje {
+      padding: 15px;
+    }
+
+    .foto {
+      width: 80%;
+    }
+
+    h2 {
+      font-size: 1.3em;
+    }
+
+    .categorias {
+      justify-content: center;
+    }
+  </style>
+</section>
