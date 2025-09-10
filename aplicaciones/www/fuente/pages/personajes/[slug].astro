@@ -247,9 +247,7 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
 
 <script>
   const filtros = document.querySelectorAll<HTMLLIElement>('.filtroCategoria');
-  console.log(filtros);
   const secciones = document.querySelectorAll<HTMLElement>('.seccion');
-  console.log(secciones);
 
   filtros.forEach((filtro) => {
     filtro.addEventListener('click', () => {
