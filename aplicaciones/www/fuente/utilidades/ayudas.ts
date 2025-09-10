@@ -169,6 +169,7 @@ export function procesarCategorias(categoriasWP: CategoriasWP) {
           nombre: node.name,
           conteo: node.count || 0,
           hijos: [],
+          indice: 0
         });
       }
     } else {
@@ -180,6 +181,7 @@ export function procesarCategorias(categoriasWP: CategoriasWP) {
           nombre: node.parent.node.name,
           conteo: node.parent.node.count || 0,
           hijos: [],
+          indice: 0
         };
         categorias.push(padre);
       }
