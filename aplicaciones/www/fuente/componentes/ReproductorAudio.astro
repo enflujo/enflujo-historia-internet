@@ -1,8 +1,19 @@
 ---
 interface Props {
   ruta: string;
+  tipo: string;
 }
-const { ruta } = Astro.props;
+const { ruta, tipo } = Astro.props;
 ---
 
-<audio controls src={ruta}></audio>
+<audio controls>
+  <source src={ruta} type={tipo} />
+</audio>
+
+<style lang="scss">
+  audio {
+    width: 100%;
+    margin: 1em 0;
+    padding: 0 5%;
+  }
+</style>

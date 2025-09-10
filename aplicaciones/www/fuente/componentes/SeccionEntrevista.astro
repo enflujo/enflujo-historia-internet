@@ -2,6 +2,7 @@
 import { listaCategoriasPrincipales } from '@/cerebros/general';
 import type { SeccionEntrevistaProcesada } from '@/tipos';
 import { base } from '@/utilidades/constantes';
+import ReproductorAudio from './ReproductorAudio.astro';
 
 interface props {
   seccion: SeccionEntrevistaProcesada;
@@ -22,13 +23,7 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
       .join(', ')});`}
   >
     <div set:html={seccion.contenido} />
-    {
-      seccion.audios.map((audio) => (
-        <audio controls>
-          <source src={audio.url} type={audio.tipo} />
-        </audio>
-      ))
-    }
+    {seccion.audios.map((audio) => <ReproductorAudio ruta={audio.url} tipo={audio.tipo} />)}
   </div>
 
   <div class="separadorCol">
