@@ -1,4 +1,5 @@
 ---
+import { listaCategoriasPrincipales } from '@/cerebros/general';
 import type { SeccionEntrevistaProcesada } from '@/tipos';
 import { base } from '@/utilidades/constantes';
 
@@ -7,10 +8,19 @@ interface props {
 }
 
 const { seccion } = Astro.props as props;
+const categoriasPrincipales = await listaCategoriasPrincipales();
 ---
 
-<section class="seccion">
-  <div class="colEntrevista">
+<section class={`seccion ${seccion.categorias.map((cat) => cat.slug).join(' ')}`}>
+  <div
+    class="colEntrevista"
+    style={`background: linear-gradient(135deg, ${seccion.categorias
+      .map(
+        (cat, i) =>
+          `color-mix(in srgb, var(--categoria${categoriasPrincipales.findIndex((c) => c.slug === cat.slug) + 1}), white 60%) ${Math.round((i / (seccion.categorias.length - 1 || 1)) * 100)}%`
+      )
+      .join(', ')});`}
+  >
     <div set:html={seccion.contenido} />
     {
       seccion.audios.map((audio) => (
@@ -21,15 +31,31 @@ const { seccion } = Astro.props as props;
     }
   </div>
 
+  <div class="separadorCol">
+    {
+      seccion.categorias.length > 0
+        ? seccion.categorias.map((categoria) => (
+            <span
+              class={`fondoCategoria fondoCategoria${categoriasPrincipales.findIndex((cat) => cat.slug === categoria.slug) + 1}`}
+            />
+          ))
+        : null
+    }
+  </div>
+
   <div class="colMetadatos">
     {
       seccion.categorias.length > 0 ? (
         <>
-          <h4>Categorias</h4>
           <div class="categorias">
             {seccion.categorias.map((categoria) => (
               <span class="categoria">
-                <a href={`${base}/categorias/${categoria.slug}`}>{categoria.nombre}</a>
+                <a
+                  class={`iconoCategoria iconoCategoria${categoriasPrincipales.findIndex((cat) => cat.slug === categoria.slug) + 1}`}
+                  href={`${base}/categorias/${categoria.slug}`}
+                >
+                  {categoria.nombre}
+                </a>
                 {categoria.hijos.length > 0 && (
                   <div class="hijos">
                     {categoria.hijos.map((hijo) => (
@@ -61,8 +87,20 @@ const { seccion } = Astro.props as props;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    border-right: 3px solid;
     padding-right: 1em;
+  }
+
+  .separadorCol {
+    display: flex;
+    flex-direction: row;
+
+    span {
+      width: 5px;
+      height: 100%;
+      &.categoria1 {
+        background-color: var(--categoria1);
+      }
+    }
   }
 
   .colMetadatos {

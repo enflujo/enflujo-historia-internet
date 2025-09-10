@@ -15,6 +15,7 @@ export interface PaginaMenu extends CamposGenerales {
   menuOrder: number;
   iconoA: string;
   iconoB: string;
+  principal: boolean;
 }
 
 export type Imagen = { node: { altText: string; sourceUrl: string } };
@@ -154,6 +155,7 @@ export interface CategoriaProcesada {
   slug: string;
   nombre: string;
   conteo: number;
+  indice: number;
   hijos: {
     slug: string;
     nombre: string;
@@ -179,4 +181,9 @@ export interface CategoriasWPNodos {
     count: number;
     children: { nodes: { slug: string; name: string; count: number }[] };
   }[];
+}
+
+export interface CategoriaPrincipal {
+  slug: string;
+  name: string;
 }

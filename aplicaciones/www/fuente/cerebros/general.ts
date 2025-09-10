@@ -1,4 +1,11 @@
-import type { CategoriasWPNodos, MetaInfo, PaginaMenu, Termino, TerminoGlosario } from '@/tipos';
+import {
+  type CategoriaPrincipal,
+  type CategoriasWPNodos,
+  type MetaInfo,
+  type PaginaMenu,
+  type Termino,
+  type TerminoGlosario,
+} from '@/tipos';
 import { extraerTerminos, gql, pedirDatos } from '@/utilidades/ayudas';
 import { atom, map } from 'nanostores';
 
@@ -7,6 +14,7 @@ export const datosPaginas = map<PaginaMenu[]>([]);
 export const arbolCategorias = atom<{ categories: CategoriasWPNodos } | null>(null);
 export const terminos = atom<Termino[]>([]);
 export const glosario = atom<TerminoGlosario[]>([]);
+export const categoriasPrincipales = atom<CategoriaPrincipal[]>([]);
 
 export async function listaCategorias() {
   const categorias = arbolCategorias.get();
@@ -139,6 +147,7 @@ export async function listaPaginas() {
           status
           iconoA
           iconoB
+          principal
         }
       }
     }
@@ -163,4 +172,25 @@ export async function listaPaginas() {
 
   datosPaginas.set(paginas);
   return paginas;
+}
+
+export async function listaCategoriasPrincipales() {
+  if (categoriasPrincipales.get().length > 0) return categoriasPrincipales.get();
+
+  const Peticion = gql`
+    query {
+      categories(where: { orderby: SLUG, order: ASC, parent: null, hideEmpty: true }) {
+        nodes {
+          slug
+          name
+        }
+      }
+    }
+  `;
+
+  const { categories } = await pedirDatos<{ categories: CategoriasWPNodos }>(Peticion);
+  const categorias = categories.nodes.map((cat) => ({ slug: cat.slug, name: cat.name }));
+  categoriasPrincipales.set(categorias);
+
+  return categorias;
 }
