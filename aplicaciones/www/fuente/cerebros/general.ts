@@ -1,4 +1,11 @@
-import { type CategoriaPrincipal, type CategoriasWPNodos, type MetaInfo, type PaginaMenu, type Termino, type TerminoGlosario } from '@/tipos';
+import {
+  type CategoriaPrincipal,
+  type CategoriasWPNodos,
+  type MetaInfo,
+  type PaginaMenu,
+  type Termino,
+  type TerminoGlosario,
+} from '@/tipos';
 import { extraerTerminos, gql, pedirDatos } from '@/utilidades/ayudas';
 import { atom, map } from 'nanostores';
 
@@ -167,20 +174,20 @@ export async function listaPaginas() {
   return paginas;
 }
 
-
 export async function listaCategoriasPrincipales() {
   if (categoriasPrincipales.get().length > 0) return categoriasPrincipales.get();
 
   const Peticion = gql`
     query {
-      categories(where: {orderby: SLUG, order: ASC, parent: null, hideEmpty: true}) {
+      categories(where: { orderby: SLUG, order: ASC, parent: null, hideEmpty: true }) {
         nodes {
           slug
           name
         }
       }
-    }`;
-    
+    }
+  `;
+
   const { categories } = await pedirDatos<{ categories: CategoriasWPNodos }>(Peticion);
   const categorias = categories.nodes.map((cat) => ({ slug: cat.slug, name: cat.name }));
   categoriasPrincipales.set(categorias);

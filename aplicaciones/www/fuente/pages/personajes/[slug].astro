@@ -107,7 +107,6 @@ const terminosPersonaje: Termino[] = [];
 const categoriasPrincipales = await listaCategoriasPrincipales();
 const entrevistaProcesada = await procesarEntrevistasPersonaje(entrevista.personaje.entrevistas.nodes);
 
-
 async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promise<EntrevistasProcesadas> {
   const categoriasPersonaje: CategoriaProcesada[] = [];
   const entrevistasPersonaje: EntrevistaSingularProcesada[] = [];
@@ -215,10 +214,17 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
         <div id="contenedorEntrevistas">
           <nav class="filtrosCategoriasEntrevista">
             <ul class="listaCategorias">
-              <li class="filtroCategoria seleccionado bordeCategoria" data-categoria="entrevista-completa">Entrevista completa</li>
+              <li class="filtroCategoria seleccionado bordeCategoria" data-categoria="entrevista-completa">
+                Entrevista completa
+              </li>
               {
                 entrevistaProcesada.categoriasPersonaje.map((categoria) => (
-                  <li class={`bordeCategoria bordeCategoria${categoria.indice} filtroCategoria`} data-categoria={categoria.slug}>{categoria.nombre}</li>
+                  <li
+                    class={`bordeCategoria bordeCategoria${categoria.indice} filtroCategoria`}
+                    data-categoria={categoria.slug}
+                  >
+                    {categoria.nombre}
+                  </li>
                 ))
               }
             </ul>
@@ -314,7 +320,6 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
   }
 
   .bordeCategoria4 {
-
     &:hover {
       background-color: var(--categoria4);
       color: var(--superficieOscura);
@@ -322,7 +327,6 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
   }
 
   .bordeCategoria5 {
-
     &:hover {
       background-color: var(--categoria5);
       color: var(--superficieOscura);
@@ -330,7 +334,6 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
   }
 
   .bordeCategoria6 {
-
     &:hover {
       background-color: var(--categoria6);
       color: var(--superficieOscura);
@@ -338,7 +341,6 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
   }
 
   .bordeCategoria7 {
-
     &:hover {
       background-color: var(--categoria7);
       color: var(--superficieOscura);
@@ -346,7 +348,6 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
   }
 
   .bordeCategoria8 {
-
     &:hover {
       background-color: var(--categoria8);
       color: var(--superficieOscura);
@@ -354,7 +355,6 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
   }
 
   .bordeCategoria9 {
-
     &:hover {
       background-color: var(--categoria9);
       color: var(--superficieOscura);
