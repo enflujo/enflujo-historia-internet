@@ -187,4 +187,70 @@ const paginas = await listaPaginas();
   .iconoMenu {
     width: 20px;
   }
+
+  @media (max-width: 1435px) {
+    #menuPrincipal {
+      width: 30vw;
+      right: -30vw;
+
+      &.visible {
+        right: 0;
+      }
+    }
+
+    #listaPaginas {
+      font-size: 1em;
+      padding: 2em 1.5em 2em 1em;
+    }
+  }
+
+  @media (max-width: 900px) {
+    #menuPrincipal {
+      width: 35vw;
+      right: -35vw;
+      #botonMenu {
+        font-size: 1.5em;
+        top: 12px;
+        right: 18px;
+      }
+      &.visible {
+        right: 0;
+      }
+    }
+
+    #listaPaginas {
+      font-size: 0.95em;
+      padding: 2em 1.5em 1.5em 0.5em;
+    }
+  }
+
+  @media (max-width: 640px) {
+    #menuPrincipal {
+      width: 100%;
+      right: -100%;
+      left: auto;
+      top: 0;
+      bottom: 0;
+      height: auto;
+      min-height: 100%;
+
+      &.visible {
+        right: 0;
+      }
+      #botonMenu {
+        font-size: 2em;
+        top: 15px;
+        right: 20px;
+      }
+    }
+
+    #listaPaginas {
+      font-size: 1.1em;
+      padding: 5em 1.5em 3em 1.5em;
+      height: 100%;
+      min-height: 100%;
+      margin-bottom: 0;
+      overflow-y: auto;
+    }
+  }
 </style>
