@@ -6,23 +6,34 @@ import { gql, pedirDatos, procesarCategorias } from '@/utilidades/ayudas';
 import { apiBase, base } from '@/utilidades/constantes';
 
 export async function getStaticPaths() {
-  const PeticionDocumentos = gql`
-    query {
-      documentos(first: 200) {
-        nodes {
-          title
-          slug
-        }
-      }
-    }
-  `;
-  const { documentos } = await pedirDatos<{ documentos: { nodes: { title: string; slug: string }[] } }>(
-    PeticionDocumentos
-  );
+  const todos: { title: string; slug: string }[] = [];
 
-  return documentos.nodes.map(({ slug }) => {
-    return { params: { slug } };
-  });
+  let tieneMas = true;
+  let final: string | null = null;
+
+  while (tieneMas) {
+    const afterClause: string = final ? `, after: "${final}"` : '';
+
+    const PeticionDocumentos: string = `query { documentos(first: 100${afterClause}) { nodes { title slug } pageInfo { hasNextPage endCursor } } }`;
+
+    const respuesta = await pedirDatos<{
+      documentos: {
+        nodes: { title: string; slug: string }[];
+        pageInfo: { hasNextPage: boolean; endCursor: string | null };
+      };
+    }>(PeticionDocumentos);
+
+    if (!respuesta || !respuesta.documentos) break;
+
+    todos.push(...(respuesta.documentos.nodes || []));
+
+    tieneMas = !!respuesta.documentos.pageInfo?.hasNextPage;
+    final = respuesta.documentos.pageInfo?.endCursor || null;
+
+    if (!tieneMas) break;
+  }
+
+  return todos.map(({ slug }) => ({ params: { slug } }));
 }
 const { slug } = Astro.params;
 
