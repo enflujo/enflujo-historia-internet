@@ -3,10 +3,10 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   publicDir: './estaticos',
-  site: 'https://enflujo.github.io/enflujo-historia-internet',
+  site: 'https://historiasinternet.uniandes.edu.co',
   srcDir: './fuente',
   outDir: './publico',
-  base: '/enflujo-historia-internet',
+  base: '/',
   integrations: [sitemap()],
   vite: {
     server: {
