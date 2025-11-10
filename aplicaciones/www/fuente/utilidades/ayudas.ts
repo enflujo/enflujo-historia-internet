@@ -5,11 +5,25 @@ import { listaGlosario } from '@/cerebros/general';
 export const gql = String.raw;
 
 export async function pedirDatos<Esquema>(query: string) {
-  const peticion = await fetch(`${apiBase}/graphql`, {
+  const url = `${apiBase.replace(/\/$/, '')}/graphql`;
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query }),
-  }).then((res) => res.json());
+  });
+
+  const text = await res.text();
+  const contentType = res.headers.get('content-type') || '';
+
+  if (!res.ok) {
+    throw new Error(`Error HTTP ${res.status} pidiendo ${url}:\n` + text.slice(0, 400));
+  }
+
+  if (!contentType.includes('application/json')) {
+    throw new Error(`Respuesta NO JSON desde ${url}:\n` + text.slice(0, 400));
+  }
+
+  const peticion = JSON.parse(text);
 
   if (peticion.errors) {
     throw new Error(JSON.stringify(peticion.errors, null, 2));
