@@ -5,7 +5,7 @@ import SeccionEntrevista from '@/componentes/SeccionEntrevista.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import FiltroFoto from '@/componentes/FiltroFoto.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
-import type { SeccionEntrevistaProcesadaCruzada, Imagen, Termino, EntrevistaCruzada } from '@/tipos';
+import type { SeccionEntrevistaProcesadaCruzada, Imagen, Termino, MetaInfo, TranscripcionesCruzadas } from '@/tipos';
 import {
   convertirTextoAHTML,
   gql,
@@ -39,52 +39,63 @@ export async function getStaticPaths() {
 const { slug } = Astro.params;
 const { nombreCategoria } = Astro.props;
 
-const PeticionTranscripcionesCategoria = gql`
-  query {
-  transcripciones(where: {categoryName: "${slug}"}) {
-    nodes {
-      title
-      transcripcion(format: RAW)
-      ordenAudios
-      databaseId
-      categories {
-        edges {
-          node {
-            name
-            slug
-            parent {
+async function pedirSeccionDatos(cursor: string = '', transcripcionesProcesadas: TranscripcionesCruzadas[] = []) {
+  const PeticionTranscripcionesCategoria = gql`
+    query Terminos {
+      transcripciones(where: {categoryName: "${slug}"}, first: 1000${cursor ? `, after: "${cursor}"` : ''}) {
+        pageInfo {
+          hasNextPage
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
+        }
+        
+        nodes {
+          title
+          transcripcion(format: RAW)
+          ordenAudios
+          databaseId
+          categories {
+            edges {
               node {
-                slug
                 name
+                slug
+                parent {
+                  node {
+                    slug
+                    name
+                  }
+                }
               }
             }
           }
-        }
-      }
-      audios {
-        nodes {
-          databaseId
-          archivos {
-            node {
-              title
-              link
-              mimeType
+          audios {
+            nodes {
+              databaseId
+              archivos {
+                node {
+                  title
+                  link
+                  mimeType
+                }
+              }
             }
           }
-        }
-      }
-      entrevista {
-        node {
-          fecha
-          ordenTranscripciones
-          personajes {
-            nodes {
-              title
-              slug
-              featuredImage {
-                node {
-                  altText
-                  sourceUrl
+          entrevista {
+            node {
+              fecha
+              ordenTranscripciones
+              personajes {
+                nodes {
+                  title
+                  slug
+                  featuredImage {
+                    node {
+                      altText
+                      sourceUrl
+                    }
+                  }
                 }
               }
             }
@@ -92,16 +103,26 @@ const PeticionTranscripcionesCategoria = gql`
         }
       }
     }
-  }
-}
-`;
+  `;
 
-const { transcripciones } = await pedirDatos<EntrevistaCruzada>(PeticionTranscripcionesCategoria);
+  const { transcripciones: algunas } = await pedirDatos<{
+    transcripciones: { pageInfo: MetaInfo; nodes: TranscripcionesCruzadas[] };
+  }>(PeticionTranscripcionesCategoria);
+  transcripcionesProcesadas.push(...(algunas.nodes || []));
+
+  if (algunas && algunas.pageInfo && algunas.pageInfo.hasNextPage) {
+    return await pedirSeccionDatos(algunas.pageInfo.endCursor, transcripcionesProcesadas);
+  }
+
+  return transcripcionesProcesadas;
+}
+
+const transcripciones = await pedirSeccionDatos();
 const terminosCategoria: Termino[] = [];
 const personajesCategoria: { nombre: string; slug: string; imagen: Imagen | null }[] = [];
-
+console.log(transcripciones);
 const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = await Promise.all(
-  transcripciones.nodes.map(async (transcripcion) => {
+  transcripciones.map(async (transcripcion) => {
     const { transcripcion: textoTranscripcion, audios, ordenAudios, entrevista, categories } = transcripcion;
     const { texto } = await convertirTextoAHTML(textoTranscripcion, terminosCategoria);
     const audiosProcesados = procesarAudiosTranscripcion(audios, ordenAudios);

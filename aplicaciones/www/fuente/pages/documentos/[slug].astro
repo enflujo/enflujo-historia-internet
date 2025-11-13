@@ -12,9 +12,14 @@ export async function getStaticPaths() {
   let final: string | null = null;
 
   while (tieneMas) {
-    const afterClause: string = final ? `, after: "${final}"` : '';
-
-    const PeticionDocumentos: string = `query { documentos(first: 100${afterClause}) { nodes { title slug } pageInfo { hasNextPage endCursor } } }`;
+    const posicion: string = final ? `, after: "${final}"` : '';
+    const PeticionDocumentos: string = gql`
+      query {
+        documentos(first: 100${posicion}) {
+          nodes { title slug }
+          pageInfo { hasNextPage endCursor }
+        }
+      }`;
 
     const respuesta = await pedirDatos<{
       documentos: {
