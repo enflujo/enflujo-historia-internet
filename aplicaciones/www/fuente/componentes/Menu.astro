@@ -22,7 +22,7 @@ const paginas = await listaPaginas();
               class={`botonPagina${ruta === rutaActual ? ' actual' : ''}`}
               data-iconoa={pagina.iconoA}
               data-iconob={pagina.iconoB}
-              href={`${pagina.slug !== 'inicio' ? `${ruta}` : `${base}`}`}
+              href={`${pagina.slug !== 'inicio' ? `${ruta}` : `${base}/`}`}
             >
               <span class="iconoMenu fuenteIconos">{pagina.iconoA}</span>
               <span class="nombrePagina">{pagina.title}</span>
