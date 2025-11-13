@@ -16,7 +16,7 @@
   "dependencies": {
     "@astrojs/check": "^0.9.5",
     "@astrojs/sitemap": "^3.6.0",
-    "astro": "5.15.4",
+    "astro": "5.15.6",
     "nanostores": "^1.0.1",
     "slug": "^10.0.0",
     "typescript": "^5.9.3"
@@ -24,6 +24,6 @@
   "devDependencies": {
     "@types/slug": "^5.0.9",
     "prettier-plugin-astro": "^0.14.1",
-    "sass": "^1.93.3"
+    "sass": "^1.94.0"
   }
 }
