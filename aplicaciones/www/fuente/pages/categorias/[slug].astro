@@ -120,7 +120,7 @@ async function pedirSeccionDatos(cursor: string = '', transcripcionesProcesadas:
 const transcripciones = await pedirSeccionDatos();
 const terminosCategoria: Termino[] = [];
 const personajesCategoria: { nombre: string; slug: string; imagen: Imagen | null }[] = [];
-console.log(transcripciones);
+
 const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = await Promise.all(
   transcripciones.map(async (transcripcion) => {
     const { transcripcion: textoTranscripcion, audios, ordenAudios, entrevista, categories } = transcripcion;
