@@ -55,8 +55,9 @@ function extraerTerminos(texto, terminos, glosario) {
     reemplazos.push({ original: match[0], anotado: textoAnotado });
   }
 
+  // Usar replaceAll para que todas las ocurrencias del término se reemplacen
   reemplazos.forEach(({ original, anotado }) => {
-    texto = texto.replace(original, anotado);
+    texto = texto.replaceAll(original, anotado);
   });
 
   return texto;
