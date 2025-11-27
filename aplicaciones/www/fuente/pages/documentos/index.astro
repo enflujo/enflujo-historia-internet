@@ -95,6 +95,7 @@ documentos.forEach((documento) => {
 
 // Extraer todas las categorías únicas de todos los documentos
 const mapaCategorias = new Map<string, { slug: string; nombre: string; conteo: number }>();
+const mapaTipos = new Map<string, { slug: string; nombre: string; conteo: number }>();
 
 documentos.forEach((documento) => {
   if (documento.categorias) {
@@ -111,9 +112,25 @@ documentos.forEach((documento) => {
       }
     });
   }
+
+  if (documento.tiposDeDocumentos?.nodes) {
+    documento.tiposDeDocumentos.nodes.forEach((tipo) => {
+      const existe = mapaTipos.get(tipo.slug);
+      if (existe) {
+        existe.conteo++;
+      } else {
+        mapaTipos.set(tipo.slug, {
+          slug: tipo.slug,
+          nombre: tipo.name,
+          conteo: 1,
+        });
+      }
+    });
+  }
 });
 
 const categoriasDisponibles = Array.from(mapaCategorias.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+const tiposDisponibles = Array.from(mapaTipos.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
 const categoriasPrincipales = await listaCategoriasPrincipales();
 ---
 
@@ -121,7 +138,7 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
   <div class="paginaConMenuIzquierdo">
     <aside class="menuIzquierdo">
       <TituloPagina titulo={pagina.title} slug={pagina.slug} modo="oscuro" />
-      <FiltrosDocumentos categorias={categoriasDisponibles} />
+      <FiltrosDocumentos categorias={categoriasDisponibles} tipos={tiposDisponibles} />
     </aside>
 
     <main class="documentos col2">
@@ -136,7 +153,11 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
       <div class="contenedorDocumentos">
         {
           documentos.map((documento) => (
-            <article class="documento" data-categorias={JSON.stringify(documento.categorias?.map((c) => c.slug) || [])}>
+            <article
+              class="documento"
+              data-categorias={JSON.stringify(documento.categorias?.map((c) => c.slug) || [])}
+              data-tipos={JSON.stringify(documento.tiposDeDocumentos?.nodes?.map((t) => t.slug) || [])}
+            >
               <h2 class="nombreDocumento">
                 <a href={`${base}/documentos/${documento.slug}`}>{documento.tituloCorto}</a>
               </h2>
@@ -172,9 +193,10 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
 </Plantilla>
 
 <script>
-  // Lógica de filtrado de documentos por categorías
+  // Lógica de filtrado de documentos por categorías y tipos
   function inicializarFiltros() {
-    const checkboxes = document.querySelectorAll<HTMLInputElement>('.checkboxCategoria');
+    const checkboxesCategorias = document.querySelectorAll<HTMLInputElement>('.checkboxCategoria');
+    const checkboxesTipos = document.querySelectorAll<HTMLInputElement>('.checkboxTipo');
     const documentos = document.querySelectorAll<HTMLElement>('.documento');
     const botonLimpiar = document.querySelector<HTMLButtonElement>('.botonLimpiar');
     const conteoActual = document.getElementById('conteoActual');
@@ -182,8 +204,12 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
     const totalDocumentos = documentos.length;
 
     function aplicarFiltros() {
-      // Obtener categorías seleccionadas
-      const categoriasSeleccionadas = Array.from(checkboxes)
+      // Obtener categorías y tipos seleccionados
+      const categoriasSeleccionadas = Array.from(checkboxesCategorias)
+        .filter((checkbox) => checkbox.checked)
+        .map((checkbox) => checkbox.value);
+
+      const tiposSeleccionados = Array.from(checkboxesTipos)
         .filter((checkbox) => checkbox.checked)
         .map((checkbox) => checkbox.value);
 
@@ -191,17 +217,27 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
 
       documentos.forEach((documento) => {
         const categoriasDocumento = JSON.parse(documento.dataset.categorias || '[]');
+        const tiposDocumento = JSON.parse(documento.dataset.tipos || '[]');
 
         // Si no hay filtros seleccionados, mostrar todos
-        if (categoriasSeleccionadas.length === 0) {
+        if (categoriasSeleccionadas.length === 0 && tiposSeleccionados.length === 0) {
           documento.style.display = '';
           conteoVisible++;
         } else {
-          // Verificar si el documento tiene alguna de las categorías seleccionadas
-          const tieneCategoria = categoriasSeleccionadas.some((cat) => categoriasDocumento.includes(cat));
+          // Verificar si cumple con los filtros de categoría (si hay alguno seleccionado)
+          const cumpleCategoria =
+            categoriasSeleccionadas.length === 0 ||
+            categoriasSeleccionadas.some((cat) => categoriasDocumento.includes(cat));
 
-          documento.style.display = tieneCategoria ? '' : 'none';
-          if (tieneCategoria) conteoVisible++;
+          // Verificar si cumple con los filtros de tipo (si hay alguno seleccionado)
+          const cumpleTipo =
+            tiposSeleccionados.length === 0 || tiposSeleccionados.some((tipo) => tiposDocumento.includes(tipo));
+
+          // Mostrar solo si cumple ambos filtros
+          const mostrar = cumpleCategoria && cumpleTipo;
+
+          documento.style.display = mostrar ? '' : 'none';
+          if (mostrar) conteoVisible++;
         }
       });
 
@@ -212,19 +248,26 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
 
       // Habilitar/deshabilitar botón de limpiar
       if (botonLimpiar) {
-        botonLimpiar.disabled = categoriasSeleccionadas.length === 0;
+        botonLimpiar.disabled = categoriasSeleccionadas.length === 0 && tiposSeleccionados.length === 0;
       }
     }
 
-    // Escuchar cambios en los checkboxes
-    checkboxes.forEach((checkbox) => {
+    // Escuchar cambios en los checkboxes de categorías y tipos
+    checkboxesCategorias.forEach((checkbox) => {
+      checkbox.addEventListener('change', aplicarFiltros);
+    });
+
+    checkboxesTipos.forEach((checkbox) => {
       checkbox.addEventListener('change', aplicarFiltros);
     });
 
     // Limpiar filtros
     if (botonLimpiar) {
       botonLimpiar.addEventListener('click', () => {
-        checkboxes.forEach((checkbox) => {
+        checkboxesCategorias.forEach((checkbox) => {
+          checkbox.checked = false;
+        });
+        checkboxesTipos.forEach((checkbox) => {
           checkbox.checked = false;
         });
         aplicarFiltros();
