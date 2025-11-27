@@ -23,7 +23,7 @@ export async function listaCategorias() {
   // Construir árbol desde cache
   const { obtenerCategorias } = await import('@/utilidades/cache');
   const categorias = obtenerCategorias();
-  
+
   // Agrupar por padre
   const padres = categorias.filter((cat: any) => !cat.parent || !cat.parent.node);
   const resultado = padres.map((padre: any) => {

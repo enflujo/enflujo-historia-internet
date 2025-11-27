@@ -44,13 +44,11 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
         <>
           <div class="categorias">
             {seccion.categorias.map((categoria) => (
-              <span class="categoria">
-                <a
-                  class={`iconoCategoria iconoCategoria${categoriasPrincipales.findIndex((cat) => cat.slug === categoria.slug) + 1}`}
-                  href={`${base}/categorias/${categoria.slug}`}
-                >
-                  {categoria.nombre}
-                </a>
+              <span
+                class={`categoria iconoCategoria iconoCategoria${categoriasPrincipales.findIndex((cat) => cat.slug === categoria.slug) + 1}`}
+              >
+                {categoria.nombre}
+
                 {categoria.hijos.length > 0 && (
                   <div class="hijos">
                     {categoria.hijos.map((hijo) => (
@@ -106,10 +104,6 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
     h4 {
       margin: 0 0 1em 0;
     }
-  }
-
-  .categoria {
-    font-weight: bold;
   }
 
   .hijo {

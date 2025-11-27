@@ -1,0 +1,370 @@
+---
+import TituloPagina from '@/componentes/TituloPagina.astro';
+const { obtenerPersonajes, obtenerCategoriasPrincipales } = await import('@/utilidades/cache');
+
+const personajes = obtenerPersonajes() as any[];
+const categoriasPrincipales = obtenerCategoriasPrincipales() as any[];
+
+interface Nodo {
+  id: string;
+  nombre: string;
+  tipo: 'personaje';
+  slug: string;
+  categorias: string[];
+}
+
+interface Enlace {
+  source: string;
+  target: string;
+  categoriasCompartidas: string[];
+  peso: number;
+}
+
+const nodos: Nodo[] = [];
+const mapaEntidades = new Map<string, string[]>();
+
+personajes.forEach((personaje) => {
+  const idPersonaje = `per-${personaje.slug}`;
+  const categoriasPersonaje: string[] = [];
+  if (personaje.entrevistas?.nodes) {
+    personaje.entrevistas.nodes.forEach((entrevista: any) => {
+      entrevista.transcripciones?.nodes?.forEach((transcripcion: any) => {
+        if (transcripcion.categorias) {
+          const cats = Array.isArray(transcripcion.categorias)
+            ? transcripcion.categorias
+            : transcripcion.categorias.nodes || [];
+          cats.forEach((cat: any) => {
+            const catSlug = cat.slug;
+            if (categoriasPrincipales.some((c) => c.slug === catSlug)) {
+              if (!categoriasPersonaje.includes(catSlug)) {
+                categoriasPersonaje.push(catSlug);
+              }
+            }
+          });
+        }
+      });
+    });
+  }
+  if (categoriasPersonaje.length > 0) {
+    nodos.push({
+      id: idPersonaje,
+      nombre: personaje.title,
+      tipo: 'personaje',
+      slug: personaje.slug,
+      categorias: categoriasPersonaje,
+    });
+    mapaEntidades.set(idPersonaje, categoriasPersonaje);
+  }
+});
+
+const enlaces: Enlace[] = [];
+const nodosArray = Array.from(mapaEntidades.keys());
+for (let i = 0; i < nodosArray.length; i++) {
+  for (let j = i + 1; j < nodosArray.length; j++) {
+    const id1 = nodosArray[i];
+    const id2 = nodosArray[j];
+    const cats1 = mapaEntidades.get(id1) || [];
+    const cats2 = mapaEntidades.get(id2) || [];
+    const categoriasCompartidas = cats1.filter((cat) => cats2.includes(cat));
+    if (categoriasCompartidas.length > 0) {
+      enlaces.push({ source: id1, target: id2, categoriasCompartidas, peso: categoriasCompartidas.length });
+    }
+  }
+}
+
+const coloresCategorias = [
+  '#fd7f6f',
+  '#7eb0d5',
+  '#b2e061',
+  '#bd7ebe',
+  '#ffb55a',
+  '#ffee65',
+  '#beb9db',
+  '#fdcce5',
+  '#8bd3c7',
+];
+
+const datosRed = { nodos, enlaces, categoriasPrincipales, coloresCategorias };
+---
+
+<div class="red-relaciones colapsado">
+  <div class="controles">
+    <button id="toggleViz" class="boton" aria-expanded="false" title="Mostrar red">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+      </svg>
+      <span>Mostrar red</span>
+    </button>
+  </div>
+
+  <div class="leyenda">
+    <h4>Categorías:</h4>
+    <div class="leyendaCategorias">
+      {
+        categoriasPrincipales.map((cat, i) => (
+          <div class="itemLeyenda">
+            <span class="circuloLeyenda" style={`background-color: ${coloresCategorias[i]}`} />
+            <span>{cat.name}</span>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="contenedorViz">
+    <div id="visualizacion"></div>
+    <div class="info">
+      <p>Total nodos: <span id="totalNodos">{nodos.length}</span></p>
+      <p>Total conexiones: <span id="totalEnlaces">{enlaces.length}</span></p>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ datosRed }}>
+  window.datosRed = datosRed;
+</script>
+
+<script>
+  import * as d3 from 'd3';
+  const datosRed = (window as any).datosRed;
+  const wrapper = document.querySelector('.red-relaciones') as HTMLElement;
+  const toggleBtn = document.getElementById('toggleViz') as HTMLButtonElement;
+
+  const width = window.innerWidth - 40;
+  const height = Math.max(500, window.innerHeight - 300);
+
+  const svg = d3
+    .select('#visualizacion')
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .attr('viewBox', [0, 0, width, height]);
+
+  const g = svg.append('g');
+  const zoom = d3
+    .zoom()
+    .scaleExtent([0.1, 4])
+    .on('zoom', (event: any) => {
+      g.attr('transform', event.transform);
+    });
+  svg.call(zoom as any);
+
+  // Toggle: mostrar/ocultar visualización y leyenda
+  function actualizarToggleUI(expanded: boolean) {
+    if (!toggleBtn) return;
+    toggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    toggleBtn.querySelector('span')!.textContent = expanded ? 'Ocultar red' : 'Mostrar red';
+    const icon = toggleBtn.querySelector('svg path') as SVGPathElement;
+    if (icon) {
+      // plus for mostrar, minus for ocultar
+      icon.setAttribute('d', expanded ? 'M5 12h14' : 'M12 5v14M5 12h14');
+    }
+  }
+
+  if (toggleBtn && wrapper) {
+    actualizarToggleUI(false);
+    toggleBtn.addEventListener('click', () => {
+      const estabaColapsado = wrapper.classList.contains('colapsado');
+      if (estabaColapsado) {
+        wrapper.classList.remove('colapsado');
+        actualizarToggleUI(true);
+      } else {
+        wrapper.classList.add('colapsado');
+        actualizarToggleUI(false);
+      }
+    });
+  }
+
+  function obtenerColorEnlace(categoriasCompartidas: string[]): string {
+    if (!categoriasCompartidas || categoriasCompartidas.length === 0) return '#999';
+    const primeraCategoria = categoriasCompartidas[0];
+    const indice = datosRed.categoriasPrincipales.findIndex((cat: any) => cat.slug === primeraCategoria);
+    if (indice !== -1 && indice < datosRed.coloresCategorias.length) {
+      return datosRed.coloresCategorias[indice];
+    }
+    return '#999';
+  }
+
+  const simulacion = d3
+    .forceSimulation(datosRed.nodos as any[])
+    .force(
+      'link',
+      d3
+        .forceLink(datosRed.enlaces as any[])
+        .id((d: any) => d.id)
+        .distance((d: any) => 120 - d.peso * 15)
+        .strength((d: any) => 0.15 + d.peso * 0.08)
+    )
+    .force('charge', d3.forceManyBody().strength(-800).distanceMax(400))
+    .force('center', d3.forceCenter(width / 2, height / 2))
+    .force('collision', d3.forceCollide().radius(60))
+    .force('x', d3.forceX(width / 2).strength(0.03))
+    .force('y', d3.forceY(height / 2).strength(0.03))
+    .alphaDecay(0.05)
+    .velocityDecay(0.8)
+    .alpha(0.3)
+    .alphaMin(0.001);
+
+  const enlaces = g
+    .append('g')
+    .selectAll('line')
+    .data(datosRed.enlaces)
+    .join('line')
+    .attr('stroke', (d: any) => obtenerColorEnlace(d.categoriasCompartidas))
+    .attr('stroke-opacity', (d: any) => 0.25 + d.peso * 0.1)
+    .attr('stroke-width', (d: any) => 0.5 + d.peso * 0.3);
+
+  const nodos = g
+    .append('g')
+    .selectAll('g')
+    .data(datosRed.nodos)
+    .join('g')
+    .attr('class', 'nodo')
+    .call(d3.drag().on('start', dragIniciado).on('drag', arrastrando).on('end', dragTerminado) as any);
+
+  nodos
+    .append('circle')
+    .attr('r', (d: any) => {
+      const numConexiones = datosRed.enlaces.filter(
+        (e: any) =>
+          (typeof e.source === 'object' ? e.source.id : e.source) === d.id ||
+          (typeof e.target === 'object' ? e.target.id : e.target) === d.id
+      ).length;
+      return Math.max(6, Math.min(14, 6 + numConexiones * 0.8));
+    })
+    .attr('fill', '#203f54')
+    .attr('fill-opacity', 0.85);
+
+  nodos
+    .append('rect')
+    .attr('x', (d: any) => {
+      const ancho = d.nombre.length * 6;
+      return -ancho / 2;
+    })
+    .attr('y', -32)
+    .attr('width', (d: any) => d.nombre.length * 6)
+    .attr('height', 16)
+    .attr('fill', 'rgba(255, 255, 255, 0.85)')
+    .attr('rx', 3)
+    .style('pointer-events', 'none');
+
+  nodos
+    .append('text')
+    .text((d: any) => d.nombre)
+    .attr('x', 0)
+    .attr('y', -20)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', '12px')
+    .attr('font-weight', 'bold')
+    .attr('fill', '#203f54')
+    .style('pointer-events', 'none');
+
+  nodos
+    .on('mouseover', function (_event: any, d: any) {
+      enlaces
+        .attr('stroke-opacity', (e: any) => (e.source.id === d.id || e.target.id === d.id ? 0.8 : 0.1))
+        .attr('stroke-width', (e: any) =>
+          e.source.id === d.id || e.target.id === d.id ? 0.5 + e.peso * 0.5 : 0.5 + e.peso * 0.3
+        );
+      (d3.select(this).select('circle') as any).attr('stroke-width', 3).attr('stroke', '#f21d44');
+    })
+    .on('mouseout', function () {
+      enlaces
+        .attr('stroke-opacity', (d: any) => 0.25 + d.peso * 0.1)
+        .attr('stroke-width', (d: any) => 0.5 + d.peso * 0.3);
+      nodos.selectAll('circle').attr('opacity', 1);
+      (d3.select(this).select('circle') as any).attr('stroke-width', 2).attr('stroke', '#fff');
+    });
+
+  simulacion.on('tick', () => {
+    enlaces
+      .attr('x1', (d: any) => (typeof d.source === 'object' ? d.source.x : d.source?.x))
+      .attr('y1', (d: any) => (typeof d.source === 'object' ? d.source.y : d.source?.y))
+      .attr('x2', (d: any) => (typeof d.target === 'object' ? d.target.x : d.target?.x))
+      .attr('y2', (d: any) => (typeof d.target === 'object' ? d.target.y : d.target?.y));
+    nodos.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
+  });
+
+  function dragIniciado(event: any) {
+    if (!event.active) simulacion.alphaTarget(0.05).restart();
+    event.subject.fx = event.subject.x;
+    event.subject.fy = event.subject.y;
+  }
+  function arrastrando(event: any) {
+    event.subject.fx = event.x;
+    event.subject.fy = event.y;
+  }
+  function dragTerminado(event: any) {
+    if (!event.active) simulacion.alphaTarget(0);
+    event.subject.fx = event.x;
+    event.subject.fy = event.y;
+  }
+</script>
+
+<style lang="scss">
+  .red-relaciones {
+    padding: 1rem 0;
+    position: relative;
+  }
+  .controles {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+  }
+
+  #toggleViz {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+  }
+  .info {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    opacity: 0.7;
+  }
+  .leyenda {
+    position: absolute;
+    top: 83px;
+    right: 0;
+    padding: 0.5rem;
+    z-index: 10;
+  }
+  .leyendaCategorias {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 0.8rem;
+  }
+  .itemLeyenda {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+  }
+  .circuloLeyenda {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .contenedorViz {
+    position: relative;
+  }
+  #visualizacion {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--bordePrimario);
+  }
+
+  /* Colapsar */
+  .red-relaciones.colapsado .leyenda {
+    display: none;
+  }
+  .red-relaciones.colapsado .contenedorViz {
+    display: none;
+  }
+</style>

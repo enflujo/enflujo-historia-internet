@@ -490,7 +490,7 @@ async function fetchTranscripcionesPorCategoria(slug) {
         const transcripcionHTML = nodo.transcripcion
           ? convertirTextoAHTML(nodo.transcripcion, terminos, glosarioCompleto)
           : '';
-        
+
         return {
           ...nodo,
           transcripcionHTML,

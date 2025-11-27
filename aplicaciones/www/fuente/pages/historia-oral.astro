@@ -2,6 +2,7 @@
 import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import FichaPersonajes from '@/componentes/FichaPersonajes.astro';
+import RedRelaciones from '@/componentes/RedRelaciones.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import { obtenerPagina, obtenerPersonajes } from '@/utilidades/cache';
 
@@ -32,11 +33,9 @@ personajes.sort((a, b) => {
     </aside>
 
     <main class="col2" data-pagefind-body>
-      <!-- {terminosGlobales ? <NubePalabras terminos={terminosGlobales} /> : null} -->
-      <!-- <VisualizacionCategorias /> -->
-
       <div class="personajes">
         <h2>Personajes</h2>
+        <div class="visMedia"><RedRelaciones /></div>
         <div class="personajes-lista">
           {
             personajes.map((personaje) => (
@@ -61,6 +60,10 @@ personajes.sort((a, b) => {
       flex-direction: column;
       padding: 1em 2em 5em 2em;
       gap: 2em;
+    }
+
+    .visMedia {
+      // width: 50%;
     }
 
     section .personaje {

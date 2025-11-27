@@ -4,6 +4,7 @@ import Plantilla from '@/plantillas/Plantilla.astro';
 import { procesarCategorias } from '@/utilidades/ayudas';
 import { apiBase, base } from '@/utilidades/constantes';
 import { obtenerDocumentos, obtenerDocumento } from '@/utilidades/cache';
+import { listaCategoriasPrincipales } from '@/cerebros/general';
 
 export async function getStaticPaths() {
   const documentos = obtenerDocumentos();
@@ -19,6 +20,7 @@ if (!documento) {
 
 const categorias = procesarCategorias(documento.categories);
 documento.categorias = categorias;
+const categoriasPrincipales = await listaCategoriasPrincipales();
 ---
 
 <Plantilla
@@ -93,14 +95,18 @@ documento.categorias = categorias;
                 {documento.categorias.map((categoria) => (
                   <div class="categoriaGrupo">
                     <span class="categoria metadato" data-pagefind-filter="categoria">
-                      <a href={`${base}/categorias/${categoria.slug}`}>{categoria.nombre}</a>
+                      <span
+                        class={`iconoCategoria iconoCategoria${categoriasPrincipales.findIndex((cat) => cat.slug === categoria.slug) + 1}`}
+                      >
+                        {categoria.nombre}
+                      </span>
                     </span>
 
                     {categoria.hijos && categoria.hijos.length > 0 && (
                       <div class="hijos">
                         {categoria.hijos.map((hijo, indice) => (
                           <span class="hijo">
-                            <a href={`${base}/categorias/${hijo.slug}`}>{hijo.nombre}</a>
+                            {hijo.nombre}
                             <span>{indice < categoria.hijos.length - 1 ? '|' : ''}</span>
                           </span>
                         ))}
