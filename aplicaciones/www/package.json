@@ -14,16 +14,17 @@
     "lint:fix": "prettier --write --list-different ."
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.5",
+    "@astrojs/check": "^0.9.6",
     "@astrojs/sitemap": "^3.6.0",
-    "astro": "5.15.6",
-    "nanostores": "^1.0.1",
+    "@astrojs/ts-plugin": "^1.10.6",
+    "astro": "5.16.1",
+    "nanostores": "^1.1.0",
     "slug": "^10.0.0",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@types/slug": "^5.0.9",
     "prettier-plugin-astro": "^0.14.1",
-    "sass": "^1.94.0"
+    "sass": "^1.94.2"
   }
 }
