@@ -2,6 +2,7 @@
 import type { CategoriaProcesada, Imagen } from '@/tipos';
 import FiltroFoto from '@/componentes/FiltroFoto.astro';
 import { base } from '@/utilidades/constantes';
+import { listaCategoriasPrincipales } from '@/cerebros/general';
 
 interface Props {
   slug: string;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const { slug, nombre, bio, foto, categorias, enlace } = Astro.props;
+const categoriasPrincipales = await listaCategoriasPrincipales();
 ---
 
 <section class="personaje" id={slug}>
@@ -29,8 +31,10 @@ const { slug, nombre, bio, foto, categorias, enlace } = Astro.props;
           <h3>Categorías</h3>
           <div class="categorias">
             {categorias.map((categoria) => (
-              <span class="categoria">
-                {categoria.nombre} ({categoria.conteo})
+              <span
+                class={`categoria iconoCategoria iconoCategoria${categoriasPrincipales.findIndex((cat) => cat.slug === categoria.slug) + 1}`}
+              >
+                <span class="nombreCategoria">{categoria.nombre}</span> <span class="nota">({categoria.conteo})</span>
               </span>
             ))}
           </div>
@@ -67,6 +71,16 @@ const { slug, nombre, bio, foto, categorias, enlace } = Astro.props;
     background-color: var(--superficieClaro);
     position: relative;
     min-height: 220px;
+  }
+
+  .nombreCategoria {
+    margin-left: 0.3rem;
+  }
+
+  .nota {
+    font-size: 0.85em;
+    color: #a3a2a2;
+    margin-left: 0.5rem;
   }
 
   .foto {
