@@ -1,0 +1,90 @@
+---
+import { listaCategoriasPrincipales } from '@/cerebros/general';
+
+interface Props {
+  categorias: Array<{ slug: string; nombre: string; conteo: number }>;
+}
+
+const { categorias } = Astro.props;
+const categoriasPrincipales = await listaCategoriasPrincipales();
+---
+
+<div class="filtros">
+  <h3>Filtrar por categorías</h3>
+  <div class="contenedorCategorias">
+    {
+      categorias.map((categoria) => (
+        <label
+          class={`categoriaFiltro bordeCategoria bordeCategoria${categoriasPrincipales.findIndex((cat) => cat.slug === categoria.slug) + 1}`}
+        >
+          <input type="checkbox" value={categoria.slug} class="checkboxCategoria" name="filtroCategoria" />
+          <span class="nombreCategoria">{categoria.nombre}</span>
+          <span class="conteoCategoria">({categoria.conteo})</span>
+        </label>
+      ))
+    }
+  </div>
+  <div class="botonesAccion">
+    <button class="boton botonLimpiar" type="button">Limpiar filtros</button>
+  </div>
+</div>
+
+<style lang="scss">
+  .filtros {
+    padding: 0.5rem;
+
+    h3 {
+      margin-top: 0;
+      font-family: var(--fuenteTitulos);
+      color: var(--colorTexto);
+    }
+  }
+
+  .contenedorCategorias {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .categoriaFiltro {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: background-color 0.2s;
+    border-right: none;
+    border-top: none;
+    border-bottom: none;
+    box-shadow: none;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .checkboxCategoria {
+      margin-right: 0.5rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .nombreCategoria {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .conteoCategoria {
+      color: var(--colorTexto);
+      opacity: 0.6;
+      font-size: 0.9em;
+      margin-left: 0.25rem;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+  }
+
+  .botonesAccion {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+</style>

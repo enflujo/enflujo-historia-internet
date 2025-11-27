@@ -1,9 +1,11 @@
 ---
 import type { Pagina, Documento, MetaInfo } from '@/tipos';
 import TituloPagina from '@/componentes/TituloPagina.astro';
+import FiltrosDocumentos from '@/componentes/FiltrosDocumentos.astro';
 import { esquemaPagina, gql, pedirDatos, procesarCategorias } from '@/utilidades/ayudas';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import { apiBase, base } from '@/utilidades/constantes';
+import { listaCategoriasPrincipales } from '@/cerebros/general';
 
 const PeticionPagina = gql`
   query {
@@ -90,40 +92,180 @@ documentos.forEach((documento) => {
   const categorias = procesarCategorias(documento.categories);
   documento.categorias = categorias;
 });
+
+// Extraer todas las categorías únicas de todos los documentos
+const mapaCategorias = new Map<string, { slug: string; nombre: string; conteo: number }>();
+
+documentos.forEach((documento) => {
+  if (documento.categorias) {
+    documento.categorias.forEach((categoria) => {
+      const existe = mapaCategorias.get(categoria.slug);
+      if (existe) {
+        existe.conteo++;
+      } else {
+        mapaCategorias.set(categoria.slug, {
+          slug: categoria.slug,
+          nombre: categoria.nombre,
+          conteo: 1,
+        });
+      }
+    });
+  }
+});
+
+const categoriasDisponibles = Array.from(mapaCategorias.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+const categoriasPrincipales = await listaCategoriasPrincipales();
 ---
 
 <Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
-  <main class="documentos">
-    <TituloPagina titulo={pagina.title} slug={pagina.slug} />
+  <div class="paginaConMenuIzquierdo">
+    <aside class="menuIzquierdo">
+      <TituloPagina titulo={pagina.title} slug={pagina.slug} modo="oscuro" />
+      <FiltrosDocumentos categorias={categoriasDisponibles} />
+    </aside>
 
-    <div class="contenedorDocumentos">
-      {
-        documentos.map((documento) => (
-          <article class="documento">
-            <h2 class="nombreDocumento">
-              <a href={`${base}/documentos/${documento.slug}`}>{documento.tituloCorto}</a>
-            </h2>
+    <main class="documentos col2">
+      <div class="contenedorResultados">
+        <p class="conteoResultados">
+          Mostrando <span id="conteoActual">{documentos.length}</span> de <span id="conteoTotal"
+            >{documentos.length}</span
+          > documentos
+        </p>
+      </div>
 
-            {documento.featuredImage && documento.featuredImage.node && documento.featuredImage.node.filePath && (
-              <div class="imagenDestacada">
-                <a href={`${base}/documentos/${documento.slug}`}>
-                  <img
-                    src={`${apiBase}/${documento.featuredImage.node.filePath}`}
-                    alt={`Imagen para ${documento.title}`}
-                  />
-                </a>
-              </div>
-            )}
-          </article>
-        ))
-      }
-    </div>
-  </main>
+      <div class="contenedorDocumentos">
+        {
+          documentos.map((documento) => (
+            <article class="documento" data-categorias={JSON.stringify(documento.categorias?.map((c) => c.slug) || [])}>
+              <h2 class="nombreDocumento">
+                <a href={`${base}/documentos/${documento.slug}`}>{documento.tituloCorto}</a>
+              </h2>
+
+              {documento.featuredImage && documento.featuredImage.node && documento.featuredImage.node.filePath && (
+                <div class="imagenDestacada">
+                  <a href={`${base}/documentos/${documento.slug}`}>
+                    <img
+                      src={`${apiBase}/${documento.featuredImage.node.filePath}`}
+                      alt={`Imagen para ${documento.title}`}
+                    />
+                  </a>
+                </div>
+              )}
+
+              {documento.categorias && documento.categorias.length > 0 && (
+                <div class="categorias">
+                  {documento.categorias.map((categoria) => (
+                    <span
+                      class={`categoriaEnDocumento iconoCategoria iconoCategoria${categoriasPrincipales.findIndex((cat) => cat.slug === categoria.slug) + 1}`}
+                    >
+                      {categoria.nombre}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </article>
+          ))
+        }
+      </div>
+    </main>
+  </div>
 </Plantilla>
+
+<script>
+  // Lógica de filtrado de documentos por categorías
+  function inicializarFiltros() {
+    const checkboxes = document.querySelectorAll<HTMLInputElement>('.checkboxCategoria');
+    const documentos = document.querySelectorAll<HTMLElement>('.documento');
+    const botonLimpiar = document.querySelector<HTMLButtonElement>('.botonLimpiar');
+    const conteoActual = document.getElementById('conteoActual');
+    const conteoTotal = document.getElementById('conteoTotal');
+    const totalDocumentos = documentos.length;
+
+    function aplicarFiltros() {
+      // Obtener categorías seleccionadas
+      const categoriasSeleccionadas = Array.from(checkboxes)
+        .filter((checkbox) => checkbox.checked)
+        .map((checkbox) => checkbox.value);
+
+      let conteoVisible = 0;
+
+      documentos.forEach((documento) => {
+        const categoriasDocumento = JSON.parse(documento.dataset.categorias || '[]');
+
+        // Si no hay filtros seleccionados, mostrar todos
+        if (categoriasSeleccionadas.length === 0) {
+          documento.style.display = '';
+          conteoVisible++;
+        } else {
+          // Verificar si el documento tiene alguna de las categorías seleccionadas
+          const tieneCategoria = categoriasSeleccionadas.some((cat) => categoriasDocumento.includes(cat));
+
+          documento.style.display = tieneCategoria ? '' : 'none';
+          if (tieneCategoria) conteoVisible++;
+        }
+      });
+
+      // Actualizar conteo
+      if (conteoActual) {
+        conteoActual.textContent = conteoVisible.toString();
+      }
+
+      // Habilitar/deshabilitar botón de limpiar
+      if (botonLimpiar) {
+        botonLimpiar.disabled = categoriasSeleccionadas.length === 0;
+      }
+    }
+
+    // Escuchar cambios en los checkboxes
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener('change', aplicarFiltros);
+    });
+
+    // Limpiar filtros
+    if (botonLimpiar) {
+      botonLimpiar.addEventListener('click', () => {
+        checkboxes.forEach((checkbox) => {
+          checkbox.checked = false;
+        });
+        aplicarFiltros();
+      });
+    }
+
+    // Inicializar el conteo total
+    if (conteoTotal) {
+      conteoTotal.textContent = totalDocumentos.toString();
+    }
+
+    // Estado inicial del botón
+    if (botonLimpiar) {
+      botonLimpiar.disabled = true;
+    }
+  }
+
+  // Ejecutar cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', inicializarFiltros);
+</script>
 
 <style lang="scss">
   .nombreDocumento {
     font-size: 1.2em;
+  }
+
+  .contenedorResultados {
+    padding: 1rem 2rem;
+    margin-bottom: 1rem;
+
+    .conteoResultados {
+      font-size: 1rem;
+      color: var(--colorTexto);
+      opacity: 0.8;
+      margin: 0;
+
+      #conteoActual {
+        font-weight: bold;
+        color: var(--cobalto);
+      }
+    }
   }
 
   .contenedorDocumentos {
@@ -207,5 +349,17 @@ documentos.forEach((documento) => {
       display: block;
       margin: 0 auto;
     }
+  }
+
+  .categorias {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .categoriaEnDocumento {
+    display: inline-block;
+    font-size: 0.75rem;
   }
 </style>
