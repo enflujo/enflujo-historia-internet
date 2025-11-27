@@ -7,6 +7,9 @@ publico/
 # generated types
 .astro/
 
+# cache prebuild
+.cache/
+
 # dependencies
 node_modules/
 

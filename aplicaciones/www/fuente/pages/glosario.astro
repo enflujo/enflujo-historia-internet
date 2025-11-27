@@ -1,70 +1,32 @@
 ---
 // Importar los módulos y tipos necesarios
-import type { Glosario, MetaInfo, Pagina } from '@/tipos';
-import { esquemaPagina, gql, pedirDatos } from '@/utilidades/ayudas';
+import type { Glosario } from '@/tipos';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
+import { obtenerGlosario, obtenerPagina } from '@/utilidades/cache';
 
-const PeticionPagina = gql`
-  query {
-    ${esquemaPagina('glosario')}
-  }
-`;
-
-async function pedirSeccionDatos(cursorTerminos: string = '', terminosProcesados: Glosario[] = []) {
-  const EsquemaEventos = gql`
-    query Terminos {
-      terminos(first: 1000${cursorTerminos ? `, after: "${cursorTerminos}"` : ''}) {
-        pageInfo {
-          hasNextPage
-          hasNextPage
-          hasPreviousPage
-          startCursor
-          endCursor
-        }
-        
-        nodes {
-          slug
-          title
-          content
-          status
-        }
-      }
-    }
-  `;
-
-  const { terminos: algunosTerminos } = await pedirDatos<{
-    terminos: { pageInfo: MetaInfo; nodes: Glosario[] };
-  }>(EsquemaEventos);
-  // Filtrar los términos que están publicados
-  terminosProcesados.push(...algunosTerminos.nodes.filter((termino) => termino.status === 'publish'));
-
-  if (algunosTerminos.pageInfo.hasNextPage) {
-    return await pedirSeccionDatos(algunosTerminos.pageInfo.endCursor, terminosProcesados);
-  }
-
-  return terminosProcesados;
+const pagina = obtenerPagina('glosario');
+if (!pagina) {
+  throw new Error('Página glosario no encontrada');
 }
 
-// Obtener los datos de la pagina
-const { pagina, terminos } = await pedirDatos<{ page: Pagina }>(PeticionPagina).then(async (respuesta) => ({
-  pagina: respuesta.page,
-  terminos: await pedirSeccionDatos(),
-}));
+const terminos = obtenerGlosario();
 
 // Organizar los términos del glosario en orden alfabético
 terminos.sort((a, b) => a.title.localeCompare(b.title));
 ---
 
 <Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
-  <main class="glosario">
+  <main class="glosario" data-pagefind-body data-pagefind-meta="seccion:Glosario">
     <TituloPagina titulo={pagina.title} slug={pagina.slug} />
 
     <div id="contenedorGlosario">
       {
         terminos.map((glosario) => (
           <article class="termino" id={glosario.slug}>
-            <h2 class="tituloTermino">{glosario.title}</h2>
+            <h2 class="tituloTermino" data-pagefind-meta="title">
+              {glosario.title}
+            </h2>
             <div class="contenidoTermino" set:html={glosario.content} />
           </article>
         ))

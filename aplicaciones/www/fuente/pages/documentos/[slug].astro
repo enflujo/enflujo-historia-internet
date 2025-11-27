@@ -1,93 +1,22 @@
 ---
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
-import type { Documento } from '@/tipos';
-import { gql, pedirDatos, procesarCategorias } from '@/utilidades/ayudas';
+import { procesarCategorias } from '@/utilidades/ayudas';
 import { apiBase, base } from '@/utilidades/constantes';
+import { obtenerDocumentos, obtenerDocumento } from '@/utilidades/cache';
 
 export async function getStaticPaths() {
-  const todos: { title: string; slug: string }[] = [];
-
-  let tieneMas = true;
-  let final: string | null = null;
-
-  while (tieneMas) {
-    const posicion: string = final ? `, after: "${final}"` : '';
-    const PeticionDocumentos: string = gql`
-      query {
-        documentos(first: 100${posicion}) {
-          nodes { title slug }
-          pageInfo { hasNextPage endCursor }
-        }
-      }`;
-
-    const respuesta = await pedirDatos<{
-      documentos: {
-        nodes: { title: string; slug: string }[];
-        pageInfo: { hasNextPage: boolean; endCursor: string | null };
-      };
-    }>(PeticionDocumentos);
-
-    if (!respuesta || !respuesta.documentos) break;
-
-    todos.push(...(respuesta.documentos.nodes || []));
-
-    tieneMas = !!respuesta.documentos.pageInfo?.hasNextPage;
-    final = respuesta.documentos.pageInfo?.endCursor || null;
-
-    if (!tieneMas) break;
-  }
-
-  return todos.map(({ slug }) => ({ params: { slug } }));
+  const documentos = obtenerDocumentos();
+  return documentos.map(({ slug }) => ({ params: { slug } }));
 }
+
 const { slug } = Astro.params;
+const documento = obtenerDocumento(slug);
 
-const PeticionDocumentos = gql`
-  query Documentos {
-    documento(id: "${slug}", idType: SLUG) {
-      id
-      slug
-      title
-      descripcion
-      fecha
-      autores
-      fuente(format: RAW)
-      identificador
-      archivos {
-        nodes {
-          filePath
-        }
-      }
-      tiposDeDocumentos {
-        nodes {
-          slug
-          name
-        }
-      }
-      featuredImage {
-        node {
-          filePath
-        }
-      }
-      categories {
-        edges {
-          node {
-            name
-            slug
-            parent {
-              node {
-                slug
-                name
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
+if (!documento) {
+  return Astro.redirect('/404');
+}
 
-const { documento } = await pedirDatos<{ documento: Documento }>(PeticionDocumentos);
 const categorias = procesarCategorias(documento.categories);
 documento.categorias = categorias;
 ---
@@ -99,29 +28,38 @@ documento.categorias = categorias;
 >
   <TituloPagina titulo="Documentos" slug="documentos" />
 
-  <article class="documento">
+  <article class="documento" data-pagefind-body data-pagefind-meta="seccion:Documentos">
     <div class="col1">
-      <h2 class="nombreDocumento">{documento.title}</h2>
+      <h2 class="nombreDocumento" data-pagefind-meta="title">{documento.title}</h2>
 
       <div class="metadatos">
         {
           documento.fecha && (
             <p class="fecha">
-              <span class="subtitulo"> Fecha:</span> <span class="metadato">{documento.fecha}</span>
+              <span class="subtitulo"> Fecha:</span>{' '}
+              <span class="metadato" data-pagefind-meta="fecha">
+                {documento.fecha}
+              </span>
             </p>
           )
         }
         {
           documento.autores && (
             <p class="autores">
-              <span class="subtitulo">Autores:</span> <span class="metadato">{documento.autores}</span>
+              <span class="subtitulo">Autores:</span>{' '}
+              <span class="metadato" data-pagefind-meta="autores">
+                {documento.autores}
+              </span>
             </p>
           )
         }
         {
           documento.fuente && (
             <p class="fuente">
-              <span class="subtitulo">Fuente:</span> <span class="metadato">{documento.fuente} </span>
+              <span class="subtitulo">Fuente:</span>{' '}
+              <span class="metadato" data-pagefind-meta="fuente">
+                {documento.fuente}{' '}
+              </span>
             </p>
           )
         }
@@ -139,7 +77,9 @@ documento.categorias = categorias;
               <span class="subtitulo">Tipo de documento:</span>
 
               {documento.tiposDeDocumentos.nodes.map((tipo) => (
-                <span class="metadato">{tipo.name}</span>
+                <span class="metadato" data-pagefind-filter="tipo">
+                  {tipo.name}
+                </span>
               ))}
             </p>
           )
@@ -152,7 +92,7 @@ documento.categorias = categorias;
               <div class="contenedorCategorias">
                 {documento.categorias.map((categoria) => (
                   <div class="categoriaGrupo">
-                    <span class="categoria metadato">
+                    <span class="categoria metadato" data-pagefind-filter="categoria">
                       <a href={`${base}/categorias/${categoria.slug}`}>{categoria.nombre}</a>
                     </span>
 

@@ -3,37 +3,16 @@ import FiltrosHistoriaOral from '@/componentes/FiltrosHistoriaOral.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import FichaPersonajes from '@/componentes/FichaPersonajes.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
-import type { Pagina, Personaje } from '@/tipos';
-import { esquemaPagina, gql, pedirDatos } from '@/utilidades/ayudas';
+import { obtenerPagina, obtenerPersonajes } from '@/utilidades/cache';
 
-const PeticionPagina = gql`
-  query {
-    ${esquemaPagina('historia-oral')}
-  }
-`;
-const { page: pagina } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
+const pagina = obtenerPagina('historia-oral');
+if (!pagina) {
+  throw new Error('Página historia-oral no encontrada');
+}
 
-const PeticionPersonajes = gql`
-  query {
-    personajes(first: 1000) {
-      nodes {
-        title
-        slug
-        content(format: RENDERED)
-        featuredImage {
-          node {
-            altText
-            sourceUrl
-          }
-        }
-      }
-    }
-  }
-`;
+const personajes = obtenerPersonajes();
 
-const { personajes } = await pedirDatos<{ personajes: { nodes: Personaje[] } }>(PeticionPersonajes);
-
-personajes.nodes.sort((a, b) => {
+personajes.sort((a, b) => {
   const nombreA = a.title.toLowerCase();
   const nombreB = b.title.toLowerCase();
 
@@ -52,7 +31,7 @@ personajes.nodes.sort((a, b) => {
       <FiltrosHistoriaOral />
     </aside>
 
-    <main class="col2">
+    <main class="col2" data-pagefind-body>
       <!-- {terminosGlobales ? <NubePalabras terminos={terminosGlobales} /> : null} -->
       <!-- <VisualizacionCategorias /> -->
 
@@ -60,7 +39,7 @@ personajes.nodes.sort((a, b) => {
         <h2>Personajes</h2>
         <div class="personajes-lista">
           {
-            personajes.nodes.map((personaje) => (
+            personajes.map((personaje) => (
               <FichaPersonajes
                 slug={personaje.slug}
                 nombre={personaje.title}

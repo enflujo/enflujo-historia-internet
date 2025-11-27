@@ -102,6 +102,9 @@ export function extraerTerminos(texto: string, terminos: Termino[], glosario?: T
   return texto;
 }
 
+// Variable global para cachear el glosario en memoria durante el build
+let glosarioCache: TerminoGlosario[] | undefined;
+
 export async function convertirTextoAHTML(
   textoSinProcesar: string,
   terminos: Termino[] = []
@@ -113,15 +116,24 @@ export async function convertirTextoAHTML(
     .replace(/^# (.*)$/gm, '<h1 class="titulo1">$1</h1>')
     .replace(/\$/g, '<span class="division"></span>');
 
-  // Procesamiento de términos anotados
-  let glosario: TerminoGlosario[] | undefined;
-  try {
-    glosario = await listaGlosario();
-  } catch (error) {
-    console.error('Error al obtener el glosario:', error);
+  // Procesamiento de términos anotados usando caché
+  if (!glosarioCache) {
+    try {
+      // Intentar usar caché primero
+      const { obtenerGlosario } = await import('./cache');
+      glosarioCache = obtenerGlosario().map((t) => ({ title: t.title, slug: t.slug }));
+    } catch {
+      // Fallback a petición GraphQL si no hay caché
+      try {
+        glosarioCache = await listaGlosario();
+      } catch (error) {
+        console.error('Error al obtener el glosario:', error);
+        glosarioCache = [];
+      }
+    }
   }
 
-  texto = extraerTerminos(texto, terminos, glosario);
+  texto = extraerTerminos(texto, terminos, glosarioCache);
 
   // Transformación de párrafos
   texto = texto

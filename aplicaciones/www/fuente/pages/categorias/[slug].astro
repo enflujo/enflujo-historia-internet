@@ -5,160 +5,69 @@ import SeccionEntrevista from '@/componentes/SeccionEntrevista.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import FiltroFoto from '@/componentes/FiltroFoto.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
-import type { SeccionEntrevistaProcesadaCruzada, Imagen, Termino, MetaInfo, TranscripcionesCruzadas } from '@/tipos';
-import {
-  convertirTextoAHTML,
-  gql,
-  pedirDatos,
-  procesarAudiosTranscripcion,
-  procesarCategorias,
-} from '@/utilidades/ayudas';
+import type { SeccionEntrevistaProcesadaCruzada, Imagen, Termino } from '@/tipos';
 import { base } from '@/utilidades/constantes';
 
 const categoria = 'Categoría';
 export async function getStaticPaths() {
-  const PeticionCategorias = gql`
-    query {
-      categories(where: { hideEmpty: true }, first: 1000) {
-        nodes {
-          name
-          slug
-        }
-      }
-    }
-  `;
-  const { categories } = await pedirDatos<{ categories: { nodes: { name: string; slug: string }[] } }>(
-    PeticionCategorias
-  );
-
-  return categories.nodes.map(({ slug, name }) => {
-    return { params: { slug: slug }, props: { nombreCategoria: name } };
-  });
+  const { obtenerCategorias } = await import('@/utilidades/cache');
+  const categorias = obtenerCategorias();
+  return categorias.map(({ slug, name }) => ({ params: { slug }, props: { nombreCategoria: name } }));
 }
 
 const { slug } = Astro.params;
 const { nombreCategoria } = Astro.props;
-
-async function pedirSeccionDatos(cursor: string = '', transcripcionesProcesadas: TranscripcionesCruzadas[] = []) {
-  const PeticionTranscripcionesCategoria = gql`
-    query Terminos {
-      transcripciones(where: {categoryName: "${slug}"}, first: 1000${cursor ? `, after: "${cursor}"` : ''}) {
-        pageInfo {
-          hasNextPage
-          hasNextPage
-          hasPreviousPage
-          startCursor
-          endCursor
-        }
-        
-        nodes {
-          title
-          transcripcion(format: RAW)
-          ordenAudios
-          databaseId
-          categories {
-            edges {
-              node {
-                name
-                slug
-                parent {
-                  node {
-                    slug
-                    name
-                  }
-                }
-              }
-            }
-          }
-          audios {
-            nodes {
-              databaseId
-              archivos {
-                node {
-                  title
-                  link
-                  mimeType
-                }
-              }
-            }
-          }
-          entrevista {
-            node {
-              fecha
-              ordenTranscripciones
-              personajes {
-                nodes {
-                  title
-                  slug
-                  featuredImage {
-                    node {
-                      altText
-                      sourceUrl
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  `;
-
-  const { transcripciones: algunas } = await pedirDatos<{
-    transcripciones: { pageInfo: MetaInfo; nodes: TranscripcionesCruzadas[] };
-  }>(PeticionTranscripcionesCategoria);
-  transcripcionesProcesadas.push(...(algunas.nodes || []));
-
-  if (algunas && algunas.pageInfo && algunas.pageInfo.hasNextPage) {
-    return await pedirSeccionDatos(algunas.pageInfo.endCursor, transcripcionesProcesadas);
-  }
-
-  return transcripcionesProcesadas;
-}
-
-const transcripciones = await pedirSeccionDatos();
+const { obtenerTranscripcionesCategoria } = await import('@/utilidades/cache');
+const transcripciones = obtenerTranscripcionesCategoria(slug);
 const terminosCategoria: Termino[] = [];
 const personajesCategoria: { nombre: string; slug: string; imagen: Imagen | null }[] = [];
 
-const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = await Promise.all(
-  transcripciones.map(async (transcripcion) => {
-    const { transcripcion: textoTranscripcion, audios, ordenAudios, entrevista, categories } = transcripcion;
-    const { texto } = await convertirTextoAHTML(textoTranscripcion, terminosCategoria);
-    const audiosProcesados = procesarAudiosTranscripcion(audios, ordenAudios);
+const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcripciones.map((transcripcion) => {
+  const { transcripcionHTML, terminos, audios, categorias, entrevista } = transcripcion as any;
 
-    return {
-      contenido: texto,
-      audios: audiosProcesados,
-      categorias: procesarCategorias(categories),
-      personajes: entrevista.node.personajes.nodes.map((personaje) => {
-        // Guardar los personajes que aparecen en esta categoría
-        const existe = personajesCategoria.find((p) => p.slug === personaje.slug);
-        if (!existe) {
-          personajesCategoria.push({
-            nombre: personaje.title,
-            slug: personaje.slug,
-            imagen: personaje.featuredImage
-              ? {
-                  node: {
-                    altText: personaje.featuredImage.node.altText,
-                    sourceUrl: personaje.featuredImage.node.sourceUrl,
-                  },
-                }
-              : null,
-          });
-        }
+  // Agregar términos de esta transcripción a la lista general
+  if (terminos && terminos.length > 0) {
+    terminos.forEach((t: Termino) => {
+      const existe = terminosCategoria.find((term) => term.slug === t.slug);
+      if (existe) {
+        existe.conteo += t.conteo;
+      } else {
+        terminosCategoria.push(t);
+      }
+    });
+  }
 
-        return {
+  return {
+    contenido: transcripcionHTML || '',
+    audios: audios || [],
+    categorias: categorias || [],
+    personajes: entrevista.node.personajes.nodes.map((personaje: any) => {
+      // Guardar los personajes que aparecen en esta categoría
+      const existe = personajesCategoria.find((p) => p.slug === personaje.slug);
+      if (!existe) {
+        personajesCategoria.push({
           nombre: personaje.title,
           slug: personaje.slug,
-        };
-      }),
+          imagen: personaje.featuredImage
+            ? {
+                node: {
+                  altText: personaje.featuredImage.node.altText,
+                  sourceUrl: personaje.featuredImage.node.sourceUrl,
+                },
+              }
+            : null,
+        });
+      }
 
-      fechaEntrevista: new Date(entrevista.node.fecha),
-    };
-  })
-);
+      return {
+        nombre: personaje.title,
+        slug: personaje.slug,
+      };
+    }),
+
+    fechaEntrevista: new Date(entrevista.node.fecha),
+  };
+});
 ---
 
 <Plantilla titulo={nombreCategoria} descripcion={categoria} conMenuIzquierdo={true}>
@@ -168,8 +77,8 @@ const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = await Pro
       <FiltrosHistoriaOral />
     </aside>
 
-    <main class="col2">
-      <h1 class="tituloCategoria">{nombreCategoria}</h1>
+    <main class="col2" data-pagefind-body data-pagefind-meta="seccion:Historia Oral">
+      <h1 class="tituloCategoria" data-pagefind-meta="title">{nombreCategoria}</h1>
 
       <section id="resumenPersonajes">
         <div class="cajaPersonajes">

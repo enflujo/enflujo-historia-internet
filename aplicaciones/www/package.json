@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "prebuild": "node scripts/prebuild-fetch-all.js",
+    "build": "yarn prebuild && astro check && astro build",
+    "build:skip-fetch": "astro check && astro build",
     "revisar": "astro check",
     "preview": "astro preview",
     "astro": "astro",
@@ -18,12 +20,14 @@
     "@astrojs/sitemap": "^3.6.0",
     "@astrojs/ts-plugin": "^1.10.6",
     "astro": "5.16.1",
+    "astro-pagefind": "^1.8.5",
     "nanostores": "^1.1.0",
     "slug": "^10.0.0",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@types/slug": "^5.0.9",
+    "pagefind": "^1.4.0",
     "prettier-plugin-astro": "^0.14.1",
     "sass": "^1.94.2"
   }

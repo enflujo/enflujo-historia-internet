@@ -17,32 +17,33 @@ export const glosario = atom<TerminoGlosario[]>([]);
 export const categoriasPrincipales = atom<CategoriaPrincipal[]>([]);
 
 export async function listaCategorias() {
-  const categorias = arbolCategorias.get();
-  if (categorias) return categorias.categories.nodes;
+  const categoriasCache = arbolCategorias.get();
+  if (categoriasCache) return categoriasCache.categories.nodes;
 
-  const PeticionCategorias = gql`
-    query {
-      categories(where: { hideEmpty: true, parent: 0 }, first: 200) {
-        nodes {
-          name
-          slug
-          count
-          children(where: { hideEmpty: true }, first: 200) {
-            nodes {
-              name
-              slug
-              count
-            }
-          }
-        }
-      }
-    }
-  `;
+  // Construir árbol desde cache
+  const { obtenerCategorias } = await import('@/utilidades/cache');
+  const categorias = obtenerCategorias();
+  
+  // Agrupar por padre
+  const padres = categorias.filter((cat: any) => !cat.parent || !cat.parent.node);
+  const resultado = padres.map((padre: any) => {
+    const hijos = categorias.filter((cat: any) => cat.parent?.node?.slug === padre.slug);
+    return {
+      name: padre.name,
+      slug: padre.slug,
+      count: padre.count,
+      children: {
+        nodes: hijos.map((hijo: any) => ({
+          name: hijo.name,
+          slug: hijo.slug,
+          count: hijo.count,
+        })),
+      },
+    };
+  });
 
-  const respuesta = await pedirDatos<{ categories: CategoriasWPNodos }>(PeticionCategorias);
-  arbolCategorias.set(respuesta);
-
-  return respuesta.categories.nodes;
+  arbolCategorias.set({ categories: { nodes: resultado } });
+  return resultado;
 }
 
 export async function listaTerminos() {
@@ -177,19 +178,8 @@ export async function listaPaginas() {
 export async function listaCategoriasPrincipales() {
   if (categoriasPrincipales.get().length > 0) return categoriasPrincipales.get();
 
-  const Peticion = gql`
-    query {
-      categories(where: { orderby: SLUG, order: ASC, parent: null, hideEmpty: true }) {
-        nodes {
-          slug
-          name
-        }
-      }
-    }
-  `;
-
-  const { categories } = await pedirDatos<{ categories: CategoriasWPNodos }>(Peticion);
-  const categorias = categories.nodes.map((cat) => ({ slug: cat.slug, name: cat.name }));
+  const { obtenerCategoriasPrincipales } = await import('@/utilidades/cache');
+  const categorias = obtenerCategoriasPrincipales();
   categoriasPrincipales.set(categorias);
 
   return categorias;

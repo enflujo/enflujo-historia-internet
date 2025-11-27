@@ -19,7 +19,7 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
 
 <section class="personaje" id={slug}>
   <div class="contenido">
-    <h2 class="tituloPersonaje">
+    <h2 class="tituloPersonaje" data-pagefind-meta="title">
       {enlace ? <a href={`${base}/personajes/${slug}`}>{nombre}</a> : nombre}
     </h2>
 

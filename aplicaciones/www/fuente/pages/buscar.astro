@@ -1,0 +1,25 @@
+---
+import Plantilla from '../plantillas/Plantilla.astro';
+import Buscador from '../componentes/Buscador.astro';
+---
+
+<Plantilla titulo="Buscador">
+  <main class="paginaBusqueda" data-pagefind-ignore>
+    <h1>Buscar</h1>
+    <Buscador />
+  </main>
+</Plantilla>
+
+<style lang="scss">
+  .paginaBusqueda {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: var(--colorPrincipal);
+    }
+  }
+</style>

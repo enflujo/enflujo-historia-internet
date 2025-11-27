@@ -1,24 +1,21 @@
 ---
 import Plantilla from '@/plantillas/Plantilla.astro';
-import { esquemaPagina, gql, pedirDatos } from '@/utilidades/ayudas';
-import type { Pagina } from '@/tipos';
-import { listaPaginas } from '@/cerebros/general';
+import { obtenerPagina, obtenerPaginas } from '@/utilidades/cache';
 import { base } from '@/utilidades/constantes';
 
-const PeticionPagina = gql`
-  query {
-    ${esquemaPagina('inicio')}
-  }
-`;
+const page = obtenerPagina('inicio');
+if (!page) {
+  throw new Error('Página inicio no encontrada');
+}
 
-const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
-const paginas = await listaPaginas().then((paginas) =>
-  paginas.filter((pagina) => pagina.slug !== 'inicio' && pagina.slug !== 'enflujo-historia-internet')
+const todasPaginas = obtenerPaginas();
+const paginas = (todasPaginas as any[]).filter(
+  (pagina) => pagina.slug !== 'inicio' && pagina.slug !== 'enflujo-historia-internet'
 );
 ---
 
 <Plantilla titulo="" descripcion={page.descripcion}>
-  <main class="inicio">
+  <main class="inicio" data-pagefind-body>
     <div class="contenidoInicio" set:html={page.content} />
 
     <div class="contenedorEnlaces">

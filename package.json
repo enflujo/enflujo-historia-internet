@@ -15,7 +15,9 @@
     "lint": "prettier --check .",
     "lint:fix": "prettier --write --list-different .",
     "preview": "yarn workspace www preview",
-    "revisar": "yarn workspace www revisar"
+    "revisar": "yarn workspace www revisar",
+    "prebuild": "yarn workspace www prebuild",
+    "build:skip-fetch": "yarn workspace www build:skip-fetch"
   },
   "devDependencies": {
     "prettier": "^3.7.1"

@@ -1,52 +1,23 @@
 ---
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
-import type { Pagina } from '@/tipos';
-import { gql, pedirDatos } from '@/utilidades/ayudas';
+import { obtenerPaginas, obtenerPagina } from '@/utilidades/cache';
 
 export async function getStaticPaths() {
-  const Paginas = gql`
-    query {
-      pages {
-        nodes {
-          status
-          slug
-        }
-      }
-    }
-  `;
-  const { pages } = await pedirDatos<{ pages: { nodes: { slug: string }[] } }>(Paginas);
-
-  return pages.nodes.map(({ slug }) => {
-    return { params: { slug } };
-  });
+  const paginas = obtenerPaginas();
+  return paginas.map(({ slug }) => ({ params: { slug } }));
 }
+
 const { slug } = Astro.params;
+const page = obtenerPagina(slug);
 
-const PeticionPagina = gql`
-  query {
-    page(id: "${slug}", idType: URI) {
-      title
-      status
-      slug
-      iconoA
-      descripcion(format: RAW)
-      featuredImage {
-        node {
-          altText
-          sourceUrl(size: MEDIUM)
-        }
-      }
-      content(format: RENDERED)
-    }
-  }
-`;
-
-const { page } = await pedirDatos<{ page: Pagina }>(PeticionPagina);
+if (!page) {
+  return Astro.redirect('/404');
+}
 ---
 
 <Plantilla titulo={page.title} descripcion={page.descripcion}>
-  <main class="pagina">
+  <main class="pagina" data-pagefind-body>
     <TituloPagina titulo={page.title} slug={page.slug} />
     <div class="contenidoPagina" set:html={page.content} />
   </main>

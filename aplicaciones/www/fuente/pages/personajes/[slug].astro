@@ -7,104 +7,36 @@ import SeccionEntrevista from '@/componentes/SeccionEntrevista.astro';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import type {
-  EntrevistaPersonaje,
-  Personaje,
   EntrevistaWP,
   EntrevistasProcesadas,
   EntrevistaSingularProcesada,
   Termino,
   CategoriaProcesada,
 } from '@/tipos';
-import {
-  convertirTextoAHTML,
-  gql,
-  pedirDatos,
-  procesarAudiosTranscripcion,
-  procesarCategorias,
-} from '@/utilidades/ayudas';
 import { opcionesFecha } from '@/utilidades/constantes';
 
 export async function getStaticPaths() {
-  const Personajes = gql`
-    query {
-      personajes(first: 200) {
-        nodes {
-          title
-          slug
-        }
-      }
-    }
-  `;
-  const { personajes } = await pedirDatos<{ personajes: { nodes: Personaje[] } }>(Personajes);
-
-  return personajes.nodes.map(({ slug }) => {
-    return { params: { slug } };
-  });
+  const { obtenerPersonajes } = await import('@/utilidades/cache');
+  const personajes = obtenerPersonajes();
+  return personajes.map(({ slug }) => ({ params: { slug } }));
 }
 
 const { slug } = Astro.params;
+const { obtenerPersonaje } = await import('@/utilidades/cache');
+const personajeData = obtenerPersonaje(slug);
 
-const PeticionEntrevistaCompleta = gql`
-  query {
-    personaje(id: "${slug}", idType: SLUG) {
-      title
-      slug
-      content(format: RENDERED)
-      featuredImage {
-        node {
-          altText
-          sourceUrl
-        }
-      }
+if (!personajeData) {
+  return Astro.redirect('/404');
+}
 
-      entrevistas {
-        nodes {
-          fecha
-          ordenTranscripciones
-          transcripciones(first: 200) {
-            nodes {
-              title
-              transcripcion(format: RAW)
-              databaseId
-              ordenAudios
-              categories {
-                edges {
-                  node {
-                    name
-                    slug
-                    count
-                    parent {
-                      node {
-                        slug
-                        name
-                      }
-                    }
-                  }
-                }
-              }
-              audios(first: 200) {
-                nodes {
-                  databaseId
-                  archivos {
-                    node {
-                      link
-                      mimeType
-                      title
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-const entrevista = await pedirDatos<EntrevistaPersonaje>(PeticionEntrevistaCompleta);
+const entrevista = { personaje: personajeData };
 const terminosPersonaje: Termino[] = [];
 const categoriasPrincipales = await listaCategoriasPrincipales();
+
+if (!entrevista.personaje.entrevistas?.nodes) {
+  throw new Error(`Personaje ${slug} no tiene entrevistas`);
+}
+
 const entrevistaProcesada = await procesarEntrevistasPersonaje(entrevista.personaje.entrevistas.nodes);
 
 async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promise<EntrevistasProcesadas> {
@@ -129,22 +61,29 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
         return ordenTranscripciones.indexOf(a.databaseId) - ordenTranscripciones.indexOf(b.databaseId);
       });
 
-      await Promise.all(
-        transcripciones.nodes.map(async (transcripcion) => {
-          const { transcripcion: textoTranscripcion, audios, ordenAudios } = transcripcion;
+      transcripciones.nodes.forEach((transcripcion: any) => {
+        const { transcripcionHTML, terminos, audios, categorias } = transcripcion;
 
-          const audiosTranscripcion = procesarAudiosTranscripcion(audios, ordenAudios);
-          const textoProcesado = await convertirTextoAHTML(textoTranscripcion, terminosPersonaje);
-
-          entrevistaActual.secciones.push({
-            contenido: textoProcesado.texto,
-            audios: audiosTranscripcion,
-            categorias: procesarCategorias(transcripcion.categories),
+        // Agregar términos de esta transcripción a la lista general
+        if (terminos && terminos.length > 0) {
+          terminos.forEach((t: Termino) => {
+            const existe = terminosPersonaje.find((term) => term.slug === t.slug);
+            if (existe) {
+              existe.conteo += t.conteo;
+            } else {
+              terminosPersonaje.push(t);
+            }
           });
+        }
 
-          const categorias = procesarCategorias(transcripcion.categories);
+        entrevistaActual!.secciones.push({
+          contenido: transcripcionHTML || '',
+          audios: audios || [],
+          categorias: categorias || [],
+        });
 
-          categorias.forEach((categoria) => {
+        if (categorias && categorias.length > 0) {
+          categorias.forEach((categoria: CategoriaProcesada) => {
             let existe = categoriasPersonaje.find((cat) => cat.slug === categoria.slug);
 
             if (!existe) {
@@ -176,14 +115,14 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
               });
             }
           });
-        })
-      );
+        }
+      });
     })
   );
 
-  categoriasPersonaje.sort((a, b) => b.conteo - a.conteo);
-  categoriasPersonaje.forEach((categoria) => {
-    categoria.hijos.sort((a, b) => b.conteo - a.conteo);
+  categoriasPersonaje.sort((a: CategoriaProcesada, b: CategoriaProcesada) => b.conteo - a.conteo);
+  categoriasPersonaje.forEach((categoria: CategoriaProcesada) => {
+    categoria.hijos.sort((a: any, b: any) => b.conteo - a.conteo);
   });
 
   return { categoriasPersonaje, entrevistas: entrevistasPersonaje };
@@ -199,7 +138,7 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
       <FiltrosHistoriaOral personaje={slug} />
     </aside>
 
-    <main class="historia-oral">
+    <main class="historia-oral" data-pagefind-body data-pagefind-meta="seccion:Historia Oral">
       <div class="col2">
         <FichaPersonajes
           nombre={entrevista.personaje.title}

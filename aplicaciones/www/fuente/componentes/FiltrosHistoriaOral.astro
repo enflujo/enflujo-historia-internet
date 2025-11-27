@@ -1,8 +1,8 @@
 ---
 import { listaCategorias } from '@/cerebros/general';
 import type { Personaje } from '@/tipos';
-import { gql, pedirDatos } from '@/utilidades/ayudas';
 import { base } from '@/utilidades/constantes';
+import { obtenerPersonajes } from '@/utilidades/cache';
 
 interface Props {
   personaje?: string;
@@ -10,19 +10,8 @@ interface Props {
 const { personaje: personajeActual } = Astro.props as Props;
 
 const categorias = await listaCategorias();
-const PeticionPersonajes = gql`
-  query {
-    personajes(first: 1000) {
-      nodes {
-        title
-        slug
-      }
-    }
-  }
-`;
-
-const { personajes } = await pedirDatos<{ personajes: { nodes: Personaje[] } }>(PeticionPersonajes);
-personajes.nodes.sort((a, b) => {
+const personajes = obtenerPersonajes();
+personajes.sort((a, b) => {
   const nombreA = a.title.toLowerCase();
   const nombreB = b.title.toLowerCase();
 
@@ -38,7 +27,7 @@ personajes.nodes.sort((a, b) => {
     <select id="listaPersonajes" name="personaje">
       <option value="">Selecciona un personaje</option>
       {
-        personajes.nodes.map((personaje) => (
+        personajes.map((personaje) => (
           <option value={personaje.slug} data-slug={personaje.slug} selected={personaje.slug === personajeActual}>
             {personaje.title}
           </option>

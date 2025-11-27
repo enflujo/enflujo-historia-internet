@@ -1,0 +1,176 @@
+---
+import Search from 'astro-pagefind/components/Search';
+---
+
+<div class="contenedorBuscador">
+  <Search
+    id="buscador"
+    className="pagefind-ui"
+    uiOptions={{
+      showImages: false,
+      excerptLength: 30,
+      pageSize: 20,
+      translations: {
+        placeholder: 'Buscar en el sitio...',
+        clear_search: 'Limpiar',
+        load_more: 'Cargar más resultados',
+        search_label: 'Buscar en este sitio',
+        filters_label: 'Filtros',
+        zero_results: 'No se encontraron resultados para [SEARCH_TERM]',
+        many_results: '[COUNT] resultados para [SEARCH_TERM]',
+        one_result: '[COUNT] resultado para [SEARCH_TERM]',
+        alt_search:
+          'No se encontraron resultados para [SEARCH_TERM]. Mostrando resultados para [DIFFERENT_TERM] en su lugar',
+        search_suggestion: 'No se encontraron resultados para [SEARCH_TERM]. Pruebe una de las siguientes búsquedas:',
+        searching: 'Buscando [SEARCH_TERM]...',
+      },
+    }}
+  />
+</div>
+
+<script is:inline>
+  // Esperar a que Pagefind cargue y renderice resultados
+  window.addEventListener('load', () => {
+    // Observar cambios en el contenedor de resultados
+    const observer = new MutationObserver(() => {
+      const resultados = document.querySelectorAll('.pagefind-ui__result');
+
+      resultados.forEach((resultado) => {
+        // Evitar procesar el mismo resultado múltiples veces
+        if (resultado.dataset.processed) return;
+        resultado.dataset.processed = 'true';
+
+        const titleElement = resultado.querySelector('.pagefind-ui__result-title');
+        if (!titleElement) return;
+
+        // Buscar el link para obtener la URL
+        const link = titleElement.querySelector('a');
+        if (!link) return;
+
+        // Obtener la URL para identificar la sección
+        const url = link.href;
+        let seccion = '';
+
+        if (url.includes('/personajes/') || url.includes('/categorias/')) {
+          seccion = 'Historia Oral';
+        } else if (url.includes('/documentos/')) {
+          seccion = 'Documentos';
+        } else if (url.includes('/glosario')) {
+          seccion = 'Glosario';
+        }
+
+        // El título ya debería ser el correcto gracias a data-pagefind-meta="title"
+        // No necesitamos procesarlo
+
+        // Insertar el meta de sección ANTES del título si existe
+        if (seccion && !resultado.querySelector('.seccion-meta')) {
+          const seccionDiv = document.createElement('div');
+          seccionDiv.className = 'seccion-meta';
+          seccionDiv.textContent = seccion;
+          titleElement.parentElement.insertBefore(seccionDiv, titleElement);
+        }
+      });
+    });
+
+    // Observar el contenedor de resultados
+    const contenedor = document.querySelector('.pagefind-ui');
+    if (contenedor) {
+      observer.observe(contenedor, {
+        childList: true,
+        subtree: true,
+      });
+    }
+  });
+</script>
+
+<style lang="scss">
+  .contenedorBuscador {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+
+    :global(.pagefind-ui__search-input) {
+      width: 100%;
+      padding: 1rem 1rem 1rem 2rem;
+      font-size: 1.1rem;
+      border: 2px solid var(--colorPrincipal, #333);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+
+      &:focus {
+        border-color: var(--colorDestacado, #0066cc);
+      }
+    }
+
+    :global(.pagefind-ui__result) {
+      padding: 1.5rem;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      transition: all 0.2s;
+
+      &:hover {
+        border-color: var(--colorDestacado, #0066cc);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+      }
+    }
+
+    :global(.pagefind-ui__result .seccion-meta) {
+      font-size: 0.75rem;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.3rem;
+      font-weight: 500;
+    }
+
+    :global(.pagefind-ui__result-title) {
+      color: var(--colorDestacado, #0066cc);
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    :global(.pagefind-ui__result-nested) {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    :global(.pagefind-ui__result-excerpt) {
+      line-height: 1.6;
+      color: var(--colorTexto);
+    }
+
+    :global(mark) {
+      background-color: #ffeb3b;
+      padding: 0.1em 0.2em;
+      border-radius: 2px;
+      font-weight: 600;
+    }
+
+    :global(.pagefind-ui__message) {
+      text-align: center;
+      padding: 2rem;
+      color: var(--colorTexto);
+      opacity: 0.7;
+    }
+
+    :global(.pagefind-ui__button) {
+      background-color: var(--colorDestacado, #0066cc);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+</style>

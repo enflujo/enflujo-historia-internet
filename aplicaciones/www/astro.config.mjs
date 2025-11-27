@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import pagefind from "astro-pagefind";
 
 export default defineConfig({
   publicDir: './estaticos',
@@ -7,7 +8,7 @@ export default defineConfig({
   srcDir: './fuente',
   outDir: './publico',
   base: '/',
-  integrations: [sitemap()],
+  integrations: [sitemap(), pagefind()],
   vite: {
     server: {
       watch: {
