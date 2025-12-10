@@ -2,8 +2,8 @@
 import TituloPagina from '@/componentes/TituloPagina.astro';
 const { obtenerPersonajes, obtenerCategoriasPrincipales } = await import('@/utilidades/cache');
 
-const personajes = obtenerPersonajes() as any[];
-const categoriasPrincipales = obtenerCategoriasPrincipales() as any[];
+const personajes = (await obtenerPersonajes()) as any[];
+const categoriasPrincipales = (await obtenerCategoriasPrincipales()) as any[];
 
 interface Nodo {
   id: string;

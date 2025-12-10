@@ -3,12 +3,12 @@ import Plantilla from '@/plantillas/Plantilla.astro';
 import { obtenerPagina, obtenerPaginas } from '@/utilidades/cache';
 import { base } from '@/utilidades/constantes';
 
-const page = obtenerPagina('inicio');
+const page = await obtenerPagina('inicio');
 if (!page) {
   throw new Error('Página inicio no encontrada');
 }
 
-const todasPaginas = obtenerPaginas();
+const todasPaginas = await obtenerPaginas();
 const paginas = (todasPaginas as any[]).filter(
   (pagina) => pagina.slug !== 'inicio' && pagina.slug !== 'enflujo-historia-internet'
 );

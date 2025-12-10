@@ -6,12 +6,12 @@ import RedRelaciones from '@/componentes/RedRelaciones.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import { obtenerPagina, obtenerPersonajes } from '@/utilidades/cache';
 
-const pagina = obtenerPagina('historia-oral');
+const pagina = await obtenerPagina('historia-oral');
 if (!pagina) {
   throw new Error('Página historia-oral no encontrada');
 }
 
-const personajes = obtenerPersonajes();
+const personajes = await obtenerPersonajes();
 
 personajes.sort((a, b) => {
   const nombreA = a.title.toLowerCase();

@@ -10,7 +10,7 @@ interface Props {
 const { personaje: personajeActual } = Astro.props as Props;
 
 const categorias = await listaCategorias();
-const personajes = obtenerPersonajes();
+const personajes = await obtenerPersonajes();
 personajes.sort((a, b) => {
   const nombreA = a.title.toLowerCase();
   const nombreB = b.title.toLowerCase();
@@ -41,13 +41,13 @@ personajes.sort((a, b) => {
 
     <ul>
       {
-        categorias.map((categoria) => (
+        categorias.map((categoria: any) => (
           <li class="categoria categoria0" data-slug={categoria.slug}>
             <span class="categoriaPrincipal">{categoria.name}</span>
 
             {categoria.children.nodes.length > 0 && (
               <ul class="subcategorias">
-                {categoria.children.nodes.map((subcategoria) => (
+                {categoria.children.nodes.map((subcategoria: any) => (
                   <li class="categoria subcategoria" data-slug={subcategoria.slug}>
                     <a href={`${base}/categorias/${subcategoria.slug}`}>{subcategoria.name}</a>
                   </li>

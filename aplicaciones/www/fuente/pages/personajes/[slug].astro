@@ -17,13 +17,13 @@ import { opcionesFecha } from '@/utilidades/constantes';
 
 export async function getStaticPaths() {
   const { obtenerPersonajes } = await import('@/utilidades/cache');
-  const personajes = obtenerPersonajes();
+  const personajes = await obtenerPersonajes();
   return personajes.map(({ slug }) => ({ params: { slug } }));
 }
 
 const { slug } = Astro.params;
 const { obtenerPersonaje } = await import('@/utilidades/cache');
-const personajeData = obtenerPersonaje(slug);
+const personajeData = await obtenerPersonaje(slug);
 
 if (!personajeData) {
   return Astro.redirect('/404');

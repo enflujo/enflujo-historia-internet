@@ -1,15 +1,16 @@
 ---
 import TituloPagina from '@/componentes/TituloPagina.astro';
+import ResaltadorCodigo from '@/componentes/ResaltadorCodigo.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import { obtenerPaginas, obtenerPagina } from '@/utilidades/cache';
 
 export async function getStaticPaths() {
-  const paginas = obtenerPaginas();
+  const paginas = await obtenerPaginas();
   return paginas.map(({ slug }) => ({ params: { slug } }));
 }
 
 const { slug } = Astro.params;
-const page = obtenerPagina(slug);
+const page = await obtenerPagina(slug);
 
 if (!page) {
   return Astro.redirect('/404');
@@ -17,6 +18,7 @@ if (!page) {
 ---
 
 <Plantilla titulo={page.title} descripcion={page.descripcion}>
+  <ResaltadorCodigo />
   <main class="pagina" data-pagefind-body>
     <TituloPagina titulo={page.title} slug={page.slug} />
     <div class="contenidoPagina" set:html={page.content} />

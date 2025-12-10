@@ -7,12 +7,12 @@ import { obtenerDocumentos, obtenerDocumento } from '@/utilidades/cache';
 import { listaCategoriasPrincipales } from '@/cerebros/general';
 
 export async function getStaticPaths() {
-  const documentos = obtenerDocumentos();
+  const documentos = await obtenerDocumentos();
   return documentos.map(({ slug }) => ({ params: { slug } }));
 }
 
 const { slug } = Astro.params;
-const documento = obtenerDocumento(slug);
+const documento = await obtenerDocumento(slug);
 
 if (!documento) {
   return Astro.redirect('/404');

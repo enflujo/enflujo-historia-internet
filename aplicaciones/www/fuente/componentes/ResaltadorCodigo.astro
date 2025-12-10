@@ -1,0 +1,119 @@
+---
+/**
+ * Componente para resaltado de sintaxis con Prism.js
+ * Incluye estilos y script para detectar y colorear bloques de código
+ */
+---
+
+<!-- Tema de Prism.js - Tomorrow Night (oscuro) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/prism-tomorrow.min.css" />
+
+<!-- Script de Prism.js con lenguajes comunes -->
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-graphql.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+
+<script is:inline>
+  // Inicializa Prism cuando la página cargue
+  document.addEventListener('DOMContentLoaded', () => {
+    // PASO 1: WordPress pone la clase en <pre>, necesitamos copiarla a <code>
+    document.querySelectorAll('pre[class*="language-"] code').forEach((code) => {
+      const pre = code.parentElement;
+      if (pre && pre.className.includes('language-')) {
+        // Copia todas las clases del pre al code
+        code.className = pre.className;
+      }
+    });
+
+    // PASO 2: Detecta bloques de código y aplica clases de lenguaje si no las tienen
+    document.querySelectorAll('pre code').forEach((block) => {
+      // Si ya tiene clase de lenguaje, no hacer nada
+      if (block.className && block.className.includes('language-')) {
+        return;
+      }
+
+      // Intenta detectar el lenguaje por contenido
+      const code = block.textContent || '';
+      
+      // Detecta GraphQL
+      if (code.includes('query') && code.includes('{') && (code.includes('nodes') || code.includes('edges'))) {
+        block.classList.add('language-graphql');
+      }
+      // Detecta JSON
+      else if (code.trim().startsWith('{') || code.trim().startsWith('[')) {
+        block.classList.add('language-json');
+      }
+      // Detecta JavaScript/TypeScript
+      else if (code.includes('const') || code.includes('let') || code.includes('function') || code.includes('=>')) {
+        block.classList.add('language-javascript');
+      }
+      // Detecta Python
+      else if (code.includes('def ') || code.includes('import ') || code.includes('print(')) {
+        block.classList.add('language-python');
+      }
+      // Detecta Bash
+      else if (code.includes('$') || code.includes('#!/bin/') || code.includes('yarn') || code.includes('npm')) {
+        block.classList.add('language-bash');
+      }
+      // Por defecto
+      else {
+        block.classList.add('language-plaintext');
+      }
+
+      // Asegura que el <pre> también tenga la clase
+      if (block.parentElement && block.parentElement.tagName === 'PRE') {
+        block.parentElement.className = block.className;
+      }
+    });
+
+    // Re-ejecuta Prism para resaltar todo
+    if (window.Prism) {
+      window.Prism.highlightAll();
+    }
+  });
+</script>
+
+<style is:global>
+  /* Estilos personalizados para bloques de código */
+  pre[class*='language-'] {
+    margin: 1.5em 0;
+    padding: 1em;
+    border-radius: 0.5em;
+    overflow: auto;
+    font-size: 0.9em;
+    line-height: 1.5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  code[class*='language-'] {
+    font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+  }
+
+  /* Código inline */
+  :not(pre) > code {
+    padding: 0.2em 0.4em;
+    border-radius: 0.3em;
+    background: #f5f5f5;
+    color: #c7254e;
+    font-size: 0.9em;
+    font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+  }
+
+  /* Ajustes para bloques largos */
+  pre[class*='language-'] {
+    max-height: 600px;
+  }
+
+  /* Scroll horizontal en móviles */
+  @media (max-width: 768px) {
+    pre[class*='language-'] {
+      font-size: 0.8em;
+      padding: 0.8em;
+    }
+  }
+</style>

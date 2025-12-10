@@ -11,18 +11,18 @@ import { base } from '@/utilidades/constantes';
 const categoria = 'Categoría';
 export async function getStaticPaths() {
   const { obtenerCategorias } = await import('@/utilidades/cache');
-  const categorias = obtenerCategorias();
+  const categorias = await obtenerCategorias();
   return categorias.map(({ slug, name }) => ({ params: { slug }, props: { nombreCategoria: name } }));
 }
 
 const { slug } = Astro.params;
 const { nombreCategoria } = Astro.props;
 const { obtenerTranscripcionesCategoria } = await import('@/utilidades/cache');
-const transcripciones = obtenerTranscripcionesCategoria(slug);
+const transcripciones = await obtenerTranscripcionesCategoria(slug);
 const terminosCategoria: Termino[] = [];
 const personajesCategoria: { nombre: string; slug: string; imagen: Imagen | null }[] = [];
 
-const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcripciones.map((transcripcion) => {
+const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcripciones.map((transcripcion: any) => {
   const { transcripcionHTML, terminos, audios, categorias, entrevista } = transcripcion as any;
 
   // Agregar términos de esta transcripción a la lista general

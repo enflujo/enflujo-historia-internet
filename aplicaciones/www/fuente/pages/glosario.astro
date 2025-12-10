@@ -5,12 +5,12 @@ import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import { obtenerGlosario, obtenerPagina } from '@/utilidades/cache';
 
-const pagina = obtenerPagina('glosario');
+const pagina = await obtenerPagina('glosario');
 if (!pagina) {
   throw new Error('Página glosario no encontrada');
 }
 
-const terminos = obtenerGlosario();
+const terminos = await obtenerGlosario();
 
 // Organizar los términos del glosario en orden alfabético
 terminos.sort((a, b) => a.title.localeCompare(b.title));
