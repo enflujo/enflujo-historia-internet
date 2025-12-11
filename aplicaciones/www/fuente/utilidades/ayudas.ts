@@ -121,7 +121,7 @@ export async function convertirTextoAHTML(
     try {
       // Intentar usar caché primero
       const { obtenerGlosario } = await import('./cache');
-      glosarioCache = obtenerGlosario().map((t) => ({ title: t.title, slug: t.slug }));
+      glosarioCache = (await obtenerGlosario()).map((t) => ({ title: t.title, slug: t.slug }));
     } catch {
       // Fallback a petición GraphQL si no hay caché
       try {

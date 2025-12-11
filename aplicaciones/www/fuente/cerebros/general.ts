@@ -22,7 +22,7 @@ export async function listaCategorias() {
 
   // Construir árbol desde cache
   const { obtenerCategorias } = await import('@/utilidades/cache');
-  const categorias = obtenerCategorias();
+  const categorias = await obtenerCategorias();
 
   // Agrupar por padre
   const padres = categorias.filter((cat: any) => !cat.parent || !cat.parent.node);
@@ -179,7 +179,7 @@ export async function listaCategoriasPrincipales() {
   if (categoriasPrincipales.get().length > 0) return categoriasPrincipales.get();
 
   const { obtenerCategoriasPrincipales } = await import('@/utilidades/cache');
-  const categorias = obtenerCategoriasPrincipales();
+  const categorias = await obtenerCategoriasPrincipales();
   categoriasPrincipales.set(categorias);
 
   return categorias;

@@ -142,6 +142,7 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
     </aside>
 
     <main class="documentos col2">
+      <div class="introPagina" set:html={pagina.content} />
       <div class="contenedorResultados">
         <p class="conteoResultados">
           Mostrando <span id="conteoActual">{documentos.length}</span> de <span id="conteoTotal"

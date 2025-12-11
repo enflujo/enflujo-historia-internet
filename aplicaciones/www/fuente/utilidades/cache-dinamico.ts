@@ -327,7 +327,7 @@ export async function obtenerCategoriasPrincipales(): Promise<CategoriaPrincipal
 
     const query = gql`
       query {
-        categories(first: 100, where: { parent: { isNull: true } }) {
+        categories(first: 100, where: { parent: 0 }) {
           nodes {
             name
             slug

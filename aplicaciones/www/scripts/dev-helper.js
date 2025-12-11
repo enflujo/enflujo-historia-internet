@@ -22,7 +22,7 @@ const hasCacheFiles = existsSync(cacheDir) &&
   existsSync(join(cacheDir, 'personajes.json'));
 
 const command = process.argv[2] || 'auto';
-const isDev = !['build', 'production'].includes(command);
+// const isDev = !['build', 'production'].includes(command);
 
 console.log('\n🚀 Historia del Internet - Modo Desarrollo\n');
 

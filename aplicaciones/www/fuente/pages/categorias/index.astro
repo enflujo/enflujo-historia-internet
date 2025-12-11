@@ -17,13 +17,13 @@ const categorias = await listaCategorias();
         <div id="filtroCategorias">
           <ul>
             {
-              categorias.map((categoria) => (
+              categorias.map((categoria: any) => (
                 <li data-slug={categoria.slug}>
                   {categoria.name}
 
                   {categoria.children.nodes.length > 0 && (
                     <ul>
-                      {categoria.children.nodes.map((subcategoria) => (
+                      {categoria.children.nodes.map((subcategoria: any) => (
                         <li data-slug={subcategoria.slug}>{subcategoria.name}</li>
                       ))}
                     </ul>

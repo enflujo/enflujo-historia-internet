@@ -1,5 +1,4 @@
 ---
-import TituloPagina from '@/componentes/TituloPagina.astro';
 const { obtenerPersonajes, obtenerCategoriasPrincipales } = await import('@/utilidades/cache');
 
 const personajes = (await obtenerPersonajes()) as any[];
