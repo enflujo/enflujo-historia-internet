@@ -20,7 +20,8 @@
 
 <script is:inline>
   // Inicializa Prism cuando la página cargue
-  document.addEventListener('DOMContentLoaded', () => {
+  // Los scripts de Astro se ejecutan cuando el DOM está listo
+  (() => {
     // PASO 1: WordPress pone la clase en <pre>, necesitamos copiarla a <code>
     document.querySelectorAll('pre[class*="language-"] code').forEach((code) => {
       const pre = code.parentElement;
@@ -39,7 +40,7 @@
 
       // Intenta detectar el lenguaje por contenido
       const code = block.textContent || '';
-      
+
       // Detecta GraphQL
       if (code.includes('query') && code.includes('{') && (code.includes('nodes') || code.includes('edges'))) {
         block.classList.add('language-graphql');
@@ -75,7 +76,7 @@
     if (window.Prism) {
       window.Prism.highlightAll();
     }
-  });
+  })();
 </script>
 
 <style is:global>

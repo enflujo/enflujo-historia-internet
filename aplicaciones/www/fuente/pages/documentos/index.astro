@@ -2,7 +2,7 @@
 import type { Pagina, Documento, MetaInfo } from '@/tipos';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import FiltrosDocumentos from '@/componentes/FiltrosDocumentos.astro';
-import { esquemaPagina, gql, pedirDatos, procesarCategorias } from '@/utilidades/ayudas';
+import { esquemaPagina, gql, pedirDatos, procesarCategorias, tieneContenidoHTML } from '@/utilidades/ayudas';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import { apiBase, base } from '@/utilidades/constantes';
 import { listaCategoriasPrincipales } from '@/cerebros/general';
@@ -136,26 +136,48 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
 
 <Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
   <div class="paginaConMenuIzquierdo">
-    <aside class="menuIzquierdo">
+    <button class="btnToggleFiltros" aria-controls="menuFiltros" aria-expanded="false"> ☰ Filtros </button>
+
+    <aside id="menuFiltros" class="menuIzquierdo" aria-label="Filtros de documentos">
       <TituloPagina titulo={pagina.title} slug={pagina.slug} modo="oscuro" />
       <FiltrosDocumentos categorias={categoriasDisponibles} tipos={tiposDisponibles} />
     </aside>
 
+    <div class="filtrosOverlay" aria-hidden="true"></div>
+
     <main class="documentos col2">
-      <div class="introPagina" set:html={pagina.content} />
+      {tieneContenidoHTML(pagina.content) && <div class="introPagina" set:html={pagina.content} />}
       <div class="contenedorResultados">
         <p class="conteoResultados">
           Mostrando <span id="conteoActual">{documentos.length}</span> de <span id="conteoTotal"
             >{documentos.length}</span
           > documentos
         </p>
+
+        <div class="barraOpciones">
+          <div class="grupoOpciones">
+            <span class="etiqueta">Vista</span>
+            <button class="btnVista activa" data-vista="tarjetas">Tarjetas</button>
+            <button class="btnVista" data-vista="lista">Lista</button>
+          </div>
+
+          <div class="grupoOpciones">
+            <span class="etiqueta">Orden</span>
+            <button class="btnOrden activa" data-orden="reciente">Reciente</button>
+            <button class="btnOrden" data-orden="antiguo">Antiguo</button>
+            <button class="btnOrden" data-orden="alfabetico">Alfabético</button>
+          </div>
+        </div>
       </div>
 
       <div class="contenedorDocumentos">
         {
-          documentos.map((documento) => (
+          documentos.map((documento, indice) => (
             <article
               class="documento"
+              data-index={indice}
+              data-fecha={documento.fecha}
+              data-titulo={documento.tituloCorto || documento.title}
               data-categorias={JSON.stringify(documento.categorias?.map((c) => c.slug) || [])}
               data-tipos={JSON.stringify(documento.tiposDeDocumentos?.nodes?.map((t) => t.slug) || [])}
             >
@@ -199,10 +221,65 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
     const checkboxesCategorias = document.querySelectorAll<HTMLInputElement>('.checkboxCategoria');
     const checkboxesTipos = document.querySelectorAll<HTMLInputElement>('.checkboxTipo');
     const documentos = document.querySelectorAll<HTMLElement>('.documento');
+    const contenedorDocumentos = document.querySelector<HTMLElement>('.contenedorDocumentos');
+    const botonesVista = document.querySelectorAll<HTMLButtonElement>('.btnVista');
+    const botonesOrden = document.querySelectorAll<HTMLButtonElement>('.btnOrden');
     const botonLimpiar = document.querySelector<HTMLButtonElement>('.botonLimpiar');
     const conteoActual = document.getElementById('conteoActual');
     const conteoTotal = document.getElementById('conteoTotal');
     const totalDocumentos = documentos.length;
+    const btnToggleFiltros = document.querySelector<HTMLButtonElement>('.btnToggleFiltros');
+    const menuFiltros = document.querySelector<HTMLElement>('#menuFiltros');
+    const filtrosOverlay = document.querySelector<HTMLElement>('.filtrosOverlay');
+
+    const normalizarTitulo = (texto: string) =>
+      texto
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .trim();
+
+    function aplicarVista(vista: 'tarjetas' | 'lista') {
+      if (!contenedorDocumentos) return;
+      contenedorDocumentos.dataset.vista = vista;
+      botonesVista.forEach((btn) => btn.classList.toggle('activa', btn.dataset.vista === vista));
+    }
+
+    function cerrarFiltros() {
+      menuFiltros?.classList.remove('abierto');
+      filtrosOverlay?.classList.remove('visible');
+      btnToggleFiltros?.setAttribute('aria-expanded', 'false');
+    }
+
+    function abrirFiltros() {
+      menuFiltros?.classList.add('abierto');
+      filtrosOverlay?.classList.add('visible');
+      btnToggleFiltros?.setAttribute('aria-expanded', 'true');
+    }
+
+    function aplicarOrden(orden: 'reciente' | 'antiguo' | 'alfabetico') {
+      if (!contenedorDocumentos) return;
+      const elementos = Array.from(documentos);
+
+      elementos.sort((a, b) => {
+        if (orden === 'alfabetico') {
+          const aTitulo = normalizarTitulo(a.dataset.titulo || '');
+          const bTitulo = normalizarTitulo(b.dataset.titulo || '');
+          return aTitulo.localeCompare(bTitulo, 'es');
+        }
+
+        // Convertir fecha a número para ordenar
+        const aFecha = a.dataset.fecha ? new Date(a.dataset.fecha).getTime() : 0;
+        const bFecha = b.dataset.fecha ? new Date(b.dataset.fecha).getTime() : 0;
+
+        if (orden === 'reciente') return bFecha - aFecha; // descendente
+        if (orden === 'antiguo') return aFecha - bFecha; // ascendente
+        return 0;
+      });
+
+      elementos.forEach((el) => contenedorDocumentos.appendChild(el));
+      botonesOrden.forEach((btn) => btn.classList.toggle('activa', btn.dataset.orden === orden));
+    }
 
     function aplicarFiltros() {
       // Obtener categorías y tipos seleccionados
@@ -262,6 +339,35 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
       checkbox.addEventListener('change', aplicarFiltros);
     });
 
+    // Vista tarjetas/lista
+    botonesVista.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const vista = btn.dataset.vista === 'lista' ? 'lista' : 'tarjetas';
+        aplicarVista(vista);
+      });
+    });
+
+    // Toggle filtros en móviles
+    btnToggleFiltros?.addEventListener('click', () => {
+      const abierto = menuFiltros?.classList.contains('abierto');
+      abierto ? cerrarFiltros() : abrirFiltros();
+    });
+
+    filtrosOverlay?.addEventListener('click', cerrarFiltros);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') cerrarFiltros();
+    });
+
+    // Ordenamientos
+    botonesOrden.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const orden =
+          btn.dataset.orden === 'antiguo' ? 'antiguo' : btn.dataset.orden === 'alfabetico' ? 'alfabetico' : 'reciente';
+        aplicarOrden(orden);
+      });
+    });
+
     // Limpiar filtros
     if (botonLimpiar) {
       botonLimpiar.addEventListener('click', () => {
@@ -284,25 +390,33 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
     if (botonLimpiar) {
       botonLimpiar.disabled = true;
     }
+
+    // Estado inicial
+    aplicarVista('tarjetas');
+    aplicarOrden('reciente');
+    cerrarFiltros();
   }
 
-  // Ejecutar cuando el DOM esté listo
-  document.addEventListener('DOMContentLoaded', inicializarFiltros);
+  // Ejecutar directamente - los scripts de Astro se ejecutan cuando el DOM está listo
+  inicializarFiltros();
 </script>
 
 <style lang="scss">
   .nombreDocumento {
-    font-size: 1.2em;
+    font-size: 1.15em;
   }
 
   .contenedorResultados {
-    padding: 1rem 2rem;
-    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 
     .conteoResultados {
       font-size: 1rem;
       color: var(--colorTexto);
-      opacity: 0.8;
+      opacity: 0.85;
       margin: 0;
 
       #conteoActual {
@@ -312,11 +426,89 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
     }
   }
 
+  .barraOpciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .grupoOpciones {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+
+    .etiqueta {
+      font-weight: 600;
+      color: var(--colorTextoSuave, #ccc);
+      margin-right: 0.25rem;
+    }
+  }
+
+  .btnVista,
+  .btnOrden {
+    background: var(--superficieClaro);
+    font-family: var(--fuentePixeles);
+    padding: 0.5em 1.3em;
+    color: var(--colorTexto);
+    border-right: 4px solid var(--bordeOscuro);
+    border-bottom: 4px solid var(--bordeOscuro);
+    box-shadow: 2px 2px 0px 0px var(#0e074a) inset;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: all 0.15s ease;
+    font-size: 0.9rem;
+    border-radius: 0;
+  }
+
+  .btnVista:hover,
+  .btnOrden:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .btnVista.activa,
+  .btnOrden.activa {
+    border-right: 4px solid #fff;
+    border-top: 4px solid var(--bordeOscuro);
+    border-bottom: 4px solid #fff;
+    border-left: 4px solid var(--bordeOscuro);
+    background: var(--rojo);
+    color: var(--textoInvertido);
+  }
+
   .contenedorDocumentos {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-    gap: 2rem;
-    padding: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    padding: 0;
+    margin-top: 0.5rem;
+  }
+
+  /* Vista lista */
+  .contenedorDocumentos[data-vista='lista'] {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .contenedorDocumentos[data-vista='lista'] .documento {
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .contenedorDocumentos[data-vista='lista'] .imagenDestacada,
+  .contenedorDocumentos[data-vista='lista'] .categorias {
+    display: none;
+  }
+
+  .contenedorDocumentos[data-vista='lista'] .nombreDocumento {
+    margin: 0;
+    font-size: 1rem;
   }
 
   .documento {
@@ -404,5 +596,12 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
   .categoriaEnDocumento {
     display: inline-block;
     font-size: 0.75rem;
+  }
+
+  @media (max-width: 640px) {
+    .barraOpciones {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 </style>

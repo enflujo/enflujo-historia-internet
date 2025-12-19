@@ -5,6 +5,7 @@ import FichaPersonajes from '@/componentes/FichaPersonajes.astro';
 import RedRelaciones from '@/componentes/RedRelaciones.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import { obtenerPagina, obtenerPersonajes } from '@/utilidades/cache';
+import { tieneContenidoHTML } from '@/utilidades/ayudas';
 
 const pagina = await obtenerPagina('historia-oral');
 if (!pagina) {
@@ -21,20 +22,23 @@ personajes.sort((a, b) => {
   if (nombreA > nombreB) return 1;
   return 0;
 });
-
 // const terminosGlobales = await listaTerminos();
 ---
 
 <Plantilla titulo={pagina.title} descripcion={pagina.descripcion} conMenuIzquierdo={true}>
   <div class="paginaConMenuIzquierdo">
-    <aside class="menuIzquierdo">
+    <button class="btnToggleFiltros" id="btnToggleFiltros" aria-controls="menuFiltros"> ☰ Filtros </button>
+    <div class="filtrosOverlay" id="filtrosOverlay"></div>
+
+    <aside class="menuIzquierdo" id="menuFiltros">
       <TituloPagina titulo={pagina.title} slug={pagina.slug} modo="oscuro" />
       <FiltrosHistoriaOral />
     </aside>
 
     <main class="col2" data-pagefind-body>
       <div class="personajes">
-        <h2>Personajes</h2>
+        <h2 class="subtituloPagina">Personajes</h2>
+        {tieneContenidoHTML(pagina.content) && <div class="introPagina" set:html={pagina.content} />}
         <div class="visMedia"><RedRelaciones /></div>
         <div class="personajes-lista">
           {
@@ -55,34 +59,6 @@ personajes.sort((a, b) => {
   </div>
 
   <style lang="scss">
-    main {
-      display: flex;
-      flex-direction: column;
-      padding: 1em 2em 5em 2em;
-      gap: 2em;
-    }
-
-    .visMedia {
-      // width: 50%;
-    }
-
-    section .personaje {
-      padding: 100px;
-    }
-
-    .personajes-lista {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 2rem;
-      width: 100%;
-    }
-
-    @media (max-width: 768px) {
-      .personajes-lista {
-        grid-template-columns: 1fr;
-      }
-    }
-
     .personajes {
       width: 100%;
 
@@ -93,8 +69,42 @@ personajes.sort((a, b) => {
       }
     }
 
-    section .personaje {
-      padding: 1rem;
+    .personajes-lista {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 1100px) {
+      .personajes-lista {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .personajes-lista {
+        gap: 1rem;
+      }
     }
   </style>
+
+  <script>
+    const btnToggle = document.getElementById('btnToggleFiltros');
+    const menu = document.getElementById('menuFiltros');
+    const overlay = document.getElementById('filtrosOverlay');
+
+    if (btnToggle && menu && overlay) {
+      btnToggle.addEventListener('click', () => {
+        menu.classList.toggle('abierto');
+        overlay.classList.toggle('visible');
+      });
+
+      overlay.addEventListener('click', () => {
+        menu.classList.remove('abierto');
+        overlay.classList.remove('visible');
+      });
+    }
+  </script>
 </Plantilla>

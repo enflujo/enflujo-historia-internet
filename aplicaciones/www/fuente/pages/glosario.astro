@@ -4,6 +4,7 @@ import type { Glosario } from '@/tipos';
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
 import { obtenerGlosario, obtenerPagina } from '@/utilidades/cache';
+import { tieneContenidoHTML } from '@/utilidades/ayudas';
 
 const pagina = await obtenerPagina('glosario');
 if (!pagina) {
@@ -19,6 +20,7 @@ terminos.sort((a, b) => a.title.localeCompare(b.title));
 <Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
   <main class="glosario" data-pagefind-body data-pagefind-meta="seccion:Glosario">
     <TituloPagina titulo={pagina.title} slug={pagina.slug} />
+    {tieneContenidoHTML(pagina.content) && <div class="introPagina" set:html={pagina.content} />}
 
     <div id="contenedorGlosario">
       {

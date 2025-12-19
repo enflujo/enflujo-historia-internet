@@ -25,6 +25,8 @@ html,
 body {
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 html {
@@ -112,6 +114,19 @@ a:visited {
   .col2 {
     width: calc(100vw - $anchoMenuIzquierdo);
     padding: 2em;
+  }
+
+  @media (max-width: 960px) {
+    .col2 {
+      width: 100vw;
+      padding: 6rem 1em 1em;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .col2 {
+      padding: 5rem 0.5em 0.5em;
+    }
   }
 }
 
@@ -247,7 +262,159 @@ a:visited {
 }
 
 .introPagina {
-  margin-bottom: 2em;
-  width: 60vw;
+  width: 40vw;
   margin: 3em auto 2em auto;
+
+  @media (max-width: 960px) {
+    width: auto;
+    margin: 2em 1em;
+  }
+
+  @media (max-width: 640px) {
+    margin: 1em 0.5em;
+  }
+}
+
+.visMedia {
+  margin-left: 2em;
+
+  @media (max-width: 960px) {
+    margin-left: 1em;
+  }
+
+  @media (max-width: 640px) {
+    margin-left: 0.5em;
+  }
+}
+
+.subtituloPagina {
+  margin-left: 1.5em;
+
+  @media (max-width: 960px) {
+    margin-left: 1em;
+  }
+
+  @media (max-width: 640px) {
+    margin-left: 0.5em;
+  }
+}
+
+/* ========== LAYOUT RESPONSIVE CON MENÚ IZQUIERDO ========== */
+
+.paginaConMenuIzquierdo {
+  display: block;
+  position: relative;
+}
+
+.btnToggleFiltros {
+  display: none;
+  margin: 0.5rem 0;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.95rem;
+  align-items: center;
+  gap: 0.4rem;
+  z-index: 100;
+}
+
+.filtrosOverlay {
+  display: none;
+}
+
+.menuIzquierdo {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: $anchoMenuIzquierdo;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: var(--colorTexto);
+  color: var(--blanco);
+  z-index: 1000;
+}
+
+main[class*='col'] {
+  margin: 0 auto;
+  padding: 1rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.introPagina{
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Desktop - menú fixed */
+@media (min-width: 961px) {
+  main[class*='col'] {
+    margin-left: $anchoMenuIzquierdo;
+  }
+}
+
+/* Tablet/Mobile - menú off-canvas */
+@media (max-width: 1100px) {
+  .btnToggleFiltros {
+    display: inline-flex;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1150;
+  }
+
+  .menuIzquierdo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: min(320px, 80vw);
+    max-width: 90vw;
+    overflow-y: auto;
+    background-color: var(--colorTexto);
+    color: var(--blanco);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease, box-shadow 0.2s ease;
+    z-index: 1200;
+    padding: 1rem 1.25rem;
+    border-radius: 0;
+  }
+
+  .menuIzquierdo.abierto {
+    transform: translateX(0);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  .filtrosOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 1100;
+  }
+
+  .filtrosOverlay.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  main[class*='col'] {
+    margin: 0 auto;
+    padding: 3.5rem 1rem 3rem;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  main[class*='col'] {
+    padding: 3.5rem 0.5rem 3rem;
+  }
 }

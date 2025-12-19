@@ -129,8 +129,8 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
     }
 
     .contenido {
-      width: 100%; /* Full width */
-      order: 2; /* Content comes second */
+      width: 100%;
+      order: 2;
       margin-top: 0;
     }
 
@@ -148,31 +148,20 @@ const categoriasPrincipales = await listaCategoriasPrincipales();
     }
   }
 
-  @media (max-width: 900px) {
-    .foto {
-      float: none;
-      width: 100%;
-      margin-top: 20px;
-      align-self: center;
-    }
-  }
-
   @media (max-width: 715px) {
     .personaje {
-      width: 50vw;
-      margin-top: 50px;
+      width: 100%;
+      margin: 0;
       align-items: center;
-      margin-right: 50px;
       padding: 10px;
       box-sizing: border-box;
       gap: 15px;
     }
-  }
 
-  @media (max-width: 600px) {
-    .personaje {
-      width: 60vw;
-      margin-left: 0;
+    .foto {
+      width: 100%;
+      margin-top: 0;
+      align-self: center;
     }
   }
 </style>

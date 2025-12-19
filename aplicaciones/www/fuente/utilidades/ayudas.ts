@@ -43,6 +43,15 @@ export const crearTitulo = (tituloPagina: string) => {
   return tituloPagina ? `${tituloPagina} | ${nombreProyecto}` : nombreProyecto;
 };
 
+/**
+ * Determina si un HTML tiene contenido real (texto más allá de tags vacíos o &nbsp;).
+ */
+export function tieneContenidoHTML(html?: string | null): boolean {
+  if (!html) return false;
+  const texto = html.replace(/<[^>]*>/g, '').replace(/&nbsp;/gi, ' ').trim();
+  return texto.length > 0;
+}
+
 export const esquemaPagina = (slug: string) => gql`
   page(id: "${slug}", idType: URI) {
     title
