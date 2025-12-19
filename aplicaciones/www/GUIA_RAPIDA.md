@@ -1,6 +1,7 @@
 # 🎯 RESUMEN: Sistema de Cache Dinámico para Desarrollo
 
 ## La pregunta original
+
 > "¿Es posible no tener que hacer prefetch cuando uso `yarn dev` y así ver de inmediato mientras estoy desarrollando?"
 
 ## ✅ Respuesta: SÍ, ¡Y está implementado!
@@ -10,6 +11,7 @@
 ## 🚀 Lo que necesitas hacer
 
 ### Para comenzar a desarrollar:
+
 ```bash
 cd aplicaciones/www
 yarn dev
@@ -39,19 +41,20 @@ yarn dev
 
 ## 💻 Comandos disponibles
 
-| Comando | Qué hace | Cuándo usar |
-|---------|----------|-----------|
-| `yarn dev` | Desarrollo rápido con API | Todos los días, desarrollo activo |
-| `yarn prebuild` | Genera cache local | Cuando quieres trabajar offline |
-| `yarn dev:api` | Fuerza API (sin cache) | Para asegurar datos frescos |
-| `yarn dev:cache` | Fuerza cache local | Para desarrollo rápido sin API |
-| `yarn build` | Build con prefetch automático | Producción |
+| Comando          | Qué hace                      | Cuándo usar                       |
+| ---------------- | ----------------------------- | --------------------------------- |
+| `yarn dev`       | Desarrollo rápido con API     | Todos los días, desarrollo activo |
+| `yarn prebuild`  | Genera cache local            | Cuando quieres trabajar offline   |
+| `yarn dev:api`   | Fuerza API (sin cache)        | Para asegurar datos frescos       |
+| `yarn dev:cache` | Fuerza cache local            | Para desarrollo rápido sin API    |
+| `yarn build`     | Build con prefetch automático | Producción                        |
 
 ---
 
 ## 🔄 El flujo ahora
 
 ### Antes (tedioso):
+
 ```
 1. yarn prebuild     ← Esperar a que termine
 2. yarn dev          ← Iniciar servidor
@@ -61,6 +64,7 @@ yarn dev
 ```
 
 ### Ahora (fluido):
+
 ```
 1. yarn dev          ← Iniciar servidor
 2. Hacer cambios
@@ -88,18 +92,22 @@ Esto ya está aplicado en todos los archivos `.astro`.
 ## 🎯 Puntos clave
 
 ✅ **Desarrollo sin fricción**
+
 - No esperas a prefetch
 - Datos frescos de WordPress inmediatamente
 
 ✅ **Producción rápida**
+
 - `yarn build` sigue funcionando igual
 - Pero ahora con desarrollo más ágil
 
 ✅ **Flexible**
+
 - Puedes usar API o cache local
 - Según necesites
 
 ✅ **Retrocompatible**
+
 - El build produce el mismo resultado
 - La web final es igual
 
@@ -113,6 +121,7 @@ yarn dev
 ```
 
 Y luego:
+
 1. Abre http://localhost:3000 en tu navegador
 2. Haz cambios en WordPress
 3. Recarga la página → Ves los cambios inmediatamente
@@ -140,12 +149,14 @@ Y luego:
 Si alguien más quiere usar este proyecto:
 
 **Opción 1 - Desarrollo rápido:**
+
 ```bash
 yarn dev
 # Los datos vienen de la API en tiempo real
 ```
 
 **Opción 2 - Desarrollo offline:**
+
 ```bash
 yarn prebuild && yarn dev
 # Los datos vienen del cache local
@@ -155,19 +166,20 @@ yarn prebuild && yarn dev
 
 ## ✨ Resumen de beneficios
 
-| Beneficio | Cómo lo logra |
-|-----------|--------------|
+| Beneficio           | Cómo lo logra                      |
+| ------------------- | ---------------------------------- |
 | No esperar prefetch | Obtiene de API directamente en dev |
-| Datos frescos | Llamadas en tiempo real a GraphQL |
-| Desarrollo rápido | Recargar página es suficiente |
-| Producción rápida | Cache local en build |
-| Flexible | Elige API o cache según necesites |
+| Datos frescos       | Llamadas en tiempo real a GraphQL  |
+| Desarrollo rápido   | Recargar página es suficiente      |
+| Producción rápida   | Cache local en build               |
+| Flexible            | Elige API o cache según necesites  |
 
 ---
 
 ## 🚀 ¡Ya está listo!
 
 Simplemente:
+
 1. Abre terminal
 2. `cd aplicaciones/www`
 3. `yarn dev`

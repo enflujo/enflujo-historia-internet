@@ -40,14 +40,11 @@ curl -X POST https://historiasinternetpre.uniandes.edu.co/graphql \
 
 ```javascript
 async function obtenerDatos(query) {
-  const response = await fetch(
-    'https://historiasinternetpre.uniandes.edu.co/graphql',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
-    }
-  );
+  const response = await fetch('https://historiasinternetpre.uniandes.edu.co/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query }),
+  });
 
   const data = await response.json();
   return data;
@@ -63,7 +60,7 @@ const query = `{
   }
 }`;
 
-obtenerDatos(query).then(resultado => console.log(resultado));
+obtenerDatos(query).then((resultado) => console.log(resultado));
 ```
 
 ### Con Python
@@ -103,14 +100,14 @@ print(json.dumps(resultado, indent=2))
 
 El proyecto tiene varios tipos de contenido que puedes consultar:
 
-| Tipo                  | Descripción                        | Ejemplo                           |
-| --------------------- | ----------------------------------- | --------------------------------- |
-| **pages**       | Páginas estáticas del sitio       | Inicio, Acerca de, Investigación |
-| **eventos**     | Eventos históricos del internet    | Nacimiento de ARPANET, primer .co |
-| **documentos**  | Documentos, artículos, referencias | PDFs, textos académicos          |
+| Tipo            | Descripción                         | Ejemplo                           |
+| --------------- | ----------------------------------- | --------------------------------- |
+| **pages**       | Páginas estáticas del sitio         | Inicio, Acerca de, Investigación  |
+| **eventos**     | Eventos históricos del internet     | Nacimiento de ARPANET, primer .co |
+| **documentos**  | Documentos, artículos, referencias  | PDFs, textos académicos           |
 | **personajes**  | Personas importantes en la historia | Fundadores, investigadores        |
 | **entrevistas** | Entrevistas a personajes            | Transcripciones de entrevistas    |
-| **terminos**    | Términos del glosario              | Definiciones técnicas            |
+| **terminos**    | Términos del glosario               | Definiciones técnicas             |
 
 ---
 
@@ -539,7 +536,7 @@ async function obtenerTodos(tipoContenido) {
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
+      body: JSON.stringify({ query }),
     });
 
     const { data } = await response.json();
@@ -556,7 +553,7 @@ async function obtenerTodos(tipoContenido) {
 }
 
 // Usar:
-obtenerTodos('eventos').then(eventos => {
+obtenerTodos('eventos').then((eventos) => {
   console.log(`Total eventos: ${eventos.length}`);
   console.log(eventos);
 });
@@ -632,24 +629,19 @@ async function crearLineaTiempo() {
     }
   }`;
 
-  const response = await fetch(
-    'https://historiasinternetpre.uniandes.edu.co/graphql',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
-    }
-  );
+  const response = await fetch('https://historiasinternetpre.uniandes.edu.co/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query }),
+  });
 
   const { data } = await response.json();
 
   // Ordenar por fecha
-  const eventos = data.eventos.nodes.sort((a, b) =>
-    new Date(a.fecha) - new Date(b.fecha)
-  );
+  const eventos = data.eventos.nodes.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
   console.log('Línea de tiempo:');
-  eventos.forEach(e => {
+  eventos.forEach((e) => {
     console.log(`${e.fecha} - ${e.title}`);
   });
 }
@@ -668,24 +660,19 @@ async function analizarCategorias() {
     }
   }`;
 
-  const response = await fetch(
-    'https://historiasinternetpre.uniandes.edu.co/graphql',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
-    }
-  );
+  const response = await fetch('https://historiasinternetpre.uniandes.edu.co/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query }),
+  });
 
   const { data } = await response.json();
 
   // Ordenar por cantidad de contenido
-  const categorias = data.categories.nodes
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10);
+  const categorias = data.categories.nodes.sort((a, b) => b.count - a.count).slice(0, 10);
 
   console.log('Top 10 categorías:');
-  categorias.forEach(c => {
+  categorias.forEach((c) => {
     console.log(`${c.name}: ${c.count} items`);
   });
 }
@@ -715,14 +702,11 @@ async function descargarTranscripciones() {
     }
   }`;
 
-  const response = await fetch(
-    'https://historiasinternetpre.uniandes.edu.co/graphql',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
-    }
-  );
+  const response = await fetch('https://historiasinternetpre.uniandes.edu.co/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query }),
+  });
 
   const { data } = await response.json();
   const entrevistas = data.entrevistas.nodes;

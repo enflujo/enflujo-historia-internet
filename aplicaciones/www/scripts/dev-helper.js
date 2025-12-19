@@ -2,7 +2,7 @@
 
 /**
  * Script para facilitar el desarrollo
- * 
+ *
  * Uso:
  *   yarn dev-api    -> Desarrollo con API (sin prefetch)
  *   yarn dev-cache  -> Desarrollo con cache local (requiere prebuild)
@@ -17,7 +17,8 @@ import { dirname } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const cacheDir = join(__dirname, '.cache');
-const hasCacheFiles = existsSync(cacheDir) && 
+const hasCacheFiles =
+  existsSync(cacheDir) &&
   existsSync(join(cacheDir, 'documentos.json')) &&
   existsSync(join(cacheDir, 'personajes.json'));
 

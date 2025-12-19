@@ -167,7 +167,9 @@ export async function obtenerPersonajes(): Promise<Personaje[]> {
   return leerCache<Personaje[]>('personajes.json');
 }
 
-export async function obtenerPersonaje(slug: string): Promise<(Personaje & { entrevistas?: { nodes: any[] } }) | undefined> {
+export async function obtenerPersonaje(
+  slug: string
+): Promise<(Personaje & { entrevistas?: { nodes: any[] } }) | undefined> {
   const personajes = await obtenerPersonajes();
   return personajes.find((p) => p.slug === slug) as any;
 }
@@ -230,7 +232,9 @@ export async function obtenerCategoria(slug: string): Promise<CategoriaBasico | 
 /**
  * Obtiene páginas desde la API en desarrollo o desde caché en build
  */
-export async function obtenerPaginas(): Promise<(Pagina & { principal?: boolean; menuOrder?: number; iconoB?: string })[]> {
+export async function obtenerPaginas(): Promise<
+  (Pagina & { principal?: boolean; menuOrder?: number; iconoB?: string })[]
+> {
   if (esDesarrollo) {
     if (cacheMemoria.has('paginas')) {
       return cacheMemoria.get('paginas');

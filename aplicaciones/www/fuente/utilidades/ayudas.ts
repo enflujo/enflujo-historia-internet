@@ -48,7 +48,10 @@ export const crearTitulo = (tituloPagina: string) => {
  */
 export function tieneContenidoHTML(html?: string | null): boolean {
   if (!html) return false;
-  const texto = html.replace(/<[^>]*>/g, '').replace(/&nbsp;/gi, ' ').trim();
+  const texto = html
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .trim();
   return texto.length > 0;
 }
 
