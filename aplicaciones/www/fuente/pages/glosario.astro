@@ -15,76 +15,416 @@ const terminos = await obtenerGlosario();
 
 // Organizar los términos del glosario en orden alfabético
 terminos.sort((a, b) => a.title.localeCompare(b.title));
+
+const normalizarTitulo = (texto: string) =>
+  texto
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .trim()
+    .toUpperCase();
+
+const grupos = new Map<string, Glosario[]>();
+
+terminos.forEach((termino) => {
+  const letra = normalizarTitulo(termino.title).charAt(0) || '#';
+  if (!grupos.has(letra)) grupos.set(letra, []);
+  grupos.get(letra)!.push(termino);
+});
+
+const letras = Array.from(grupos.keys()).sort((a, b) => a.localeCompare(b));
 ---
 
-<Plantilla titulo={pagina.title} descripcion={pagina.descripcion}>
-  <main class="glosario" data-pagefind-body data-pagefind-meta="seccion:Glosario">
-    <TituloPagina titulo={pagina.title} slug={pagina.slug} />
-    {tieneContenidoHTML(pagina.content) && <div class="introPagina" set:html={pagina.content} />}
+<Plantilla titulo={pagina.title} descripcion={pagina.descripcion} conMenuIzquierdo={true}>
+  <div class="paginaConMenuIzquierdo">
+    <button class="btnToggleFiltros" id="btnToggleFiltros" aria-controls="menuFiltros">☰ Letras</button>
+    <div class="filtrosOverlay" id="filtrosOverlay"></div>
 
-    <div id="contenedorGlosario">
-      {
-        terminos.map((glosario) => (
-          <article class="termino" id={glosario.slug}>
-            <h2 class="tituloTermino" data-pagefind-meta="title">
-              {glosario.title}
-            </h2>
-            <div class="contenidoTermino" set:html={glosario.content} />
-          </article>
-        ))
-      }
-    </div>
-  </main>
+    <aside class="menuIzquierdo" id="menuFiltros">
+      <TituloPagina titulo={pagina.title} slug={pagina.slug} modo="oscuro" />
+      <nav class="indiceLetras" aria-label="Ir a letra">
+        <ul>
+          {
+            letras.map((letra) => (
+              <li>
+                <button class="btnLetra" data-letra={letra} type="button">
+                  {letra}
+                </button>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="glosario col2" data-pagefind-body data-pagefind-meta="seccion:Glosario">
+      <div class="barraOpciones">
+        <div class="grupoOpciones">
+          <span class="etiqueta">Vista</span>
+          <button class="btnVista activa" data-vista="tarjetas" type="button">Tarjetas</button>
+          <button class="btnVista" data-vista="lista" type="button">Lista</button>
+        </div>
+      </div>
+
+      <TituloPagina titulo={pagina.title} slug={pagina.slug} />
+      {tieneContenidoHTML(pagina.content) && <div class="introPagina" set:html={pagina.content} />}
+
+      <div id="contenedorGlosario" data-vista="tarjetas">
+        {
+          letras.map((letra) => (
+            <section class="grupoLetra" id={`letra-${letra}`} data-letra={letra}>
+              <h2 class="letraTitulo">{letra}</h2>
+              <div class="gridTerminos">
+                {grupos.get(letra)?.map((glosario) => (
+                  <article class="termino" id={glosario.slug} data-letra={letra}>
+                    <button class="tituloTermino" type="button" aria-expanded="false">
+                      <span class="textoTitulo">{glosario.title}</span>
+                      <span class="iconoToggle" aria-hidden="true">
+                        ▸
+                      </span>
+                    </button>
+                    <div class="contenidoTermino" hidden set:html={glosario.content} />
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))
+        }
+      </div>
+    </main>
+  </div>
 </Plantilla>
 
 <script>
+  const btnToggle = document.getElementById('btnToggleFiltros');
+  const menu = document.getElementById('menuFiltros');
+  const overlay = document.getElementById('filtrosOverlay');
+  const contenedor = document.getElementById('contenedorGlosario');
+  const botonesVista = document.querySelectorAll('.btnVista');
+  const botonesLetra = document.querySelectorAll('.btnLetra');
+  const terminos = document.querySelectorAll('.termino');
+  const seccionesLetra = document.querySelectorAll('.grupoLetra');
+
+  const setActiveLetra = (letra: string | undefined) => {
+    if (!letra) return;
+    botonesLetra.forEach((b) =>
+      (b as HTMLElement).classList.toggle('activa', (b as HTMLElement).dataset.letra === letra)
+    );
+  };
+
+  const setTerminoState = (termino: Element, abierto: boolean) => {
+    const titulo = termino.querySelector('.tituloTermino');
+    const contenido = termino.querySelector('.contenidoTermino');
+    if (!titulo || !contenido) return;
+    termino.classList.toggle('abierto', abierto);
+    titulo.setAttribute('aria-expanded', String(abierto));
+    if (abierto) {
+      contenido.removeAttribute('hidden');
+    } else {
+      contenido.setAttribute('hidden', '');
+    }
+  };
+
+  // Variable para controlar scroll programático vs manual
+  let scrollingProgrammatically = false;
+
+  if (btnToggle && menu && overlay) {
+    btnToggle.addEventListener('click', () => {
+      menu.classList.toggle('abierto');
+      overlay.classList.toggle('visible');
+    });
+
+    overlay.addEventListener('click', () => {
+      menu.classList.remove('abierto');
+      overlay.classList.remove('visible');
+    });
+  }
+
+  botonesLetra.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const destino = document.getElementById(`letra-${(btn as HTMLElement).dataset.letra}`);
+      if (destino) {
+        scrollingProgrammatically = true;
+        setActiveLetra((btn as HTMLElement).dataset.letra);
+        destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        menu?.classList.remove('abierto');
+        overlay?.classList.remove('visible');
+
+        // Después de 1 segundo, permitir que el scroll manual actualice la letra
+        setTimeout(() => {
+          scrollingProgrammatically = false;
+        }, 1000);
+      }
+    });
+  });
+
+  botonesVista.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const vista = (btn as HTMLElement).dataset.vista;
+      if (!vista || !contenedor) return;
+
+      contenedor.dataset.vista = vista;
+      botonesVista.forEach((b) => b.classList.toggle('activa', b === btn));
+
+      // En vista tarjetas mostramos todo; en lista los plegamos por defecto
+      terminos.forEach((termino) => {
+        setTerminoState(termino, vista === 'tarjetas');
+      });
+    });
+  });
+
+  terminos.forEach((termino) => {
+    const titulo = termino.querySelector('.tituloTermino');
+    const contenido = termino.querySelector('.contenidoTermino');
+    if (!titulo || !contenido) return;
+
+    titulo.addEventListener('click', () => {
+      const abierto = !termino.classList.contains('abierto');
+      setTerminoState(termino, abierto);
+    });
+  });
+
+  // Observador para resaltar letra según scroll
+  if (seccionesLetra.length && botonesLetra.length) {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const actualizarLetraActiva = () => {
+      if (scrollingProgrammatically) return;
+
+      let letraActiva = null;
+      let menorDistancia = Infinity;
+
+      seccionesLetra.forEach((seccion) => {
+        const titulo = seccion.querySelector('.letraTitulo');
+        if (!titulo) return;
+
+        const rect = titulo.getBoundingClientRect();
+
+        // Solo considerar si el título está en la mitad superior del viewport
+        if (rect.top >= 0 && rect.top < window.innerHeight / 2) {
+          const distancia = rect.top;
+
+          if (distancia < menorDistancia) {
+            menorDistancia = distancia;
+            letraActiva = (seccion as HTMLElement).dataset.letra;
+          }
+        }
+      });
+
+      if (letraActiva) {
+        setActiveLetra(letraActiva);
+      }
+    };
+
+    const handleScroll = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(actualizarLetraActiva, 100);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    actualizarLetraActiva(); // Inicial
+  }
+
+  // Vista por defecto: tarjetas con contenido abierto
+  terminos.forEach((termino) => setTerminoState(termino, true));
+  const primeraLetra = (document.querySelector('.grupoLetra') as HTMLElement | null)?.dataset?.letra;
+  if (primeraLetra) setActiveLetra(primeraLetra);
+
   const idTermino = window.location.hash;
   if (idTermino) {
     const elemento = document.querySelector(idTermino);
     if (elemento) {
       elemento.classList.add('terminoEnfocado');
+      elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const boton = elemento.querySelector('.tituloTermino');
+      if (boton) boton.dispatchEvent(new Event('click'));
+      const letra =
+        (elemento as HTMLElement).dataset?.letra ||
+        (elemento.closest('.grupoLetra') as HTMLElement | null)?.dataset?.letra;
+      if (letra) setActiveLetra(letra);
     }
   }
 </script>
 
 <style lang="scss">
+  .barraOpciones {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+  }
+
+  .grupoOpciones {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+
+    .etiqueta {
+      font-weight: 600;
+      color: var(--colorTextoSuave, #ccc);
+      margin-right: 0.25rem;
+    }
+  }
+
+  .btnVista {
+    background: var(--superficieClaro);
+    font-family: var(--fuentePixeles);
+    padding: 0.5em 1.3em;
+    color: var(--colorTexto);
+    border-right: 4px solid var(--bordeOscuro);
+    border-bottom: 4px solid var(--bordeOscuro);
+    box-shadow: 2px 2px 0px 0px var(#0e074a) inset;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 0.9rem;
+    border-radius: 0;
+  }
+
+  .btnVista:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .btnVista.activa {
+    border-right: 4px solid #fff;
+    border-top: 4px solid var(--bordeOscuro);
+    border-bottom: 4px solid #fff;
+    border-left: 4px solid var(--bordeOscuro);
+    background: var(--rojo);
+    color: var(--textoInvertido);
+  }
+
+  .indiceLetras ul {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+    gap: 0.4rem;
+  }
+
+  .btnLetra {
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--blanco);
+    cursor: pointer;
+    font-family: var(--fuentePixeles);
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .btnLetra.activa {
+    background: var(--cobalto, #2a4de0);
+    border-color: #fff;
+    color: var(--blanco);
+  }
+
   #contenedorGlosario {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: center;
+    flex-direction: column;
+    gap: 2rem;
     margin: 0;
-    padding-bottom: 8em;
+    padding-bottom: 4rem;
+  }
 
-    .termino {
-      width: 30vw;
-      margin: 1em;
-      position: relative;
-    }
+  .grupoLetra {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
 
-    .tituloTermino {
-      padding-left: 10px;
-    }
+  .letraTitulo {
+    margin: 0;
+    font-family: var(--fuenteTitulos);
+    color: var(--colorTexto);
+  }
+
+  .gridTerminos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    align-items: start;
+    justify-items: stretch;
+    width: 100%;
+  }
+
+  #contenedorGlosario[data-vista='lista'] .gridTerminos {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+
+  .termino {
+    background-color: var(--superficieClaro);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+    align-self: start;
+    width: 100%;
+    border: 1px solid transparent;
+  }
+
+  .termino.abierto {
+    border-color: var(--colorTexto);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  .tituloTermino {
+    background: none;
+    border: none;
+    padding: 0.85rem 0.9rem;
+    margin: 0;
+    text-align: left;
+    color: var(--colorTexto);
+    font-family: var(--fuenteTitulos);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .iconoToggle {
+    transition: transform 0.2s ease;
+  }
+
+  .termino.abierto .iconoToggle {
+    transform: rotate(90deg);
   }
 
   .contenidoTermino {
-    border: 2px solid var(--bordePrimario, #f21d44);
-    padding: 10px;
-    background-color: var(--superficieClaro);
-    position: relative;
-    margin-bottom: 2em;
+    border: none;
+    padding: 0.85rem 0.9rem 0.95rem;
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+
+  .contenidoTermino[hidden],
+  .termino:not(.abierto) .contenidoTermino {
+    display: none !important;
+    padding: 0;
+    border: 0;
+    margin: 0;
   }
 
   .terminoEnfocado {
-    h2 {
-      border-bottom: 2px solid var(--colorTexto);
+    border-color: var(--colorTexto);
+    box-shadow: 0 0 10px var(--colorTexto);
+  }
+
+  @media (max-width: 700px) {
+    .barraOpciones {
+      flex-direction: column;
+      align-items: flex-start;
     }
 
-    .contenidoTermino {
-      background-color: var(--amarillo);
-      border: 2px solid var(--colorTexto);
-      box-shadow: 0 0 10px var(--colorTexto);
+    .gridTerminos {
+      grid-template-columns: 1fr;
     }
   }
 </style>

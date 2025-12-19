@@ -72,12 +72,15 @@ const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcrip
 
 <Plantilla titulo={nombreCategoria} descripcion={categoria} conMenuIzquierdo={true}>
   <div class="paginaConMenuIzquierdo">
-    <aside class="menuIzquierdo">
+    <button class="btnToggleFiltros" id="btnToggleFiltros" aria-controls="menuFiltros"> ☰ Filtros </button>
+    <div class="filtrosOverlay" id="filtrosOverlay"></div>
+
+    <aside class="menuIzquierdo" id="menuFiltros">
       <TituloPagina titulo="Historia Oral" slug={slug} modo="oscuro" />
       <FiltrosHistoriaOral />
     </aside>
 
-    <main class="col2" data-pagefind-body data-pagefind-meta="seccion:Historia Oral">
+    <main class="categoria col2" data-pagefind-body data-pagefind-meta="seccion:Historia Oral">
       <h1 class="tituloCategoria" data-pagefind-meta="title">{nombreCategoria}</h1>
 
       <section id="resumenPersonajes">
@@ -133,6 +136,24 @@ const transcripcionesProcesadas: SeccionEntrevistaProcesadaCruzada[] = transcrip
     </main>
   </div>
 </Plantilla>
+
+<script>
+  const btnToggle = document.getElementById('btnToggleFiltros');
+  const menu = document.getElementById('menuFiltros');
+  const overlay = document.getElementById('filtrosOverlay');
+
+  if (btnToggle && menu && overlay) {
+    btnToggle.addEventListener('click', () => {
+      menu.classList.toggle('abierto');
+      overlay.classList.toggle('visible');
+    });
+
+    overlay.addEventListener('click', () => {
+      menu.classList.remove('abierto');
+      overlay.classList.remove('visible');
+    });
+  }
+</script>
 
 <style lang="scss">
   .tituloCategoria {

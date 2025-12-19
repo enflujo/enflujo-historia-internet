@@ -121,6 +121,12 @@ export async function obtenerDocumento(slug: string): Promise<Documento | undefi
  * Obtiene personajes desde la API en desarrollo o desde caché en build
  */
 export async function obtenerPersonajes(): Promise<Personaje[]> {
+  // Si existe cache en disco, usarlo (tiene los datos procesados del prebuild)
+  const rutaCache = join(cacheDir, 'personajes.json');
+  if (existsSync(rutaCache)) {
+    return leerCache<Personaje[]>('personajes.json');
+  }
+
   if (esDesarrollo) {
     if (cacheMemoria.has('personajes')) {
       return cacheMemoria.get('personajes');
@@ -349,6 +355,13 @@ export async function obtenerCategoriasPrincipales(): Promise<CategoriaPrincipal
 }
 
 export async function obtenerTranscripcionesCategoria(slug: string): Promise<TranscripcionesCruzadas[]> {
+  // Si existe cache en disco, usarlo (tiene los datos procesados del prebuild)
+  const rutaCache = join(cacheDir, 'transcripciones-categorias.json');
+  if (existsSync(rutaCache)) {
+    const todas = leerCache<Record<string, TranscripcionesCruzadas[]>>('transcripciones-categorias.json');
+    return todas[slug] || [];
+  }
+
   if (esDesarrollo) {
     // En desarrollo, obtener dinámicamente
     const query = gql`

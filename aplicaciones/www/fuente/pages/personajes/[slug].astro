@@ -33,11 +33,7 @@ const entrevista = { personaje: personajeData };
 const terminosPersonaje: Termino[] = [];
 const categoriasPrincipales = await listaCategoriasPrincipales();
 
-if (!entrevista.personaje.entrevistas?.nodes) {
-  throw new Error(`Personaje ${slug} no tiene entrevistas`);
-}
-
-const entrevistaProcesada = await procesarEntrevistasPersonaje(entrevista.personaje.entrevistas.nodes);
+const entrevistaProcesada = await procesarEntrevistasPersonaje(entrevista.personaje.entrevistas?.nodes || []);
 
 async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promise<EntrevistasProcesadas> {
   const categoriasPersonaje: CategoriaProcesada[] = [];
@@ -133,57 +129,76 @@ async function procesarEntrevistasPersonaje(entrevistas: EntrevistaWP[]): Promis
 
 <Plantilla titulo={entrevista.personaje.title} descripcion={'entrevista.personaje'} conMenuIzquierdo={true}>
   <div class="paginaConMenuIzquierdo">
-    <aside class="menuIzquierdo">
+    <button class="btnToggleFiltros" id="btnToggleFiltros" aria-controls="menuFiltros"> ☰ Filtros </button>
+    <div class="filtrosOverlay" id="filtrosOverlay"></div>
+
+    <aside class="menuIzquierdo" id="menuFiltros">
       <TituloPagina titulo="Historias Orales" slug="historia-oral" modo="oscuro" />
       <FiltrosHistoriaOral personaje={slug} />
     </aside>
 
-    <main class="historia-oral" data-pagefind-body data-pagefind-meta="seccion:Historia Oral">
-      <div class="col2">
-        <FichaPersonajes
-          nombre={entrevista.personaje.title}
-          slug={entrevista.personaje.slug}
-          bio={entrevista.personaje.content}
-          foto={entrevista.personaje.featuredImage}
-          categorias={entrevistaProcesada.categoriasPersonaje}
-        />
+    <main class="historia-oral col2" data-pagefind-body data-pagefind-meta="seccion:Historia Oral">
+      <FichaPersonajes
+        nombre={entrevista.personaje.title}
+        slug={entrevista.personaje.slug}
+        bio={entrevista.personaje.content}
+        foto={entrevista.personaje.featuredImage}
+        categorias={entrevistaProcesada.categoriasPersonaje}
+      />
 
-        <NubePalabras terminos={terminosPersonaje} />
+      <NubePalabras terminos={terminosPersonaje} />
 
-        <div id="contenedorEntrevistas">
-          <nav class="filtrosCategoriasEntrevista">
-            <h3>Filtrar por categoría</h3>
-            <ul class="listaCategorias">
-              <li class="filtroCategoria seleccionado bordeCategoria" data-categoria="entrevista-completa">
-                Entrevista completa
-              </li>
-              {
-                entrevistaProcesada.categoriasPersonaje.map((categoria) => (
-                  <li
-                    class={`bordeCategoria bordeCategoria${categoria.indice} filtroCategoria`}
-                    data-categoria={categoria.slug}
-                  >
-                    {categoria.nombre}
-                  </li>
-                ))
-              }
-            </ul>
-          </nav>
-          {
-            entrevistaProcesada.entrevistas.map((entrevista) => (
-              <section class="entrevista">
-                <h3>Entrevista: {entrevista.fecha.toLocaleDateString('es-CO', opcionesFecha)}</h3>
-                {entrevista.secciones.map((seccion) => (
-                  <SeccionEntrevista seccion={seccion} />
-                ))}
-              </section>
-            ))
-          }
-        </div>
+      <div id="contenedorEntrevistas">
+        <nav class="filtrosCategoriasEntrevista">
+          <h3>Filtrar por categoría</h3>
+          <ul class="listaCategorias">
+            <li class="filtroCategoria seleccionado bordeCategoria" data-categoria="entrevista-completa">
+              Entrevista completa
+            </li>
+            {
+              entrevistaProcesada.categoriasPersonaje.map((categoria) => (
+                <li
+                  class={`bordeCategoria bordeCategoria${categoria.indice} filtroCategoria`}
+                  data-categoria={categoria.slug}
+                >
+                  {categoria.nombre}
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+        {
+          entrevistaProcesada.entrevistas.map((entrevista) => (
+            <section class="entrevista">
+              <h3>Entrevista: {entrevista.fecha.toLocaleDateString('es-CO', opcionesFecha)}</h3>
+              {entrevista.secciones.map((seccion) => (
+                <SeccionEntrevista seccion={seccion} />
+              ))}
+            </section>
+          ))
+        }
       </div>
     </main>
   </div>
 </Plantilla>
+
+<script>
+  const btnToggle = document.getElementById('btnToggleFiltros');
+  const menu = document.getElementById('menuFiltros');
+  const overlay = document.getElementById('filtrosOverlay');
+
+  if (btnToggle && menu && overlay) {
+    btnToggle.addEventListener('click', () => {
+      menu.classList.toggle('abierto');
+      overlay.classList.toggle('visible');
+    });
+
+    overlay.addEventListener('click', () => {
+      menu.classList.remove('abierto');
+      overlay.classList.remove('visible');
+    });
+  }
+</script>
 
 <script>
   const filtros = document.querySelectorAll<HTMLLIElement>('.filtroCategoria');

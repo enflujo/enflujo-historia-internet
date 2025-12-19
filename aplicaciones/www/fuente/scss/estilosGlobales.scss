@@ -116,6 +116,13 @@ a:visited {
     padding: 2em;
   }
 
+  @media (min-width: 961px) and (max-width: 1100px) {
+    .col2 {
+      width: auto;
+      max-width: none;
+    }
+  }
+
   @media (max-width: 960px) {
     .col2 {
       width: 100vw;
