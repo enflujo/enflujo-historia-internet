@@ -60,11 +60,6 @@ if (imagen) {
     <meta name="twitter:image" content={img.url} />
     <meta name="twitter:image:alt" content={img.titulo} />
     <meta name="generator" content={Astro.generator} />
-    <script
-      is:inline
-      defer
-      src="https://analiticaarca.uniandes.edu.co/script.js"
-      data-website-id="2c771a00-6171-463b-86a3-6c2aec28d976"></script>
   </head>
   <body class={sinFuego ? 'sinFuego' : ''}>
     <Menu />
@@ -261,3 +256,29 @@ if (imagen) {
     }
   }
 </style>
+
+<script is:inline>
+  // Cargar script de analítica de manera asíncrona sin bloquear la página
+  (function () {
+    const script = document.createElement('script');
+    script.src = 'https://analiticaarca.uniandes.edu.co/script.js';
+    script.setAttribute('data-website-id', '2c771a00-6171-463b-86a3-6c2aec28d976');
+    script.async = true;
+
+    // Timeout para evitar que bloquee la página si no carga
+    const timeout = setTimeout(() => {
+      console.warn('El script de analítica tardó demasiado en cargar');
+    }, 5000);
+
+    script.onload = () => {
+      clearTimeout(timeout);
+    };
+
+    script.onerror = () => {
+      clearTimeout(timeout);
+      console.warn('El script de analítica no pudo cargarse');
+    };
+
+    document.body.appendChild(script);
+  })();
+</script>
