@@ -233,10 +233,18 @@ const letras = Array.from(grupos.keys()).sort((a, b) => a.localeCompare(b));
   if (idTermino) {
     const elemento = document.querySelector(idTermino);
     if (elemento) {
+      // Asegurar que el término esté abierto
+      setTerminoState(elemento, true);
+
+      // Agregar resaltado amarillo
       elemento.classList.add('terminoEnfocado');
-      elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      const boton = elemento.querySelector('.tituloTermino');
-      if (boton) boton.dispatchEvent(new Event('click'));
+
+      // Scroll al término
+      setTimeout(() => {
+        elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+
+      // Resaltar la letra activa
       const letra =
         (elemento as HTMLElement).dataset?.letra ||
         (elemento.closest('.grupoLetra') as HTMLElement | null)?.dataset?.letra;
@@ -413,8 +421,9 @@ const letras = Array.from(grupos.keys()).sort((a, b) => a.localeCompare(b));
   }
 
   .terminoEnfocado {
-    border-color: var(--colorTexto);
-    box-shadow: 0 0 10px var(--colorTexto);
+    background-color: #fff59d !important;
+    border: 2px solid #fbc02d !important;
+    box-shadow: 0 0 15px rgba(251, 192, 45, 0.5) !important;
   }
 
   @media (max-width: 700px) {

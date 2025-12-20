@@ -206,6 +206,70 @@ a:visited {
   background-color: var(--categoria4);
 }
 
+/* Tablas de documentación (WordPress block tables) */
+figure.wp-block-table {
+  width: 100%;
+  margin: 1rem 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--superficieClaro);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
+
+figure.wp-block-table > table,
+.wp-block-table table,
+table.has-fixed-layout {
+  width: 100%;
+  min-width: 640px; /* permite scroll horizontal en móviles */
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.wp-block-table th,
+.wp-block-table td,
+table th,
+table td {
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  text-align: left;
+  vertical-align: top;
+}
+
+.wp-block-table thead th,
+.wp-block-table tr:first-child td,
+table thead th {
+  font-weight: 700;
+  background: color-mix(in srgb, var(--superficieClaro), white 20%);
+}
+
+.wp-block-table tbody tr:nth-child(odd),
+table tbody tr:nth-child(odd) {
+  background-color: var(--fondoTabla);
+}
+
+.wp-block-table tbody tr:hover,
+table tbody tr:hover {
+  background: color-mix(in srgb, var(--fondoTabla), white 15%);
+}
+
+.wp-block-table code,
+table code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.95em;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+}
+
+@media (max-width: 600px) {
+  .wp-block-table table,
+  table.has-fixed-layout {
+    min-width: 520px;
+  }
+}
+
 .iconoCategoria5::before {
   background-color: var(--categoria5);
 }

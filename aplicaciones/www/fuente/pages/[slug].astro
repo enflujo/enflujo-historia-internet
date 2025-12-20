@@ -2,7 +2,7 @@
 import TituloPagina from '@/componentes/TituloPagina.astro';
 import ResaltadorCodigo from '@/componentes/ResaltadorCodigo.astro';
 import Plantilla from '@/plantillas/Plantilla.astro';
-import { obtenerPaginas, obtenerPagina } from '@/utilidades/cache';
+import { obtenerPaginas, obtenerPagina, limpiarCacheMemoria } from '@/utilidades/cache';
 
 export async function getStaticPaths() {
   const paginas = await obtenerPaginas();
@@ -10,6 +10,13 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
+// Permitir forzar refresco del cache en dev con ?refresh=1
+try {
+  const url = new URL(Astro.request.url);
+  if (url.searchParams.get('refresh') === '1') {
+    limpiarCacheMemoria();
+  }
+} catch {}
 const page = await obtenerPagina(slug);
 
 if (!page) {
@@ -27,38 +34,20 @@ if (!page) {
 
 <style lang="scss">
   .contenidoPagina {
-    padding: 2em;
-    margin-left: 25vw;
-    margin-right: 25vw;
-    display: flex;
-    text-align: justify;
-    flex-direction: column;
-    justify-content: center;
-    flex-shrink: 0;
+    width: min(1200px, 92vw);
+    margin: 1.25rem auto;
+    padding: 0;
   }
 
-  @media (max-width: 600px) {
+  @media (min-width: 601px) {
     .contenidoPagina {
-      padding: 1.8em;
-      margin-left: 15vw;
-      margin-right: 15vw;
+      width: 85vw;
     }
   }
 
-  @media (min-width: 601px) and (max-width: 849px) {
+  @media (min-width: 850px) {
     .contenidoPagina {
-      padding: 1.8em;
-      margin-left: 20vw;
-      margin-right: 20vw;
-      display: flex;
-    }
-  }
-  @media (min-width: 850px) and (max-width: 1000px) {
-    .contenidoPagina {
-      padding: 1.8em;
-      margin-left: 22vw;
-      margin-right: 22vw;
-      display: flex;
+      width: 60vw;
     }
   }
 </style>

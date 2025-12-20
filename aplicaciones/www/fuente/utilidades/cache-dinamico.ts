@@ -242,10 +242,6 @@ export async function obtenerPaginas(): Promise<
   (Pagina & { principal?: boolean; menuOrder?: number; iconoB?: string })[]
 > {
   if (esDesarrollo) {
-    if (cacheMemoria.has('paginas')) {
-      return cacheMemoria.get('paginas');
-    }
-
     const query = gql`
       query {
         pages {
@@ -265,7 +261,6 @@ export async function obtenerPaginas(): Promise<
     `;
 
     const datos = await pedirDatos<any>(query);
-    cacheMemoria.set('paginas', datos.pages.nodes);
     return datos.pages.nodes;
   }
 
