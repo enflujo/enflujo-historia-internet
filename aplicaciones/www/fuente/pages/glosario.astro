@@ -436,4 +436,15 @@ const letras = Array.from(grupos.keys()).sort((a, b) => a.localeCompare(b));
       grid-template-columns: 1fr;
     }
   }
+
+  @media (max-width: 700px) {
+    #contenedorGlosario {
+      flex-direction: column;
+      align-items: center;
+      .termino {
+        width: 90vw;
+        margin: 1em auto;
+      }
+    }
+  }
 </style>
